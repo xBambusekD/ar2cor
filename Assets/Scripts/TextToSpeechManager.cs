@@ -41,6 +41,16 @@ public class TextToSpeechManager : MonoBehaviour {
         textToSpeech.StartSpeaking(textToSay);
     }
 
+    //waits for Zira to talk out sentence and then speaks
+    public void WaitAndSay(String textToSay) {
+        StartCoroutine(WaitWhileSpeakingAndThenSay(textToSay));        
+    }
+
+    IEnumerator WaitWhileSpeakingAndThenSay(String textToSay) {
+        yield return new WaitWhile(() => textToSpeech.SpeechTextInQueue() || textToSpeech.IsSpeaking());
+        textToSpeech.StartSpeaking(textToSay);
+    }
+
     public bool IsSpeakingOrInQueue() {
         return textToSpeech.IsSpeaking() || textToSpeech.SpeechTextInQueue();
     }

@@ -1,4 +1,5 @@
 ﻿using SimpleJSON;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,8 +9,8 @@ public class ObjectsManager : MonoBehaviour {
     [SerializeField] private GameObject[] m_Prefabs;
     public GameObject worldAnchor;
     public List<GameObject> virtualObjectList = new List<GameObject>();
-    
-    private List<GameObject> objectsList = new List<GameObject>();
+
+    public List<GameObject> objectsList = new List<GameObject>();
     private List<int> existingObjectsID = new List<int>();
 
     private JSONNode dataFromROS;
@@ -59,16 +60,39 @@ public class ObjectsManager : MonoBehaviour {
     }
 
     private void createObject(JSONNode objectData) {
-        GameObject instance = Instantiate(m_Prefabs[0]);
-        instance.transform.parent = worldAnchor.transform;
-        DetectedObject obj = instance.GetComponent<DetectedObject>();
+        GameObject detectedObject = Instantiate(m_Prefabs[0]);
+        detectedObject.transform.parent = worldAnchor.transform;
+        
+        DetectedObject obj = detectedObject.GetComponent<DetectedObject>();
         obj._id = objectData["name"].AsInt;
         obj.type = objectData["type"];
         obj.position = new Vector3(objectData["position"]["x"].AsFloat, -objectData["position"]["y"].AsFloat, objectData["position"]["z"].AsFloat);
+        detectedObject.transform.localPosition = new Vector3(objectData["position"]["x"].AsFloat, -objectData["position"]["y"].AsFloat, objectData["position"]["z"].AsFloat);
         obj.rotation = new Quaternion(objectData["orientation"]["x"].AsFloat, objectData["orientation"]["y"].AsFloat, objectData["orientation"]["z"].AsFloat, objectData["orientation"]["w"].AsFloat);
+        detectedObject.transform.localRotation = new Quaternion(objectData["orientation"]["x"].AsFloat, objectData["orientation"]["y"].AsFloat, objectData["orientation"]["z"].AsFloat, objectData["orientation"]["w"].AsFloat);
         obj.bbox = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
-        instance.tag = objectData["type"];
-        objectsList.Add(instance);
+        detectedObject.transform.localScale = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
+        detectedObject.tag = translate(objectData["type"]);
+        objectsList.Add(detectedObject);
+    }
+
+    private string translate(string objectType) {
+        string translatedType;
+        switch (objectType) {
+            case "Spojka":
+                translatedType = "Stretcher";
+                break;
+            case "Kratka_noha":
+                translatedType = "ShortLeg";
+                break;
+            case "Dlouha_noha":
+                translatedType = "LongLeg";
+                break;
+            default:
+                translatedType = objectType;
+                break;
+        }
+        return translatedType;
     }
 
     private void updateObject(JSONNode objectData) {
@@ -76,19 +100,18 @@ public class ObjectsManager : MonoBehaviour {
         foreach (GameObject detectedObject in objectsList) {
             obj = detectedObject.GetComponent<DetectedObject>();
             if (obj._id == objectData["name"].AsInt) {
+                obj._id = objectData["name"].AsInt;
+                obj.type = objectData["type"];
+                obj.position = new Vector3(objectData["position"]["x"].AsFloat, -objectData["position"]["y"].AsFloat, objectData["position"]["z"].AsFloat);
+                detectedObject.transform.localPosition = new Vector3(objectData["position"]["x"].AsFloat, -objectData["position"]["y"].AsFloat, objectData["position"]["z"].AsFloat);
+                obj.rotation = new Quaternion(objectData["orientation"]["x"].AsFloat, objectData["orientation"]["y"].AsFloat, objectData["orientation"]["z"].AsFloat, objectData["orientation"]["w"].AsFloat);
+                detectedObject.transform.localRotation = new Quaternion(objectData["orientation"]["x"].AsFloat, objectData["orientation"]["y"].AsFloat, objectData["orientation"]["z"].AsFloat, objectData["orientation"]["w"].AsFloat);
+                obj.bbox = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
+                detectedObject.transform.localScale = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
+
                 break;
             }
-        }
-        obj._id = objectData["name"].AsInt;
-        obj.type = objectData["type"];
-        //ARtable_x = Unity_x
-        //ARtable_y = Unity_z
-        //ARtable_z = Unity_x
-        //z can be inverted
-        obj.position = new Vector3(objectData["position"]["x"].AsFloat, -objectData["position"]["y"].AsFloat, objectData["position"]["z"].AsFloat);
-        obj.rotation = new Quaternion(objectData["orientation"]["x"].AsFloat, objectData["orientation"]["y"].AsFloat, objectData["orientation"]["z"].AsFloat, objectData["orientation"]["w"].AsFloat);
-        //Debug.Log(obj.rotation.eulerAngles);
-        obj.bbox = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
+        }        
     }
 
     private bool checkIfObjectExists(int id) {
@@ -120,12 +143,15 @@ public class ObjectsManager : MonoBehaviour {
         Vector3 dimensions = new Vector3();
         switch(objectName) {
             case "Stretcher":
+            case "Spojka":
                 dimensions = new Vector3(0.046f, 0.046f, 0.154f);
                 break;
             case "ShortLeg":
+            case "Kratka_noha":
                 dimensions = new Vector3(0.046f, 0.046f, 0.298f);
                 break;
             case "LongLeg":
+            case "Dlouha_noha":
                 dimensions = new Vector3(0.046f, 0.046f, 0.398f);
                 break;
         }
@@ -177,4 +203,28 @@ public class ObjectsManager : MonoBehaviour {
         return result;
     }
 
+    //returns list of objects placed on the table
+    public List<GameObject> GetObjectsFromTable() {
+        List<GameObject> objectsOnTable = new List<GameObject>();
+
+        foreach (GameObject detectedObject in objectsList) {
+            if (detectedObject.transform.localPosition.z < 0.05) {
+                objectsOnTable.Add(detectedObject);
+            }
+        }
+
+        return objectsOnTable;
+    }
+
+    //checks if at least one object is placed on the table, if so, return true
+    public bool AnyObjectIsOnTable() {
+
+        foreach (GameObject detectedObject in objectsList) {
+            if (detectedObject.transform.localPosition.z < 0.05) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

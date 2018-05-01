@@ -49,6 +49,7 @@ public class WaitUntilUserFinishes : ProgramInstruction {
 
     public override void Run() {
         base.Run();
-        speechManager.Say("Running wait until user finishes instruction");
+        //speechManager.Say("Running wait until user finishes instruction.");
+        speechManager.Say("The robot will wait until you finish interaction with objects in current task.");
     }
 }

@@ -241,6 +241,12 @@ public class PickFromFeeder : ProgramInstruction {
         InitRobotGripper();
         InitObjectToPick();
         base.Run();
-        speechManager.Say("Running pick from feeder instruction");
+        if(left_feeder) {
+            speechManager.Say("The robot is grabbing the object from feeder on your left side.");
+        }
+        else {
+            speechManager.Say("The robot is grabbing the object from feeder on your right side.");
+        }
+        //speechManager.Say("Running pick from feeder instruction.");
     }
 }

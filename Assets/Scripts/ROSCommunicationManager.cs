@@ -52,6 +52,7 @@ public class ROSCommunicationManager : MonoBehaviour {
             JSONNode node = JSONNode.Parse(yaml);
             ProgramMsg programMsg = new ProgramMsg(node["program"]);
             ProgramManager.Instance.SetProgramMsgFromROS(programMsg);
+            PlaceToPoseIE.Instance.SetProgramMsgFromROS(programMsg);
         }
         //1. moznost jak ziskat velikosti objektu .. asi se nebude pouzivat
         if (service == objectGetService) {
@@ -139,6 +140,9 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
         InterfaceStateMsg Imsg = (InterfaceStateMsg) msg;
 
         VisualizationManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        InteractiveEditManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        PickFromPolygonIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        PlaceToPoseIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
 
         //Debug.Log(Imsg.ToYAMLString());
         //Debug.Log(Imsg.GetSystemState());

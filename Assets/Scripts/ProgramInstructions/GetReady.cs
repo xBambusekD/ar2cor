@@ -64,6 +64,7 @@ public class GetReady : ProgramInstruction {
         robot_ready = false;
 
         base.Run();
-        speechManager.Say("Running get ready instruction");
+        //speechManager.Say("Running get ready instruction.");
+        speechManager.Say("The robot is getting back to it's default pose.");
     }
 }

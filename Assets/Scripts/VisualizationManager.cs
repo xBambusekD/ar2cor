@@ -53,9 +53,9 @@ public class VisualizationManager : MonoBehaviour {
                                 case visualization_state.VISUALIZATION_RUN:
                                     if (!visualization_running) {
                                         Debug.Log("VISUALIZATION_RUN");
-                                        //call for service to load current program.. response comes in ROSCommunicationManager's method ServiceCallBack()
-                                        ROSCommunicationManager.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");
                                         ProgramManager.Instance.StartVisualization(interfaceStateMsg);
+                                        //call for service to load current program.. response comes in ROSCommunicationManager's method ServiceCallBack()
+                                        ROSCommunicationManager.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");                                        
                                         visualization_running = true;
                                         visualization_stopped = false;
                                         hololensStateMsg = null;

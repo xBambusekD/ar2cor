@@ -173,6 +173,7 @@ public class PlaceToPose : ProgramInstruction {
         InitPlacePose();
 
         base.Run();
-        speechManager.Say("Running place to pose instruction");
+        //speechManager.Say("Running place to pose instruction.");
+        speechManager.Say("The robot is placing the object to preset place pose.");
     }
 }

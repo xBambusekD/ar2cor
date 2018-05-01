@@ -406,8 +406,11 @@ public class ProgramManager : MonoBehaviour {
     }
 
     public void SetProgramMsgFromROS(ProgramMsg msg) {
-        programMsg = msg;
-        Debug.Log(programMsg.ToYAMLString());
+        //receive only if program is really visualizing (conflicts when in edit mode)
+        if(start_visualization) {
+            programMsg = msg;
+        }
+        //Debug.Log(programMsg.ToYAMLString());
     }
 
     //1. moznost zjisteni velikosti objektu

@@ -39,6 +39,17 @@ namespace ROSBridgeLib {
                 return _blocks;
             }
 
+            public ProgramBlockMsg GetBlockByID(UInt16 id) {
+                ProgramBlockMsg searchedBlock = null;
+                foreach (ProgramBlockMsg block in _blocks) {
+                    if(block.GetID() == id) {
+                        searchedBlock = block;
+                        break;
+                    }
+                }
+                return searchedBlock;
+            }
+
             public override string ToString() {
                 string blocksString = "[";
                 for (int i = 0; i < _blocks.Count; i++) {

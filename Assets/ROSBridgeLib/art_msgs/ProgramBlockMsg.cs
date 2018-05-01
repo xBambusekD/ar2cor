@@ -53,6 +53,17 @@ namespace ROSBridgeLib {
                 return _items;
             }
 
+            public ProgramItemMsg GetProgramItemByID(UInt16 id) {
+                ProgramItemMsg searchedItem = null;
+                foreach (ProgramItemMsg item in _items) {
+                    if (item.GetID() == id) {
+                        searchedItem = item;
+                        break;
+                    }
+                }
+                return searchedItem;
+            }
+
             public UInt16 GetOnSuccess() {
                 return _on_success;
             }

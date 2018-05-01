@@ -236,6 +236,7 @@ public class PickFromPolygon : ProgramInstruction {
         arm_rotation = Quaternion.Euler(-90f, 90f, 0f);         
 
         base.Run();
-        speechManager.Say("Running pick from polygon instruction");
+        //speechManager.Say("Running pick from polygon instruction.");
+        speechManager.Say("The robot is grabbing the object from preset polygon.");
     }
 }

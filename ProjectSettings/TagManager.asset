@@ -16,6 +16,10 @@ TagManager:
   - Stretcher
   - ShortLeg
   - LongLeg
+  - Kratka_noha
+  - Dlouha_noha
+  - Spojka
+  - PointingHand
   layers:
   - Default
   - TransparentFX

@@ -465,6 +465,7 @@ public class DrillPoints : ProgramInstruction {
         arm_rotation = Quaternion.Euler(-90f, 90f, 0f);
 
         base.Run();
-        speechManager.Say("Running drill points instruction");
+        //speechManager.Say("Running drill points instruction.");
+        speechManager.Say("The robot is applying glue into the holes of the object.");
     }
 }
