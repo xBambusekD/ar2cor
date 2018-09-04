@@ -359,7 +359,7 @@ public class ARUWPMarker : MonoBehaviour{
             Debug.Log(TAG + ": not able to find ARUWPController");
             Application.Quit();
         }
-        holoLensCamera = GameObject.Find("Main Camera");
+        holoLensCamera = GameObject.FindGameObjectWithTag("MainCamera");
         if (holoLensCamera == null) {
             Debug.Log(TAG + ": Main Camera does not exist in the scene");
             Application.Quit();

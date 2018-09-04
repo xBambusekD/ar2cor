@@ -47,13 +47,27 @@ namespace ROSBridgeLib {
             }
 
             public override string ToString() {
+                string itemsString = "[";
+                for (int i = 0; i < _dimensions.Count; i++) {
+                    itemsString = itemsString + _dimensions[i].ToString();
+                    if (_dimensions.Count - i > 1) itemsString += ",";
+                }
+                itemsString += "]";
+
                 return "SolidPrimitive [type=" + (UInt16)_type +
-                    ", dimensions=" + _dimensions.ToArray() + "]";
+                    ", dimensions=" + itemsString + "]";
 			}
             
             public override string ToYAMLString() {
+                string itemsString = "[";
+                for (int i = 0; i < _dimensions.Count; i++) {
+                    itemsString = itemsString + _dimensions[i].ToString();
+                    if (_dimensions.Count - i > 1) itemsString += ",";
+                }
+                itemsString += "]";
+
                 return "{\"type\":" + (UInt16)_type +
-                    ", \"dimensions\":" + _dimensions.ToArray() + "}";
+                    ", \"dimensions\":" + itemsString + "}";
             }
 		}
 	}

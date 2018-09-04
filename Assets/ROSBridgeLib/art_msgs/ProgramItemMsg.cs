@@ -37,19 +37,20 @@ namespace ROSBridgeLib {
             private UInt16 _id;     //id of program
             private UInt16 _on_success;
             private UInt16 _on_failure;
-            private program_type _type;   //type of current operation eg. PICK_FROM_POLYGON=100, PLACE_TO_POSE=200
+            private string _type;   //type of current operation eg. PICK_FROM_POLYGON=100, PLACE_TO_POSE=200
             private List<string> _object = new List<string>();
             private List<PoseStampedMsg> _pose = new List<PoseStampedMsg>();
             private List<PolygonStampedMsg> _polygon = new List<PolygonStampedMsg>();
             private List<UInt16> _ref_id = new List<UInt16>();
             private List<KeyValueMsg> _flags = new List<KeyValueMsg>();
+            private List<string> _do_not_clear = new List<string>();
             private List<SceneLabelMsg> _labels = new List<SceneLabelMsg>();
 
             public ProgramItemMsg(JSONNode msg) {
                 _id = UInt16.Parse(msg["id"]);
                 _on_success = UInt16.Parse(msg["on_success"]);
                 _on_failure = UInt16.Parse(msg["on_failure"]);
-                _type = (program_type)UInt16.Parse(msg["type"]);
+                _type = msg["type"];
                 foreach (JSONNode item in msg["object"].AsArray) {
                     _object.Add(item);
                 }
@@ -65,12 +66,15 @@ namespace ROSBridgeLib {
                 foreach (JSONNode item in msg["flags"].AsArray) {
                     _flags.Add(new KeyValueMsg(item));
                 }
+                foreach (JSONNode item in msg["do_not_clear"].AsArray) {
+                    _do_not_clear.Add(item);
+                }
                 foreach (JSONNode item in msg["labels"].AsArray) {
                     _labels.Add(new SceneLabelMsg(item));
                 }
             }
 			
-			public ProgramItemMsg(UInt16 id, UInt16 on_success, UInt16 on_failure, program_type type, List<string> obj, List<PoseStampedMsg> pose, List<PolygonStampedMsg> polygon, List<UInt16> ref_id, List<KeyValueMsg> flags, List<SceneLabelMsg> labels) {
+			public ProgramItemMsg(UInt16 id, UInt16 on_success, UInt16 on_failure, string type, List<string> obj, List<PoseStampedMsg> pose, List<PolygonStampedMsg> polygon, List<UInt16> ref_id, List<KeyValueMsg> flags, List<string> do_not_clear, List<SceneLabelMsg> labels) {
                 _id = id;
                 _on_success = on_success;
                 _on_failure = on_failure;
@@ -80,6 +84,7 @@ namespace ROSBridgeLib {
                 _polygon = polygon;
                 _ref_id = ref_id;
                 _flags = flags;
+                _do_not_clear = do_not_clear;
                 _labels = labels;
             }
 			
@@ -99,7 +104,7 @@ namespace ROSBridgeLib {
                 return _on_failure;
             }
 
-            public program_type GetIType() {
+            public string GetIType() {
                 return _type;
             }
             
@@ -121,6 +126,10 @@ namespace ROSBridgeLib {
 
             public List<KeyValueMsg> GetFlags() {
                 return _flags;
+            }
+
+            public List<string> GetDoNotClear() {
+                return _do_not_clear;
             }
 
             public List<SceneLabelMsg> GetLabels() {
@@ -164,12 +173,13 @@ namespace ROSBridgeLib {
                 return "ProgramItem [id=" + _id +
                     ", on_success=" + _on_success +
                     ", on_failure=" + _on_failure +
-                    ", type=" + (UInt16) _type +
+                    ", type=\"" + _type + "\"" +
                     ", object=[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
                     ", pose=" + poseString +
                     ", polygon=" + polygonString +
                     ", ref_id=[" + string.Join(",", _ref_idSTR.ToArray()) + "]" +
                     ", flags=" + flagsString +
+                    ", do_not_clear=[\"" + string.Join("\",\"", _do_not_clear.ToArray()) + "\"]" +
                     ", labels=" + labelsString + "]";
             }
 
@@ -210,12 +220,13 @@ namespace ROSBridgeLib {
                 return "{\"id\":" + _id +
                     ", \"on_success\":" + _on_success +
                     ", \"on_failure\":" + _on_failure +
-                    ", \"type\":" + (UInt16) _type +
+                    ", \"type\":\"" + _type + "\"" +
                     ", \"object\":[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
                     ", \"pose\":" + poseString +
                     ", \"polygon\":" + polygonString +
                     ", \"ref_id\":[" + string.Join(",", _ref_idSTR.ToArray()) + "]" +
                     ", \"flags\":" + flagsString +
+                    ", \"do_not_clear\":[\"" + string.Join("\",\"", _do_not_clear.ToArray()) + "\"]" +
                     ", \"labels\":" + labelsString + "}";
             }
 		}

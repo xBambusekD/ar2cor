@@ -1,11 +1,12 @@
-﻿using ROSBridgeLib.art_msgs;
+﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.geometry_msgs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PickFromPolygonIE : MonoBehaviour {
+public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
 
     public GameObject pointingHand;
     public GameObject pointingHandPrefab;
@@ -30,22 +31,6 @@ public class PickFromPolygonIE : MonoBehaviour {
     private List<GameObject> objectsOnTable = new List<GameObject>();
     private List<GameObject> pointingHandsList = new List<GameObject>();
 
-    //SINGLETON
-    private static PickFromPolygonIE instance;
-    public static PickFromPolygonIE Instance {
-        get {
-            return instance;
-        }
-    }
-    private void Awake() {
-        if (instance != null && instance != this) {
-            Destroy(this.gameObject);
-        }
-        else {
-            instance = this;
-        }
-    }
-
     // Use this for initialization
     void Start () {
         worldAnchor = GameObject.FindGameObjectWithTag("world_anchor");
@@ -65,7 +50,7 @@ public class PickFromPolygonIE : MonoBehaviour {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {
                 //pick from polygon editing
-                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == program_type.PICK_FROM_POLYGON &&
+                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PickFromPolygon" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
                     
                     //if no object is selected

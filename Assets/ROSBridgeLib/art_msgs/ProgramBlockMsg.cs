@@ -75,7 +75,7 @@ namespace ROSBridgeLib {
                 string itemsString = "[";
                 for (int i = 0; i < _items.Count; i++) {
                     itemsString = itemsString + _items[i].ToString();
-                    if (_items.Count - i <= 1) itemsString += ",";
+                    if (_items.Count - i > 1) itemsString += ",";
                 }
                 itemsString += "]";
 
@@ -90,7 +90,7 @@ namespace ROSBridgeLib {
                 string itemsString = "[";
                 for (int i = 0; i < _items.Count; i++) {
                     itemsString = itemsString + _items[i].ToYAMLString();
-                    if (_items.Count - i <= 1) itemsString += ",";
+                    if (_items.Count - i > 1) itemsString += ",";
                 }
                 itemsString += "]";
                 return "{\"id\":" + _id +

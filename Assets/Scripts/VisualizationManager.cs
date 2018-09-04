@@ -1,32 +1,17 @@
-﻿using ROSBridgeLib.art_msgs;
+﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VisualizationManager : MonoBehaviour {
+public class VisualizationManager : Singleton<VisualizationManager> {
 
     private InterfaceStateMsg interfaceStateMsg;
     private HololensStateMsg hololensStateMsg;
     private HololensStateMsg hololensLastStateMsg;
     private bool visualization_running;
     private bool visualization_stopped;
-
-    //SINGLETON
-    private static VisualizationManager instance;
-    public static VisualizationManager Instance {
-        get {
-            return instance;
-        }
-    }
-    private void Awake() {
-        if (instance != null && instance != this) {
-            Destroy(this.gameObject);
-        }
-        else {
-            instance = this;
-        }
-    }
-
+    
     // Use this for initialization
     void Start () {
         visualization_running = false;
@@ -55,7 +40,7 @@ public class VisualizationManager : MonoBehaviour {
                                         Debug.Log("VISUALIZATION_RUN");
                                         ProgramManager.Instance.StartVisualization(interfaceStateMsg);
                                         //call for service to load current program.. response comes in ROSCommunicationManager's method ServiceCallBack()
-                                        ROSCommunicationManager.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");                                        
+                                        ROSCommunicationManager.Instance.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");                                        
                                         visualization_running = true;
                                         visualization_stopped = false;
                                         hololensStateMsg = null;

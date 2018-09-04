@@ -5,44 +5,61 @@ using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
 using SimpleJSON;
 using ROSBridgeLib.art_msgs;
+using System;
+using HoloToolkit.Unity;
 
-public class ROSCommunicationManager : MonoBehaviour {
+public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
     [SerializeField] private string serverIP;
     [SerializeField] private int port;
 
-    public static ROSBridgeWebSocketConnection ros = null;
+    private bool connectToROS = false;
+    public bool connectedToROS = false;
+
+    public ROSBridgeWebSocketConnection ros = new ROSBridgeWebSocketConnection();
 
     public static string programGetService = "/art/db/program/get";
     public static string objectGetService = "/art/db/object_type/get";
 
     private float awake_counter = 0f;
 
-    void Awake () {
-        ros = new ROSBridgeWebSocketConnection("ws://" + serverIP, port);
-        ros.AddSubscriber(typeof(DetectedObjectsSubscriber));
-        ros.AddSubscriber(typeof(InterfaceStateSubscriber));
-        ros.AddSubscriber(typeof(HololensStateSubscriber));
-        ros.AddPublisher(typeof(HoloLensActivityPublisher));
-        ros.AddPublisher(typeof(InterfaceStatePublisher));
-        ros.AddServiceResponse(typeof(ROSCommunicationManager));
-        ros.Connect();
-	}
-
     void Start() {
         
     }
 
     void Update () {
-        //activate callbacks
-        ros.Render();
-        
-        //every 5 secs publish activity msg
-        if(awake_counter <= 0f) {
-            ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true));
-            awake_counter = 5f;
+        if(connectToROS) {
+            ros.SetIPConfig(serverIP, port);
+            ros.AddSubscriber(typeof(DetectedObjectsSubscriber));
+            ros.AddSubscriber(typeof(InterfaceStateSubscriber));
+            ros.AddSubscriber(typeof(HololensStateSubscriber));
+            ros.AddSubscriber(typeof(CollisionEnvSubscriber));
+            ros.AddPublisher(typeof(HoloLensActivityPublisher));
+            ros.AddPublisher(typeof(InterfaceStatePublisher));
+            ros.AddPublisher(typeof(CollisionEnvPublisher));
+            ros.AddServiceResponse(typeof(ROSCommunicationManager));
+            ros.Connect();
+
+            connectToROS = false;
         }
-        awake_counter -= Time.deltaTime;        
+
+        if(ros._connected) {
+            connectedToROS = true;
+
+            //activate callbacks
+            ros.Render();
+
+            //every 5 secs publish activity msg
+            if (awake_counter <= 0f) {
+                ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true));
+                awake_counter = 5f;
+            }
+            awake_counter -= Time.deltaTime;
+        }
+
+        if(!ros._connected) {
+            connectedToROS = false;
+        }
     }
 
     //callback which calls when service is received
@@ -58,8 +75,19 @@ public class ROSCommunicationManager : MonoBehaviour {
         if (service == objectGetService) {
             JSONNode node = JSONNode.Parse(yaml);
             ObjectTypeMsg objectTypeMsg = new ObjectTypeMsg(node["object_type"]);
-            ProgramManager.Instance.SetObjectTypeMsgFromROS(objectTypeMsg);
+            ObjectsManager.Instance.SetObjectTypeMsgFromROS(objectTypeMsg);
+            Debug.Log(objectTypeMsg.ToYAMLString());
+
         }
+    }
+
+    public void SetIPConfig(string ip, string portStr) {
+        serverIP = ip;
+        port = Int32.Parse(portStr);
+    }
+
+    public void ConnectToROS() {
+        connectToROS = true;
     }
 
     //unsubscribe form topics
@@ -148,7 +176,7 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
         //Debug.Log(Imsg.GetSystemState());
 
         //funkcni volani sluzby
-        //ROSCommunicationManager.ros.CallService("/art/db/program/get", "{\"id\": " + Imsg.GetProgramID() + "}");
+        //ROSCommunicationManager.Instance.ros.CallService("/art/db/program/get", "{\"id\": " + Imsg.GetProgramID() + "}");
 
         //CallService("/art/db/program/get", "\"id: 22\"");
     }
@@ -176,6 +204,26 @@ public class HololensStateSubscriber : ROSBridgeSubscriber {
         //if(Hmsg.GetHololensState() == hololens_state.STATE_VISUALIZING) {
         //    Debug.Log("VISUALIZING " + Hmsg.GetVisualizationState());
         //}
+    }
+}
+
+public class CollisionEnvSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/art/collision_env/artificial";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/CollisionObjects";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new CollisionObjectsMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        CollisionObjectsMsg Cmsg = (CollisionObjectsMsg)msg;
+
+        CollisionEnvironmentManager.Instance.SetCollisionObjectsMsgFromROS(Cmsg);
     }
 }
 
@@ -212,5 +260,23 @@ public class InterfaceStatePublisher : ROSBridgePublisher {
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new InterfaceStateMsg(msg);
+    }
+}
+
+public class CollisionEnvPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/art/collision_env/artificial";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/CollisionObjects";
+    }
+
+    public static string ToYAMLString(CollisionObjectsMsg msg) {
+        return msg.ToYAMLString();
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new CollisionObjectsMsg(msg);
     }
 }

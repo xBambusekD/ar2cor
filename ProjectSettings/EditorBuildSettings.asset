@@ -8,3 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/mainGUI.unity
     guid: 4984106615732534aa813e5f8ef1cbbd
+  - enabled: 0
+    path: Assets/Scenes/mainGUIExcelDemo.unity
+    guid: fcd20ff84444a10499aed962e8722392

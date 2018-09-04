@@ -6,47 +6,32 @@ using UnityEngine;
 using System.Linq;
 using ROSBridgeLib.std_msgs;
 using ROSBridgeLib.diagnostic_msgs;
+using HoloToolkit.Unity;
 
-public class ProgramManager : MonoBehaviour {
+public class ProgramManager : Singleton<ProgramManager> {
     public GameObject visualizeObjectPrefab;
 
     private ProgramMsg programMsg;
-    private ObjectTypeMsg objectTypeMsg;
     private InterfaceStateMsg interfaceStateMsg;
     private visualization_state visualizationState = visualization_state.VISUALIZATION_DISABLED;
     private ProgramItemMsg currentProgramItem = null;
 
+    private bool buildingProgram;
     private bool start_visualization;
     private bool replay_visualization;
     private bool visualization_running;
     private ProgramBlockMsg programBlockMsg;
     private Dictionary<UInt16, GameObject> programToVisualize = new Dictionary<UInt16, GameObject>();
 
+    private Coroutine buildProgramCoroutine;
     private Coroutine runProgramCoroutine;
 
     private GameObject speechManagerObj;
     private TextToSpeechManager speechManager;
-
-    //SINGLETON
-    private static ProgramManager instance;
-    
+       
     //indicators when user says "Next" or "Previous"
     private bool next;
     private bool previous;
-
-    public static ProgramManager Instance {
-        get {
-            return instance;
-        }
-    }
-    private void Awake() {
-        if (instance != null && instance != this) {
-            Destroy(this.gameObject);
-        }
-        else {
-            instance = this;
-        }
-    }
 
     // Use this for initialization
     void Start () {
@@ -70,7 +55,8 @@ public class ProgramManager : MonoBehaviour {
                         if (programBlockMsg != null) {
                             Debug.Log("VISUALIZING PROGRAM " + interfaceStateMsg.GetProgramID() + " and its block " + programBlockMsg.GetID());
 
-                            BuildProgram();
+                            buildingProgram = true;
+                            StartCoroutine(BuildProgram());
                             runProgramCoroutine = StartCoroutine(RunProgram());
                             visualization_running = true;
                         }
@@ -94,14 +80,20 @@ public class ProgramManager : MonoBehaviour {
         return null;
     }
 
-    private void BuildProgram() {
+    private IEnumerator BuildProgram() {
+        Debug.Log("BULDING PROGRAM");
+        buildingProgram = true;
         foreach (var programItem in programBlockMsg.GetProgramItems()) {
+            Debug.Log(programItem.GetType());
             switch (programItem.GetIType()) {
-                case program_type.PICK_FROM_POLYGON:
+                //case program_type.PICK_FROM_POLYGON:
+                case "PickFromPolygon":
                     //1. moznost jak zjistit rozmery aktualniho objektu .. nutno ale pockat na odpoved
                     //2. moznost bude to napevno naprat do kodu
-                    //ROSCommunicationManager.ros.CallService("/art/db/object_type/get", "{\"name\": \"" + programItem.GetObject()[0] + "\"}");
-                    
+                    ROSCommunicationManager.Instance.ros.CallService("/art/db/object_type/get", "{\"name\": \"" + programItem.GetObject()[0] + "\"}");
+                    //wait until ROS sends object dimensions.. az podminka nabude true, pujde se dal
+                    yield return new WaitUntil(() => ObjectsManager.Instance.ObjectIsKnown(programItem.GetObject()[0]));
+
                     GameObject pickFromPolygonInstr = new GameObject();
                     pickFromPolygonInstr.AddComponent<PickFromPolygon>();
                     pickFromPolygonInstr.transform.parent = gameObject.transform;
@@ -109,14 +101,16 @@ public class ProgramManager : MonoBehaviour {
 
                     PickFromPolygon pfg = pickFromPolygonInstr.GetComponent<PickFromPolygon>();
                     pfg.programItem = programItem;
-                    pfg.visualizeObjectPrefab = visualizeObjectPrefab;
+                    pfg.visualizeObjectPrefab = visualizeObjectPrefab;                   
 
                     programToVisualize.Add(programItem.GetID(), pickFromPolygonInstr);
 
                     Debug.Log("PICK_FROM_POLYGON Instruction created");
 
                     break;
-                case program_type.PICK_FROM_FEEDER:
+                //case program_type.PICK_FROM_FEEDER:
+                case "PickFromFeeder":
+                    Debug.Log("Building PICK_FROM_FEEDER");
                     GameObject pickFromFeederInstr = new GameObject();
                     pickFromFeederInstr.AddComponent<PickFromFeeder>();
                     pickFromFeederInstr.transform.parent = gameObject.transform;
@@ -134,16 +128,21 @@ public class ProgramManager : MonoBehaviour {
                                 PickFromFeeder refInstr = programToVisualize[programItem.GetRefID()[0]].GetComponent<PickFromFeeder>();
                                 pff.programItem = new ProgramItemMsg(pff.programItem.GetID(), pff.programItem.GetOnSuccess(), pff.programItem.GetOnFailure(), pff.programItem.GetIType(),
                                     refInstr.programItem.GetObject(), refInstr.programItem.GetPose(), refInstr.programItem.GetPolygon(), pff.programItem.GetRefID(), pff.programItem.GetFlags(),
-                                    pff.programItem.GetLabels());
+                                    pff.programItem.GetDoNotClear(), pff.programItem.GetLabels());
+
+                                ROSCommunicationManager.Instance.ros.CallService("/art/db/object_type/get", "{\"name\": \"" + pff.programItem.GetObject()[0] + "\"}");
+                                yield return new WaitUntil(() => ObjectsManager.Instance.ObjectIsKnown(pff.programItem.GetObject()[0]));
                             }
                     }
+                                       
 
                     programToVisualize.Add(programItem.GetID(), pickFromFeederInstr);
 
                     Debug.Log("PICK_FROM_FEEDER Instruction created");
 
                     break;
-                case program_type.PLACE_TO_POSE:
+                //case program_type.PLACE_TO_POSE:
+                case "PlaceToPose":
                     GameObject placeToPoseInstr = new GameObject();
                     placeToPoseInstr.AddComponent<PlaceToPose>();
                     placeToPoseInstr.transform.parent = gameObject.transform;
@@ -161,7 +160,11 @@ public class ProgramManager : MonoBehaviour {
 
                     Debug.Log("PLACE_TO_POSE Instruction created");                    
                     break;
-                case program_type.DRILL_POINTS:
+                //case program_type.DRILL_POINTS:
+                case  "DrillPoints":
+                    ROSCommunicationManager.Instance.ros.CallService("/art/db/object_type/get", "{\"name\": \"" + programItem.GetObject()[0] + "\"}");
+                    yield return new WaitUntil(() => ObjectsManager.Instance.ObjectIsKnown(programItem.GetObject()[0]));
+
                     GameObject drillPointsInstr = new GameObject();
                     drillPointsInstr.AddComponent<DrillPoints>();
                     drillPointsInstr.transform.parent = gameObject.transform;
@@ -170,12 +173,13 @@ public class ProgramManager : MonoBehaviour {
                     DrillPoints dp = drillPointsInstr.GetComponent<DrillPoints>();
                     dp.programItem = programItem;
                     dp.visualizeObjectPrefab = visualizeObjectPrefab;
-
+                    
                     programToVisualize.Add(programItem.GetID(), drillPointsInstr);
 
                     Debug.Log("DRILL_POINTS Instruction created");
                     break;
-                case program_type.GET_READY:
+                //case program_type.GET_READY:
+                case "GetReady":
                     GameObject getReadyInstr = new GameObject();
                     getReadyInstr.AddComponent<GetReady>();
                     getReadyInstr.transform.parent = gameObject.transform;
@@ -187,7 +191,8 @@ public class ProgramManager : MonoBehaviour {
                     programToVisualize.Add(programItem.GetID(), getReadyInstr);
                     Debug.Log("GET_READY Instruction created");
                     break;
-                case program_type.WAIT_UNTIL_USER_FINISHES:
+                //case program_type.WAIT_UNTIL_USER_FINISHES:
+                case "WaitUntilUserFinishes":
                     GameObject waitUntilUserFinishesInstr = new GameObject();
                     waitUntilUserFinishesInstr.AddComponent<WaitUntilUserFinishes>();
                     waitUntilUserFinishesInstr.transform.parent = gameObject.transform;
@@ -203,11 +208,17 @@ public class ProgramManager : MonoBehaviour {
                     break;
             }
         }
+        buildingProgram = false;
+        yield return null;
     }
 
-    private IEnumerator RunProgram() {        
+
+    private IEnumerator RunProgram() {
+        //wait while program is building
+        yield return new WaitWhile(() => buildingProgram);
+
         //foreach(var programItem in programToVisualize.Values) {
-        for(int i=0; i < programToVisualize.Count; i++) {
+        for (int i=0; i < programToVisualize.Count; i++) {
             GameObject programItem = programToVisualize.ElementAt(i).Value;
             switch (programItem.gameObject.tag) {
                 case "PICK_FROM_POLYGON":
@@ -340,7 +351,7 @@ public class ProgramManager : MonoBehaviour {
         InterfaceStateMsg msg = new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
             interfaceStateMsg.GetProgramID(), interfaceStateMsg.GetBlockID(), programItemMsg, interfaceStateMsg.GetFlags(), interfaceStateMsg.GetEditEnabled(),
             interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode());
-        ROSCommunicationManager.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), msg);
+        ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), msg);
     }
 
     private int GetCorrectIndexOfPreviousInstruction(int i) {
@@ -413,10 +424,6 @@ public class ProgramManager : MonoBehaviour {
         //Debug.Log(programMsg.ToYAMLString());
     }
 
-    //1. moznost zjisteni velikosti objektu
-    public void SetObjectTypeMsgFromROS(ObjectTypeMsg msg) {
-        objectTypeMsg = msg;
-    }
 
     public void SetVisualizationState(visualization_state vState) {
         visualizationState = vState;
@@ -445,7 +452,7 @@ public class ProgramManager : MonoBehaviour {
         //stop can be called from all states except STOP state
         if (visualizationState == visualization_state.VISUALIZATION_RUN || visualizationState == visualization_state.VISUALIZATION_RESUME ||
             visualizationState == visualization_state.VISUALIZATION_REPLAY || visualizationState == visualization_state.VISUALIZATION_PAUSE) {
-            ROSCommunicationManager.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
+            ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
                 interfaceStateMsg.GetProgramID(), interfaceStateMsg.GetBlockID(), currentProgramItem, new List<KeyValueMsg>() { new KeyValueMsg("HOLOLENS_VISUALIZATION", "STOP") },
                 interfaceStateMsg.GetEditEnabled(), interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode()));
         }
@@ -461,7 +468,7 @@ public class ProgramManager : MonoBehaviour {
     public void OnReplay() {
         //replay can be called only from STOP state
         if (visualizationState == visualization_state.VISUALIZATION_STOP) {
-            ROSCommunicationManager.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
+            ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
                 interfaceStateMsg.GetProgramID(), interfaceStateMsg.GetBlockID(), currentProgramItem, new List<KeyValueMsg>() { new KeyValueMsg("HOLOLENS_VISUALIZATION", "REPLAY") },
                 interfaceStateMsg.GetEditEnabled(), interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode()));
         }
@@ -478,7 +485,7 @@ public class ProgramManager : MonoBehaviour {
     public void OnPause() {
         if (visualizationState == visualization_state.VISUALIZATION_RUN || visualizationState == visualization_state.VISUALIZATION_RESUME || 
             visualizationState == visualization_state.VISUALIZATION_REPLAY) {
-            ROSCommunicationManager.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
+            ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
                 interfaceStateMsg.GetProgramID(), interfaceStateMsg.GetBlockID(), currentProgramItem, new List<KeyValueMsg>() { new KeyValueMsg("HOLOLENS_VISUALIZATION", "PAUSE") },
                 interfaceStateMsg.GetEditEnabled(), interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode()));
         }
@@ -497,7 +504,7 @@ public class ProgramManager : MonoBehaviour {
     public void OnResume() {
         //resume can be called only from PAUSE state
         if (visualizationState == visualization_state.VISUALIZATION_PAUSE) {
-            ROSCommunicationManager.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
+            ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), new InterfaceStateMsg("PROJECTED UI", interfaceStateMsg.GetSystemState(), interfaceStateMsg.GetTimestamp(),
                 interfaceStateMsg.GetProgramID(), interfaceStateMsg.GetBlockID(), currentProgramItem, new List<KeyValueMsg>() { new KeyValueMsg("HOLOLENS_VISUALIZATION", "PAUSE") },
                 interfaceStateMsg.GetEditEnabled(), interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode()));
         }

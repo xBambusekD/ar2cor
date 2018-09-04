@@ -1,30 +1,15 @@
-﻿using ROSBridgeLib.art_msgs;
+﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InteractiveEditManager : MonoBehaviour {
+public class InteractiveEditManager : Singleton<InteractiveEditManager> {
 
     private InterfaceStateMsg interfaceStateMsg;
     private InterfaceStateMsg interfaceStateMsgOldState;
 
     private bool interfaceStateChanged;
-
-    //SINGLETON
-    private static InteractiveEditManager instance;
-    public static InteractiveEditManager Instance {
-        get {
-            return instance;
-        }
-    }
-    private void Awake() {
-        if (instance != null && instance != this) {
-            Destroy(this.gameObject);
-        }
-        else {
-            instance = this;
-        }
-    }
 
     // Use this for initialization
     void Start() {

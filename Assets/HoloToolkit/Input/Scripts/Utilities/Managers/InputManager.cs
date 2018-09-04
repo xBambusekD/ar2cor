@@ -49,6 +49,7 @@ namespace HoloToolkit.Unity.InputModule
         private PointerSpecificEventData pointerSpecificEventData;
         private InputPositionEventData inputPositionEventData;
         private SelectPressedEventData selectPressedEventData;
+        private BoundingBoxEventData boundingBoxActivityEventData;
 #if UNITY_WSA || UNITY_STANDALONE_WIN
         private SpeechEventData speechEventData;
         private DictationEventData dictationEventData;
@@ -211,6 +212,7 @@ namespace HoloToolkit.Unity.InputModule
             sourceRotationEventData = new SourceRotationEventData(EventSystem.current);
             sourcePositionEventData = new SourcePositionEventData(EventSystem.current);
             xboxControllerEventData = new XboxControllerEventData(EventSystem.current);
+            boundingBoxActivityEventData = new BoundingBoxEventData(EventSystem.current);
 #if UNITY_WSA || UNITY_STANDALONE_WIN
             speechEventData = new SpeechEventData(EventSystem.current);
             dictationEventData = new DictationEventData(EventSystem.current);
@@ -435,8 +437,12 @@ namespace HoloToolkit.Unity.InputModule
                 pointerInputEventData.InputSource = source;
                 pointerInputEventData.SourceId = sourceId;
 
-                ExecuteEvents.ExecuteHierarchy(inputEventData.selectedObject, pointerInputEventData, ExecuteEvents.pointerUpHandler);
-                ExecuteEvents.ExecuteHierarchy(inputEventData.selectedObject, pointerInputEventData, ExecuteEvents.pointerClickHandler);
+                if (pointerInputEventData.selectedObject != null)
+                {
+                    ExecuteEvents.ExecuteHierarchy(pointerInputEventData.selectedObject, pointerInputEventData, ExecuteEvents.pointerUpHandler);
+                    ExecuteEvents.ExecuteHierarchy(pointerInputEventData.selectedObject, pointerInputEventData, ExecuteEvents.pointerClickHandler);
+                }
+
                 pointerInputEventData.Clear();
             }
         }
@@ -473,7 +479,10 @@ namespace HoloToolkit.Unity.InputModule
                 pointerInputEventData.pressPosition = pointerInputEventData.position;
                 pointerInputEventData.pointerPressRaycast = pointerInputEventData.pointerCurrentRaycast;
 
-                ExecuteEvents.ExecuteHierarchy(inputEventData.selectedObject, pointerInputEventData, ExecuteEvents.pointerDownHandler);
+                if (pointerInputEventData.selectedObject != null)
+                {
+                    ExecuteEvents.ExecuteHierarchy(pointerInputEventData.selectedObject, pointerInputEventData, ExecuteEvents.pointerDownHandler);
+                }
             }
         }
 
@@ -836,6 +845,40 @@ namespace HoloToolkit.Unity.InputModule
         }
 
         #endregion // Xbox Controller Events
+
+        #region Bounding Box Rig Activity Events
+        private static readonly ExecuteEvents.EventFunction<IBoundingBoxStateHandler> OnBoundingBoxRigActivatedEventHandler =
+            delegate (IBoundingBoxStateHandler handler, BaseEventData eventData)
+            {
+                BoundingBoxEventData casted = ExecuteEvents.ValidateEventData<BoundingBoxEventData>(eventData);
+                handler.OnBoundingBoxRigActivated(casted);
+            };
+
+        public void RaiseBoundingBoxRigActivated(GameObject boundingBoxRiggedObject)
+        {
+            // Create input event
+            boundingBoxActivityEventData.Initialize(boundingBoxRiggedObject);
+
+            // Pass to the handler through HandleEvent to perform the fallback logic
+            HandleEvent(boundingBoxActivityEventData, OnBoundingBoxRigActivatedEventHandler);
+        }
+
+        private static readonly ExecuteEvents.EventFunction<IBoundingBoxStateHandler> OnBoundingBoxRigDeactivatedEventHandler =
+            delegate (IBoundingBoxStateHandler handler, BaseEventData eventData)
+            {
+                BoundingBoxEventData casted = ExecuteEvents.ValidateEventData<BoundingBoxEventData>(eventData);
+                handler.OnBoundingBoxRigDeactivated(casted);
+            };
+
+        public void RaiseBoundingBoxRigDeactivated(GameObject boundingBoxRiggedObject)
+        {
+            // Create input event
+            boundingBoxActivityEventData.Initialize(boundingBoxRiggedObject);
+
+            // Pass to the handler through HandleEvent to perform the fallback logic
+            HandleEvent(boundingBoxActivityEventData, OnBoundingBoxRigDeactivatedEventHandler);
+        }
+        #endregion // Bounding Box Rig Activity Events
 
 #if UNITY_WSA || UNITY_STANDALONE_WIN
         #region Speech Events

@@ -64,6 +64,8 @@ namespace ROSBridgeLib {
         };
         private string _host;
         private int _port;
+        public bool _connected;
+
 #if UNITY_EDITOR
         private WebSocket _ws;
         private System.Threading.Thread _myThread;
@@ -131,14 +133,18 @@ namespace ROSBridgeLib {
 		 * Make a connection to a host/port. 
 		 * This does not actually start the connection, use Connect to do that.
 		 */
-        public ROSBridgeWebSocketConnection(string host, int port) {
-            _host = host;
-            _port = port;
+        public ROSBridgeWebSocketConnection() {
+            _connected = false;
 #if UNITY_EDITOR
             _myThread = null;
 #endif
             _subscribers = new List<Type>();
             _publishers = new List<Type>();
+        }
+
+        public void SetIPConfig(string serverIP, int port) {
+            _host = "ws://" + serverIP;
+            _port = port;
         }
 
         /**
@@ -209,6 +215,7 @@ namespace ROSBridgeLib {
                     dataWriter.StoreAsync();
                     Debug.Log("Sending " + ROSBridgeMsg.Advertise(GetMessageTopic(p), GetMessageType(p)));
                 }
+                _connected = true;
             }
         }
 #endif
@@ -228,6 +235,7 @@ namespace ROSBridgeLib {
                 Debug.Log("Sending " + ROSBridgeMsg.UnAdvertise(GetMessageTopic(p)));
             }
             _ws.Close();
+            _connected = false;
 #endif
 #if !UNITY_EDITOR
             Debug.Log("Disconnectig...");
@@ -243,6 +251,7 @@ namespace ROSBridgeLib {
             }
             messageWebSocket.Dispose();
             messageWebSocket = null;
+            _connected = false;
 #endif
         }
 
@@ -250,6 +259,7 @@ namespace ROSBridgeLib {
 #if UNITY_EDITOR
             _ws = new WebSocket(_host + ":" + _port);
             _ws.OnMessage += (sender, e) => this.OnMessage(e.Data);
+            //TODO connecting takes too long
             _ws.Connect();
 
             foreach (Type p in _subscribers) {
@@ -260,6 +270,9 @@ namespace ROSBridgeLib {
                 _ws.Send(ROSBridgeMsg.Advertise(GetMessageTopic(p), GetMessageType(p)));
                 Debug.Log("Sending " + ROSBridgeMsg.Advertise(GetMessageTopic(p), GetMessageType(p)));
             }
+
+            _connected = true;
+
             while (true) {
                 Thread.Sleep(1000);
             }

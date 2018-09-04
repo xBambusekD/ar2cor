@@ -130,7 +130,13 @@ public class PickFromPolygon : ProgramInstruction {
         objectToPick.transform.localPosition = new Vector3(centroid.x, -centroid.y, 0);
 
         //rotate object to lay down on the table and to be parallel with world_anchor
-        objectToPick.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
+        if(objectToPick.tag.Equals("Stretcher") || objectToPick.tag.Equals("LongLeg") || objectToPick.tag.Equals("ShortLeg") ||
+            objectToPick.tag.Equals("Spojka") || objectToPick.tag.Equals("Dlouha_noha") || objectToPick.tag.Equals("Kratka_noha")) {
+            objectToPick.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
+        }
+        else {
+            objectToPick.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
+        }
     }
 
     private void InitRobotGripper() {

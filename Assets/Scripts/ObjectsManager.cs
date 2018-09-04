@@ -1,35 +1,24 @@
-﻿using SimpleJSON;
+﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
+using SimpleJSON;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectsManager : MonoBehaviour {
+public class ObjectsManager : Singleton<ObjectsManager> {
 
     [SerializeField] private GameObject[] m_Prefabs;
     public GameObject worldAnchor;
     public List<GameObject> virtualObjectList = new List<GameObject>();
 
     public List<GameObject> objectsList = new List<GameObject>();
+
+    //list of known objects and their dimensions
+    private List<ObjectTypeMsg> knownObjects = new List<ObjectTypeMsg>();
     private List<int> existingObjectsID = new List<int>();
 
     private JSONNode dataFromROS;
-
-    //SINGLETON
-    private static ObjectsManager instance;
-    public static ObjectsManager Instance {
-        get {
-            return instance;
-        }
-    }
-    private void Awake() {
-        if (instance != null && instance != this) {
-            Destroy(this.gameObject);
-        }
-        else {
-            instance = this;
-        }
-    }
 
     // Use this for initialization
     void Start() {
@@ -38,9 +27,8 @@ public class ObjectsManager : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         if (SystemStarter.Instance.calibrated) {
-            existingObjectsID.Clear();
-
             if (dataFromROS != null) {
+                existingObjectsID.Clear();
 
                 for (int i = 0; i < dataFromROS.Count; i++) {
                     existingObjectsID.Add(dataFromROS[i]["name"].AsInt);
@@ -133,29 +121,58 @@ public class ObjectsManager : MonoBehaviour {
             }
         }
     }
-    
+
     public void setDataFromROS(JSONNode data) {
         dataFromROS = data;
     }
 
     //returns dimensions of object based on it's name
     public Vector3 getObjectDimensions(string objectName) {
-        Vector3 dimensions = new Vector3();
-        switch(objectName) {
-            case "Stretcher":
-            case "Spojka":
-                dimensions = new Vector3(0.046f, 0.046f, 0.154f);
-                break;
-            case "ShortLeg":
-            case "Kratka_noha":
-                dimensions = new Vector3(0.046f, 0.046f, 0.298f);
-                break;
-            case "LongLeg":
-            case "Dlouha_noha":
-                dimensions = new Vector3(0.046f, 0.046f, 0.398f);
-                break;
+        foreach (ObjectTypeMsg knownObject in knownObjects) {
+            if (knownObject.GetName().Equals(objectName)) {
+                if(knownObject.GetBBox().GetPrimitiveType() == ROSBridgeLib.shape_msgs.primitive_type.BOX) {
+                    return new Vector3(knownObject.GetBBox().GetDimesions()[0], knownObject.GetBBox().GetDimesions()[1], knownObject.GetBBox().GetDimesions()[2]);
+                }
+            }
         }
-        return dimensions;
+        return new Vector3(0.046f, 0.046f, 0.154f);
+
+        //Vector3 dimensions = new Vector3();
+        //switch(objectName) {
+        //    case "Stretcher":
+        //    case "Spojka":
+        //        dimensions = new Vector3(0.046f, 0.046f, 0.154f);
+        //        break;
+        //    case "ShortLeg":
+        //    case "Kratka_noha":
+        //        dimensions = new Vector3(0.046f, 0.046f, 0.298f);
+        //        break;
+        //    case "LongLeg":
+        //    case "Dlouha_noha":
+        //        dimensions = new Vector3(0.046f, 0.046f, 0.398f);
+        //        break;
+        //}
+        //return dimensions;
+    }
+    
+    //adds new object dimensions to list of known objects
+    public void SetObjectTypeMsgFromROS(ObjectTypeMsg msg) {
+        if(!ObjectIsKnown(msg.GetName())) {
+            knownObjects.Add(msg);
+        }
+        foreach (ObjectTypeMsg knownObject in knownObjects) {            
+            Debug.Log("KNOWN OBJECT: " + knownObject.GetName());
+        }
+    }
+
+    //returns true/false if object exists in list of known objects
+    public bool ObjectIsKnown(string objectName) {
+        foreach (ObjectTypeMsg knownObject in knownObjects) {
+            if (knownObject.GetName().Equals(objectName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //returns list of detected objects of specific type (Stretcher|ShortLeg|LongLeg) that are in given polygon

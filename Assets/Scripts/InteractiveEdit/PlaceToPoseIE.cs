@@ -1,12 +1,14 @@
-﻿using ROSBridgeLib.art_msgs;
+﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.geometry_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlaceToPoseIE : MonoBehaviour {
+public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
 
     public GameObject pointingHand;
+    public Vector3 spawnPointOnTable;
 
     private InterfaceStateMsg interfaceStateMsg;
     private ProgramItemMsg programItemMsg;
@@ -27,23 +29,6 @@ public class PlaceToPoseIE : MonoBehaviour {
     private PoseMsg originalPoseMsg;
     private bool animationShowed;
 
-    //SINGLETON
-    private static PlaceToPoseIE instance;    
-
-    public static PlaceToPoseIE Instance {
-        get {
-            return instance;
-        }
-    }
-    private void Awake() {
-        if (instance != null && instance != this) {
-            Destroy(this.gameObject);
-        }
-        else {
-            instance = this;
-        }
-    }
-
     // Use this for initialization
     void Start() {
         speechManagerObj = GameObject.FindGameObjectWithTag("speech_manager");
@@ -61,12 +46,12 @@ public class PlaceToPoseIE : MonoBehaviour {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {
                 //pick from polygon editing
-                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == program_type.PLACE_TO_POSE &&
+                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PlaceToPose" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
 
                     //check that object type is set
                     if (programMsg == null && !serviceCalled) {
-                        ROSCommunicationManager.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");
+                        ROSCommunicationManager.Instance.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");
                         serviceCalled = true;
                     }
                     else if (programMsg != null && !objTypeReferenceSet) {
@@ -101,7 +86,7 @@ public class PlaceToPoseIE : MonoBehaviour {
                                                  programItemMsg.GetPose()[0].GetPose().GetPosition().GetZ());
                         //ARTABLE BUG - place pose not actualizing interface state.. initially set to 0.. if so, set spawn point on the middle of the table (where it appears)
                         if(spawnPoint.Equals(new Vector3(0f, 0f, 0f))) {
-                            spawnPoint = new Vector3(0.74f, -0.3f, 0f);
+                            spawnPoint = spawnPointOnTable;
                         }
                         movePoint = spawnPoint + new Vector3(0f, 0.15f, 0f);
 
@@ -168,7 +153,7 @@ public class PlaceToPoseIE : MonoBehaviour {
     public void SetProgramMsgFromROS(ProgramMsg msg) {
         //set only if system is really in edit mode of this particullar instruction
         if (interfaceStateMsg != null) {
-            if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == program_type.PLACE_TO_POSE &&
+            if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PlaceToPose" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
                 programMsg = msg;
             }
