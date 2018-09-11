@@ -218,6 +218,11 @@ namespace HoloToolkit.Unity.UX
                     boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
                     Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
                     Destroy(boundingBox.Target);
+                    //destroy also parent of target gameobject
+                    if(boundingBox.Target.transform.parent != null) {
+                        boundingBox.Target.GetComponentInParent<CollisionPrimitive>().DestroyThis();
+                        //Destroy(boundingBox.Target.transform.parent.gameObject);
+                    }
                     Destroy(gameObject);
                     break;
 
@@ -248,6 +253,14 @@ namespace HoloToolkit.Unity.UX
                 default:
                     break;
             }
+        }
+
+        public void DestroyThis() {
+            // Destroy the target object, Bounding Box, Bounding Box Rig and App Bar
+            boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+            Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
+            Destroy(boundingBox.Target);
+            Destroy(gameObject);
         }
 
         private void CreateButton(ButtonTemplate template, ButtonIconProfile customIconProfile)

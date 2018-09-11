@@ -24,6 +24,7 @@ ehthumbs.db
 *.user
 *.unityproj
 *.booproj
+*.pdb
 
 # Unity generated
 # ===============

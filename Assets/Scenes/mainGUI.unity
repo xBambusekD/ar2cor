@@ -7332,6 +7332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverIP: 192.168.104.100
   port: 9090
+  connectedToROS: 0
 --- !u!1 &1361908764
 GameObject:
   m_ObjectHideFlags: 0
@@ -9032,6 +9033,52 @@ MonoBehaviour:
   PortInput: {fileID: 1517536872}
   PortPlaceholder: {fileID: 195890952}
   PingMessage: {fileID: 2125875092}
+--- !u!1001 &1623049844
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_RootOrder
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1635451555213648, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &1665726097
 GameObject:
   m_ObjectHideFlags: 0
@@ -9763,52 +9810,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1708331000}
---- !u!1001 &1752893881
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4340268134304576, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_RootOrder
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 1635451555213648, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 649c75bc83d0f7f45ac09bb7855d0f82, type: 2}
-  m_IsPrefabParent: 0
 --- !u!1 &1758417654
 GameObject:
   m_ObjectHideFlags: 0
@@ -10052,7 +10053,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   calibrationManager: {fileID: 1386252796}
   calibrated: 0
-  connectedToROS: 0
   worldAnchor: {fileID: 130183170}
   worldAnchorVisualizationCube: {fileID: 1966723868}
   worldAnchorRecalibrationButton: {fileID: 366721642}

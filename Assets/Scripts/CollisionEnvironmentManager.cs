@@ -2,6 +2,7 @@
 using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.shape_msgs;
+using ROSBridgeLib.std_msgs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,23 +27,27 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
 	
 	// Update is called once per frame
 	void Update () {
-		if(collisionObjectsMsg != null) {
-            existingPrimitives.Clear();
-            foreach (CollisionPrimitiveMsg primitiveMsg in collisionObjectsMsg.GetPrimitives()) {
-                //get all existing primitives names
-                existingPrimitives.Add(primitiveMsg.GetName());
+        if (SystemStarter.Instance.calibrated) {
+            if (collisionObjectsMsg != null) {
+                existingPrimitives.Clear();
+                foreach (CollisionPrimitiveMsg primitiveMsg in collisionObjectsMsg.GetPrimitives()) {
+                    //get all existing primitives names
+                    existingPrimitives.Add(primitiveMsg.GetName());
 
-                UpdatePrimitive(primitiveMsg);
+                    UpdatePrimitive(primitiveMsg);
+                }
+                DeleteRemovedPrimitives();
+                collisionObjectsMsg = null;
             }
-            DeleteRemovedPrimitives();
-            collisionObjectsMsg = null;
         }
     }
 
+    //deletes primitives that were removed on ARTable side
     private void DeleteRemovedPrimitives() {
         for (int i = 0; i < collisionPrimitives.Count; i++) {
             CollisionPrimitive colPrimitive = collisionPrimitives[i].GetComponent<CollisionPrimitive>();
             if (!existingPrimitives.Contains(colPrimitive.collisionPrimitiveMsg.GetName())) {
+                colPrimitive.DestroyAppBar();
                 Destroy(collisionPrimitives[i]);
                 collisionPrimitives.Remove(collisionPrimitives[i]);
             }
@@ -63,6 +68,7 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
         //if primitive wasn't updated, meaning it doesn't exists.. so create new one
         if(!updated) {
             GameObject new_primitive = Instantiate(new GameObject(), worldAnchor.transform);
+            new_primitive.name = "CollisionObj-" + primitiveMsg.GetName();
             CollisionPrimitive collisionPrimitive = new_primitive.AddComponent<CollisionPrimitive>();
             // TODO pick correct prefab due to collision primitive (cube, sphere..)
             collisionPrimitive.InitNewPrimitive(primitiveMsg, collisionPrefabs[0]);
@@ -70,24 +76,41 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
         }
     }
 
-    //public void CreateNewPrimitive(GameObject prefab, Vector3 position) {
-    //    GameObject new_primitive = Instantiate(new GameObject(), worldAnchor.transform);
-    //    new_primitive.transform.localPosition = position;
-    //    CollisionPrimitive collisionPrimitive = new_primitive.AddComponent<CollisionPrimitive>();
+    private string GenerateUniqueName() {
+        bool name_is_unique;
 
-    //    //CollisionPrimitiveMsg primitiveMsg = new CollisionPrimitiveMsg("DefaultPrimitive", MainMenuManager.Instance.currentSetup.GetSetupID(),
-    //    //        new SolidPrimitiveMsg(primitive_type.BOX, new List<float>() { new_primitive.transform.localScale.x, new_primitive.transform.localScale.y, new_primitive.transform.localScale.z }),
-    //    //        new PoseStampedMsg(collisionPrimitiveMsg.GetPose().GetHeader(),
-    //    //        new PoseMsg(new PointMsg(primitive.transform.localPosition.x, -primitive.transform.localPosition.y, primitive.transform.localPosition.z),
-    //    //        new QuaternionMsg(-primitive.transform.localRotation.x, primitive.transform.localRotation.y, -primitive.transform.localRotation.z, primitive.transform.localRotation.w))));
+        while (true) {
+            Guid guid = Guid.NewGuid();
+            string unique_name = guid.ToString();
+            name_is_unique = true;
 
-    //    collisionPrimitive.InitNewPrimitive(primitiveMsg, prefab);
-    //    collisionPrimitives.Add(new_primitive);
-    //}
+            //check if generated name is not already present in known primitives
+            foreach(GameObject primitive in collisionPrimitives) {
+                if(unique_name.Equals(primitive.GetComponent<CollisionPrimitive>().collisionPrimitiveMsg.GetName())) {
+                    name_is_unique = false;
+                }
+            }
+            if(name_is_unique) {
+                return unique_name;
+            }
+        }
+    }
+
+    public void CreateNewPrimitive(GameObject prefab, Vector3 position) {
+        // TODO replace marker to world_frame
+        CollisionPrimitiveMsg newMsg = new CollisionPrimitiveMsg(GenerateUniqueName(), MainMenuManager.Instance.currentSetup.GetSetupID(),
+                new SolidPrimitiveMsg(primitive_type.BOX, new List<float>() { prefab.transform.localScale.x, prefab.transform.localScale.y, prefab.transform.localScale.z }),
+                new PoseStampedMsg(new HeaderMsg(0, new TimeMsg(0, 0), "marker"),
+                new ROSBridgeLib.geometry_msgs.PoseMsg(new PointMsg(position.x, -position.y, position.z),
+                new QuaternionMsg(0, 0, 0, 1))));
+
+        UpdatePrimitive(newMsg);
+        ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.addCollisionPrimitiveService, "{\"primitive\": " + newMsg.ToYAMLString() + "}");
+    }
 
     public void SetCollisionObjectsMsgFromROS(CollisionObjectsMsg msg) {
         //receive only if messages are not the same
-        if(!newCollisionObjectsMsg.Equals(msg)) {
+        if(!newCollisionObjectsMsg.ToYAMLString().Equals(msg.ToYAMLString())) {
             collisionObjectsMsg = msg;
             newCollisionObjectsMsg = msg;
         }
@@ -95,10 +118,14 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
 
     public void UpdateCollisionPrimitiveMsg(CollisionPrimitiveMsg msg) {
         newCollisionObjectsMsg.UpdatePrimitiveMsg(msg);
-        SendCollisionObjectsMsgToROS(newCollisionObjectsMsg);
+        //SendCollisionObjectsMsgToROS(newCollisionObjectsMsg);
     }
 
-    private void SendCollisionObjectsMsgToROS(CollisionObjectsMsg msg) {
-        ROSCommunicationManager.Instance.ros.Publish(CollisionEnvPublisher.GetMessageTopic(), msg);
+    //private void SendCollisionObjectsMsgToROS(CollisionObjectsMsg msg) {
+    //    //ROSCommunicationManager.Instance.ros.Publish(CollisionEnvPublisher.GetMessageTopic(), msg);
+    //}
+
+    public void RemoveDestroyedPrimitive(GameObject primitive) {
+        collisionPrimitives.Remove(primitive);
     }
 }

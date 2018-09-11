@@ -20,6 +20,8 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
     public static string programGetService = "/art/db/program/get";
     public static string objectGetService = "/art/db/object_type/get";
+    public static string addCollisionPrimitiveService = "/art/collision_env/artificial/add/primitive";
+    public static string deleteCollisionPrimitiveService = "/art/collision_env/artificial/clear/name";
 
     private float awake_counter = 0f;
 
@@ -77,7 +79,14 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ObjectTypeMsg objectTypeMsg = new ObjectTypeMsg(node["object_type"]);
             ObjectsManager.Instance.SetObjectTypeMsgFromROS(objectTypeMsg);
             Debug.Log(objectTypeMsg.ToYAMLString());
-
+        }
+        if(service == addCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
+        }
+        if(service == deleteCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
         }
     }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using HoloToolkit.Unity.InputModule;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -203,6 +204,12 @@ namespace HoloToolkit.Unity.UX
             appBarInstance.BoundingBox = boxInstance;
             appBarInstance.HoverOffsetZ = appBarHoverOffsetZ;
             //appBarInstance.transform.parent = this.gameObject.transform;
+            try {
+                gameObject.GetComponentInParent<CollisionPrimitive>().SetAppBar(appBarInstance);
+            }
+            catch (NullReferenceException e) {
+                Debug.Log(e);
+            }
 
             boxInstance.IsVisible = false;
         }
