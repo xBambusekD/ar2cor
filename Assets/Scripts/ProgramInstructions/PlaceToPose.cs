@@ -132,7 +132,7 @@ public class PlaceToPose : ProgramInstruction {
 
     private void InitPlacePose() {
         placePose = programItem.GetPose()[0].GetPose();
-        placePosition = new Vector3(placePose.GetPosition().GetX(), -placePose.GetPosition().GetY(), placePose.GetPosition().GetZ() - 0.023f);
+        placePosition = new Vector3(placePose.GetPosition().GetX(), -placePose.GetPosition().GetY(), placePose.GetPosition().GetZ());
         //placePosition = new Vector3(placePose.GetPosition().GetX(), -placePose.GetPosition().GetY(), 0f);
         placeQuaternion = new Quaternion(-placePose.GetOrientation().GetX(), placePose.GetOrientation().GetY(), -placePose.GetOrientation().GetZ(), placePose.GetOrientation().GetW());
         upPosition = objectToPlace.transform.localPosition + new Vector3(0,0,0.1f);

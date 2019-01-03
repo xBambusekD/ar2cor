@@ -165,6 +165,7 @@ MonoBehaviour:
   UseHide: 1
   DisplayType: 0
   State: 0
+  InitialState: 2
   CustomButtonIconProfile: {fileID: 0}
   buttons: []
   buttonParent: {fileID: 4691479528535670}

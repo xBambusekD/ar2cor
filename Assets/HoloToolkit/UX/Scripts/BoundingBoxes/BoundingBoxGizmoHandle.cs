@@ -191,6 +191,17 @@ namespace HoloToolkit.Unity.UX
 
                 lastHandWorldPos = currentHandPosition;
             }
+
+            RescaleHandle();
+        }
+
+        private void RescaleHandle() {
+            if (transformToAffect.localScale.x <= 0.13f || transformToAffect.localScale.y <= 0.13f || transformToAffect.localScale.z <= 0.13f) {
+                gameObject.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
+            }
+            else {
+                gameObject.transform.localScale = new Vector3(0.04f, 0.04f, 0.04f);
+            }
         }
 
         private Vector3 GetHandPosition(uint sourceId)

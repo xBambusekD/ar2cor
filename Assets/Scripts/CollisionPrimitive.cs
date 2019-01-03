@@ -1,4 +1,6 @@
-﻿using ROSBridgeLib.art_msgs;
+﻿using HoloToolkit.Unity.InputModule;
+using HoloToolkit.Unity.UX;
+using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.shape_msgs;
 using System;
@@ -12,22 +14,54 @@ public class CollisionPrimitive : MonoBehaviour {
 
     public CollisionPrimitiveMsg collisionPrimitiveMsg;
     private GameObject primitive;
+    private AppBar appBarInstance;
+    private Vector3 lastPosition;
+    private Vector3 lastScale;
+    private Quaternion lastRotation;
+    private bool paramsSet;
+    private bool coroutineStarted;
+
+    private void Awake() {
+        paramsSet = false;
+        coroutineStarted = false;
+    }
 
     private void Update() {
-        
-        if (primitive.transform.hasChanged) {
-            Debug.Log("TRANSFORM HAS CHANGED");
-            primitive.transform.hasChanged = false;
-            CollisionPrimitiveMsg newMsg = new CollisionPrimitiveMsg(collisionPrimitiveMsg.GetName(), collisionPrimitiveMsg.GetSetup(),
-                new SolidPrimitiveMsg(primitive_type.BOX, new List<float>() { primitive.transform.localScale.x, primitive.transform.localScale.y, primitive.transform.localScale.z }),
-                new PoseStampedMsg(collisionPrimitiveMsg.GetPose().GetHeader(),
-                new PoseMsg(new PointMsg(primitive.transform.localPosition.x, -primitive.transform.localPosition.y, primitive.transform.localPosition.z),
-                new QuaternionMsg(-primitive.transform.localRotation.x, primitive.transform.localRotation.y, -primitive.transform.localRotation.z, primitive.transform.localRotation.w))));
-            collisionPrimitiveMsg = newMsg;
-            CollisionEnvironmentManager.Instance.UpdateCollisionPrimitiveMsg(collisionPrimitiveMsg);
+        if (paramsSet) {
+            if(!coroutineStarted) {
+                if (primitive.transform.localScale != lastScale || primitive.transform.localRotation != lastRotation) {
+                    StartCoroutine(WaitAndPublishTransformChange());
+                    coroutineStarted = true;
+                }
+            }
         }
     }
 
+    private IEnumerator WaitAndPublishTransformChange() {
+        yield return new WaitForSeconds(2f);
+
+        Debug.Log(collisionPrimitiveMsg.GetName() + " TRANSFORM HAS CHANGED");
+        primitive.transform.hasChanged = false;
+        CollisionPrimitiveMsg newMsg = new CollisionPrimitiveMsg(collisionPrimitiveMsg.GetName(), collisionPrimitiveMsg.GetSetup(),
+            new SolidPrimitiveMsg(primitive_type.BOX, new List<float>() { primitive.transform.localScale.x, primitive.transform.localScale.y, primitive.transform.localScale.z }),
+            new PoseStampedMsg(collisionPrimitiveMsg.GetPose().GetHeader(),
+            new PoseMsg(new PointMsg(primitive.transform.localPosition.x, -primitive.transform.localPosition.y, primitive.transform.localPosition.z),
+            new QuaternionMsg(-primitive.transform.localRotation.x, primitive.transform.localRotation.y, -primitive.transform.localRotation.z, primitive.transform.localRotation.w))));
+        collisionPrimitiveMsg = newMsg;
+        CollisionEnvironmentManager.Instance.UpdateCollisionPrimitiveMsg(collisionPrimitiveMsg);
+
+        //update transform of this object in ROS
+        ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.addCollisionPrimitiveService, "{\"primitive\": " + newMsg.ToYAMLString() + "}");
+        lastPosition = primitive.transform.localPosition;
+        lastScale = primitive.transform.localScale;
+        lastRotation = primitive.transform.localRotation;
+
+        coroutineStarted = false;
+
+        yield return null;
+    }
+
+    //creates new primitive based on given prefab and position in received CollisionPrimitiveMsg
     public void InitNewPrimitive(CollisionPrimitiveMsg msg, GameObject prefab) {
         collisionPrimitiveMsg = msg;
         primitivePrefab = prefab;
@@ -35,29 +69,35 @@ public class CollisionPrimitive : MonoBehaviour {
     }
 
     public void UpdatePrimitive(CollisionPrimitiveMsg msg) {
-        collisionPrimitiveMsg = msg;
-        UpdateExistingPrimitive();
+        //don't update primitive if new msg is same as old one
+        if (!collisionPrimitiveMsg.ToYAMLString().Equals(msg.ToYAMLString())) {
+            collisionPrimitiveMsg = msg;
+            UpdateExistingPrimitive();
+        }
     }
 
     private void UpdateExistingPrimitive() {
-        primitive.transform.localPosition = new Vector3(collisionPrimitiveMsg.GetPose().GetPose().GetPosition().GetX(), -collisionPrimitiveMsg.GetPose().GetPose().GetPosition().GetY(),
-            collisionPrimitiveMsg.GetPose().GetPose().GetPosition().GetZ());
-        primitive.transform.localRotation = new Quaternion(-collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetX(), collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetY(),
-            -collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetZ(), collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetW());
-        primitive.transform.localScale = new Vector3(collisionPrimitiveMsg.GetBBox().GetDimesions()[0], collisionPrimitiveMsg.GetBBox().GetDimesions()[1],
-            collisionPrimitiveMsg.GetBBox().GetDimesions()[2]);
-        primitive.transform.hasChanged = false;
+        Debug.Log("UPDATING EXISTING PRIMITIVE: " + collisionPrimitiveMsg.GetName());
+        SetPrimitiveTransform(collisionPrimitiveMsg);        
     }
 
     private void CreateNewPrimitive() {
         primitive = Instantiate(primitivePrefab, gameObject.transform);
-        primitive.transform.localPosition = new Vector3(collisionPrimitiveMsg.GetPose().GetPose().GetPosition().GetX(), -collisionPrimitiveMsg.GetPose().GetPose().GetPosition().GetY(),
-            collisionPrimitiveMsg.GetPose().GetPose().GetPosition().GetZ());
-        primitive.transform.localRotation = new Quaternion(-collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetX(), collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetY(),
-            -collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetZ(), collisionPrimitiveMsg.GetPose().GetPose().GetOrientation().GetW());
-        primitive.transform.localScale = new Vector3(collisionPrimitiveMsg.GetBBox().GetDimesions()[0], collisionPrimitiveMsg.GetBBox().GetDimesions()[1],
-            collisionPrimitiveMsg.GetBBox().GetDimesions()[2]);
-        primitive.transform.hasChanged = false;
+        SetPrimitiveTransform(collisionPrimitiveMsg);
+    }
+
+    private void SetPrimitiveTransform(CollisionPrimitiveMsg msg) {
+        primitive.transform.localPosition = new Vector3(msg.GetPose().GetPose().GetPosition().GetX(), -msg.GetPose().GetPose().GetPosition().GetY(),
+            msg.GetPose().GetPose().GetPosition().GetZ());
+        primitive.transform.localRotation = new Quaternion(-msg.GetPose().GetPose().GetOrientation().GetX(), msg.GetPose().GetPose().GetOrientation().GetY(),
+            -msg.GetPose().GetPose().GetOrientation().GetZ(), msg.GetPose().GetPose().GetOrientation().GetW());
+        primitive.transform.localScale = new Vector3(msg.GetBBox().GetDimesions()[0], msg.GetBBox().GetDimesions()[1],
+            msg.GetBBox().GetDimesions()[2]);
+        lastPosition = primitive.transform.localPosition;
+        lastScale = primitive.transform.localScale;
+        lastRotation = primitive.transform.localRotation;
+        paramsSet = true;
+        //primitive.transform.hasChanged = false;
     }
 
     public void OnDestroy() {
@@ -66,5 +106,39 @@ public class CollisionPrimitive : MonoBehaviour {
         //Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
         //Destroy(boundingBox.Target);
         //Destroy(gameObject);
+        
+    }
+
+    public void SetAppBar(AppBar appBar) {
+        appBarInstance = appBar;
+    }
+
+    public void DestroyAppBar() {
+        appBarInstance.DestroyThis();
+    }
+
+    public void DestroyThis() {
+        CollisionEnvironmentManager.Instance.RemoveDestroyedPrimitive(gameObject);
+        ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.deleteCollisionPrimitiveService, "{\"str\": \"" + collisionPrimitiveMsg.GetName() + "\"}");
+        Destroy(gameObject);
+    }
+
+    public void UpdatePositionToROS() {
+        Debug.Log(collisionPrimitiveMsg.GetName() + " TRANSFORM HAS CHANGED");
+        primitive.transform.hasChanged = false;
+        CollisionPrimitiveMsg newMsg = new CollisionPrimitiveMsg(collisionPrimitiveMsg.GetName(), collisionPrimitiveMsg.GetSetup(),
+            new SolidPrimitiveMsg(primitive_type.BOX, new List<float>() { primitive.transform.localScale.x, primitive.transform.localScale.y, primitive.transform.localScale.z }),
+            new PoseStampedMsg(collisionPrimitiveMsg.GetPose().GetHeader(),
+            new PoseMsg(new PointMsg(primitive.transform.localPosition.x, -primitive.transform.localPosition.y, primitive.transform.localPosition.z),
+            new QuaternionMsg(-primitive.transform.localRotation.x, primitive.transform.localRotation.y, -primitive.transform.localRotation.z, primitive.transform.localRotation.w))));
+        collisionPrimitiveMsg = newMsg;
+        CollisionEnvironmentManager.Instance.UpdateCollisionPrimitiveMsg(collisionPrimitiveMsg);
+
+        //update transform of this object in ROS
+        ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.addCollisionPrimitiveService, "{\"primitive\": " + newMsg.ToYAMLString() + "}");
+
+        lastPosition = primitive.transform.localPosition;
+        lastScale = primitive.transform.localScale;
+        lastRotation = primitive.transform.localRotation;
     }
 }

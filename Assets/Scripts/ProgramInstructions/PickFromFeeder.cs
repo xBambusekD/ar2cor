@@ -117,7 +117,7 @@ public class PickFromFeeder : ProgramInstruction {
             childObjectToPick.transform.localScale = ObjectsManager.Instance.getObjectDimensions(programItem.GetObject()[0]);
             childObjectToPick.transform.parent = objectToPick.transform;
 
-            objectToPick.tag = programItem.GetObject()[0];
+            objectToPick.name = programItem.GetObject()[0];
 
             //add reference on created object into ObjectsManagers list
             ObjectsManager.Instance.virtualObjectList.Add(objectToPick);
@@ -188,9 +188,15 @@ public class PickFromFeeder : ProgramInstruction {
         catch (MissingReferenceException) {
             Debug.Log("MissingReferenceException: Object destroyed");
         }
-        //remove reference on object from ObjectsManager
-        ObjectsManager.Instance.virtualObjectList.Remove(objectToPick);
-        Destroy(objectToPick);
+
+        try {
+            //remove reference on object from ObjectsManager
+            ObjectsManager.Instance.virtualObjectList.Remove(objectToPick);
+            Destroy(objectToPick);
+        }
+        catch(NullReferenceException e) {
+            Debug.Log(e);
+        }
     }
 
     //called when restart

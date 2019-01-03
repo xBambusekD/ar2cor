@@ -364,19 +364,29 @@ public class ARUWPMarker : MonoBehaviour{
             Debug.Log(TAG + ": Main Camera does not exist in the scene");
             Application.Quit();
         }
-        else {
-            if (!anchoredToWorld) {
-                target.transform.SetParent(holoLensCamera.transform);
-            }
-            else {
-                dummyGameObject = new GameObject("Dummy");
-                dummyGameObject.transform.SetParent(holoLensCamera.transform);
-            }
-        }
+        //else {
+        //    if (!anchoredToWorld) {
+        //        target.transform.SetParent(holoLensCamera.transform);
+        //    }
+        //    else {
+        //        dummyGameObject = new GameObject("Dummy");
+        //        dummyGameObject.transform.SetParent(holoLensCamera.transform);
+        //    }
+        //}
         // magic function initialization
         InitMagicFunction();
     }
 
+    public void SetTarget(GameObject t) {
+        target = t;
+        if (!anchoredToWorld) {
+            target.transform.SetParent(holoLensCamera.transform);
+        }
+        else {
+            dummyGameObject = new GameObject("Dummy");
+            dummyGameObject.transform.SetParent(holoLensCamera.transform);
+        }
+    }
 
     /// <summary>
     /// Unity Monobehavior function: update tracking information of the current marker.

@@ -281,7 +281,7 @@ public class DrillPoints : ProgramInstruction {
                     objectToDrill.transform.parent = world_anchor.transform;
                     objectToDrill.transform.localPosition = obj.transform.localPosition;
                     objectToDrill.transform.localRotation = obj.transform.localRotation;
-                    objectToDrill.tag = programItem.GetObject()[0];
+                    objectToDrill.name = programItem.GetObject()[0];
 
                     //instantiate actual object to drill and attach it to empty parent
                     GameObject childObjectToDrill = Instantiate(visualizeObjectPrefab, objectToDrill.transform);
@@ -307,7 +307,7 @@ public class DrillPoints : ProgramInstruction {
                 //setting localPosition to [0,0,0] would make it appear on the same position as world_anchor
                 objectToDrill.transform.parent = world_anchor.transform;
                 objectToDrill.transform.localPosition = new Vector3(0, 0, 0);
-                objectToDrill.tag = programItem.GetObject()[0];
+                objectToDrill.name = programItem.GetObject()[0];
 
                 //compute centroid of polygon in which to drill
                 centroid = GetCentroid(points);

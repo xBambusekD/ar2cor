@@ -5,6 +5,7 @@ using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
 using SimpleJSON;
 using ROSBridgeLib.art_msgs;
+using ROSBridgeLib.tf2_msgs;
 using System;
 using HoloToolkit.Unity;
 
@@ -20,6 +21,11 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
     public static string programGetService = "/art/db/program/get";
     public static string objectGetService = "/art/db/object_type/get";
+    public static string addCollisionPrimitiveService = "/art/collision_env/artificial/add/primitive";
+    public static string deleteCollisionPrimitiveService = "/art/collision_env/artificial/clear/name";
+    public static string saveAllCollisionPrimitiveService = "/art/collision_env/artificial/save_all";
+    public static string clearAllCollisionPrimitiveService = "/art/collision_env/artificial/clear/all";
+    public static string reloadAllCollisionPrimitiveService = "/art/collision_env/artificial/reload";
 
     private float awake_counter = 0f;
 
@@ -37,6 +43,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ros.AddPublisher(typeof(HoloLensActivityPublisher));
             ros.AddPublisher(typeof(InterfaceStatePublisher));
             ros.AddPublisher(typeof(CollisionEnvPublisher));
+            ros.AddPublisher(typeof(TFPublisher));
             ros.AddServiceResponse(typeof(ROSCommunicationManager));
             ros.Connect();
 
@@ -77,7 +84,26 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ObjectTypeMsg objectTypeMsg = new ObjectTypeMsg(node["object_type"]);
             ObjectsManager.Instance.SetObjectTypeMsgFromROS(objectTypeMsg);
             Debug.Log(objectTypeMsg.ToYAMLString());
-
+        }
+        if(service == addCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
+        }
+        if(service == deleteCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
+        }
+        if (service == saveAllCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
+        }
+        if (service == clearAllCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
+        }
+        if (service == reloadAllCollisionPrimitiveService) {
+            JSONNode node = JSONNode.Parse(yaml);
+            //Debug.Log(node);
         }
     }
 
@@ -278,5 +304,24 @@ public class CollisionEnvPublisher : ROSBridgePublisher {
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new CollisionObjectsMsg(msg);
+    }
+}
+
+public class TFPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/remote_device_tf";
+        //return "/tf";
+    }
+
+    public new static string GetMessageType() {
+        return "tf2_msgs/TFMessage";
+    }
+
+    public static string ToYAMLString(TFMessageMsg msg) {
+        return msg.ToYAMLString();
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new TFMessageMsg(msg);
     }
 }

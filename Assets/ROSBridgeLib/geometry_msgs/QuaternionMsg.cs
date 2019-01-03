@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 using SimpleJSON;
+using UnityEngine;
 
 /**
  * Define a geometry_msgs quaternion message. This has been hand-crafted from the corresponding
@@ -27,8 +28,15 @@ namespace ROSBridgeLib {
 				_z = z;
 				_w = w;
 			}
-			
-			public static string getMessageType() {
+
+            public QuaternionMsg(Quaternion qt) {
+                _x = qt.x;
+                _y = qt.y;
+                _z = qt.z;
+                _w = qt.w;
+            }
+
+            public static string getMessageType() {
 				return "geometry_msgs/Quaternion";
 			}
 			
@@ -47,6 +55,10 @@ namespace ROSBridgeLib {
 			public float GetW() {
 				return _w;
 			}
+
+            public Quaternion GetQuaternion() {
+                return new Quaternion(_x, _y, _z, _w);
+            }
 			
 			public override string ToString() {
 				return "geometry_msgs/Quaternion [x=" + _x + ",  y=" + _y + ", z=" + _z + ", w=" + _w + "]";

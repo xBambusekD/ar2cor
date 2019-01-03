@@ -94,27 +94,7 @@ public class PickFromPolygon : ProgramInstruction {
     }
 
     private void InitObjectToPick() {
-
-        //If no object created yet, then create new one and set everything needed for the freshly created object
-        if (objectToPick == null) {
-            //create empty parent object that has scale 1,1,1 .. when arm attaches it, it won't deform (cube for picking has different scale and it caused mess when arm attached it)
-            objectToPick = new GameObject();
-
-            //objectToPick is created at [0,0,0] world coords
-            //making him child of world_anchor leaves him still at [0,0,0] world coords.. but shifts it's localPosition to be in respect to world_anchor
-            //setting localPosition to [0,0,0] would make it appear on the same position as world_anchor
-            objectToPick.transform.parent = world_anchor.transform;
-            objectToPick.transform.localPosition = new Vector3(0, 0, 0);
-
-            //instantiate actual object to pick and attach it to empty parent
-            GameObject childObjectToPick = Instantiate(visualizeObjectPrefab, objectToPick.transform);
-            childObjectToPick.transform.localScale = ObjectsManager.Instance.getObjectDimensions(programItem.GetObject()[0]);
-            childObjectToPick.transform.parent = objectToPick.transform;
-
-            objectToPick.tag = programItem.GetObject()[0];
-            //add reference on created object into ObjectsManagers list
-            ObjectsManager.Instance.virtualObjectList.Add(objectToPick);
-        }      
+        List<GameObject> objectsInPolygon = new List<GameObject>();
 
         //TODO: overit, ze v polygonu neni virtualni objekt .. pokud je, tak beru ho 
         PolygonMsg polygonMsg = programItem.GetPolygon()[0].GetPolygon();
@@ -126,17 +106,53 @@ public class PickFromPolygon : ProgramInstruction {
             points.Add(new Vector2(_points[i].GetX(), _points[i].GetY()));
         }
         centroid = GetCentroid(points);
-        //apply this centroid to init of object to pick
-        objectToPick.transform.localPosition = new Vector3(centroid.x, -centroid.y, 0);
 
-        //rotate object to lay down on the table and to be parallel with world_anchor
-        if(objectToPick.tag.Equals("Stretcher") || objectToPick.tag.Equals("LongLeg") || objectToPick.tag.Equals("ShortLeg") ||
-            objectToPick.tag.Equals("Spojka") || objectToPick.tag.Equals("Dlouha_noha") || objectToPick.tag.Equals("Kratka_noha")) {
-            objectToPick.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
+        //find all virtual objects that might be in given polygon
+        objectsInPolygon = ObjectsManager.Instance.GetVirtualObjectsFromPolygon(points, programItem.GetObject()[0]);
+        //HIGHEST PRIORITY - we have some virtual objects placed in polygon
+        if (objectsInPolygon.Count > 0) {
+            foreach(GameObject obj in objectsInPolygon) {
+                if(obj.name.Equals(programItem.GetObject()[0])) {
+                    objectToPick = obj;
+                    break;
+                }
+            }
         }
-        else {
-            objectToPick.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
-        }
+        //If no object created yet, then create new one and set everything needed for the freshly created object
+        else if (objectToPick == null) {
+            //create empty parent object that has scale 1,1,1 .. when arm attaches it, it won't deform (cube for picking has different scale and it caused mess when arm attached it)
+            objectToPick = new GameObject();
+
+            //objectToPick is created at [0,0,0] world coords
+            //making him child of world_anchor leaves him still at [0,0,0] world coords.. but shifts it's localPosition to be in respect to world_anchor
+            //setting localPosition to [0,0,0] would make it appear on the same position as world_anchor
+            objectToPick.transform.parent = world_anchor.transform;
+            
+
+            //instantiate actual object to pick and attach it to empty parent
+            GameObject childObjectToPick = Instantiate(visualizeObjectPrefab, objectToPick.transform);
+            childObjectToPick.transform.localScale = ObjectsManager.Instance.getObjectDimensions(programItem.GetObject()[0]);
+            childObjectToPick.transform.parent = objectToPick.transform;
+
+            objectToPick.transform.localPosition = new Vector3(0, 0, childObjectToPick.transform.localScale.x / 2f);
+            objectToPick.name = programItem.GetObject()[0];
+            //add reference on created object into ObjectsManagers list
+            ObjectsManager.Instance.virtualObjectList.Add(objectToPick);
+
+
+            //apply this centroid to init of object to pick
+            objectToPick.transform.localPosition = new Vector3(centroid.x, -centroid.y, objectToPick.transform.GetChild(0).transform.localScale.x / 2f);
+
+            //rotate object to lay down on the table and to be parallel with world_anchor
+            if (objectToPick.name.Equals("Stretcher") || objectToPick.name.Equals("LongLeg") || objectToPick.name.Equals("ShortLeg") ||
+                objectToPick.name.Equals("Spojka") || objectToPick.name.Equals("Dlouha_noha") || objectToPick.name.Equals("Kratka_noha")) {
+                objectToPick.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);
+            }
+            else {
+                objectToPick.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
+            }
+        }                      
+
     }
 
     private void InitRobotGripper() {
@@ -195,7 +211,12 @@ public class PickFromPolygon : ProgramInstruction {
             Debug.Log("MissingReferenceException: Object destroyed");
         }
         //remove reference on object from ObjectsManager
-        ObjectsManager.Instance.virtualObjectList.Remove(objectToPick);
+        try {
+            ObjectsManager.Instance.virtualObjectList.Remove(objectToPick);
+        }
+        catch(NullReferenceException e) {
+            Debug.Log(e);
+        }
         Destroy(objectToPick);
     }
 
@@ -206,7 +227,7 @@ public class PickFromPolygon : ProgramInstruction {
             objectToPick.SetActive(true);
 
             //apply this centroid to init of object to pick
-            objectToPick.transform.localPosition = new Vector3(centroid.x, -centroid.y, 0);
+            objectToPick.transform.localPosition = new Vector3(centroid.x, -centroid.y, objectToPick.transform.GetChild(0).transform.localScale.x / 2f);
 
             //rotate object to lay down on the table
             objectToPick.transform.localEulerAngles = new Vector3(-90f, 0f, 0f);

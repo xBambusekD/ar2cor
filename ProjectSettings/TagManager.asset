@@ -13,13 +13,10 @@ TagManager:
   - WAIT_UNTIL_USER_FINISHES
   - speech_manager
   - pr2_arm
-  - Stretcher
-  - ShortLeg
-  - LongLeg
-  - Kratka_noha
-  - Dlouha_noha
-  - Spojka
   - PointingHand
+  - VISUAL_INSPECTION
+  - PLACE_TO_CONTAINER
+  - speech_input_source
   layers:
   - Default
   - TransparentFX

@@ -102,7 +102,8 @@ namespace HoloToolkit.Unity.UX
                     switch (template.Type)
                     {
                         case AppBar.ButtonTypeEnum.Show:
-                            Show();
+                            //Show();
+                            Hide();
                             break;
 
                         default:

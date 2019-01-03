@@ -21,6 +21,10 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         
     private SetupsFileMsg setupsFileMsg;
     public ARTableSetupMsg currentSetup;
+    private bool positionSet;
+    private GameObject worldAnchor;
+
+    public GameObject SpatialMapping;
 
     // Use this for initialization
     void Start () {
@@ -31,6 +35,21 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         CollisionShapes.SetActive(false);
         IPSetup.SetActive(false);
         TableSetup.SetActive(false);
+
+        //turn off spatial mapping to enable user to connect
+        SpatialMapping.SetActive(false);
+
+        positionSet = false;
+        worldAnchor = GameObject.FindGameObjectWithTag("world_anchor");
+    }
+
+    void Update() {
+        if(SystemStarter.Instance.calibrated && !positionSet) {
+            gameObject.transform.parent = worldAnchor.transform;
+            gameObject.transform.localPosition = new Vector3(1.4f, -1f, 0.7f);
+            gameObject.transform.localRotation = Quaternion.Euler(124f, -90f, -90f);
+            positionSet = true;
+        }
     }
 
     public void OnSetupPickerSetupButtonClicked() {
@@ -49,6 +68,13 @@ public class MainMenuManager : Singleton<MainMenuManager> {
 
         SetupPicker.SetActive(false);
         CollisionShapes.SetActive(true);
+
+        SetupList.SetActive(false);
+        IPSetup.SetActive(false);
+        TableSetup.SetActive(false);
+
+        //turn on spatial mapping after user connects
+        SpatialMapping.SetActive(true);
     }
 
     public void OnSetupListCreateNewButtonClicked() {
@@ -74,7 +100,7 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         }
         else {
             //init file with default setups in case that no save file exists
-            file = "{\"last_setup\":\"ARTABLE SETUP 1\",\"saved_setups\":[{\"setup_name\":\"ARTABLE SETUP 1\",\"connection\":{\"ip\":\"192.168.104.100\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1.5\",\"length\":\"0.7\"}},{\"setup_name\":\"ARTABLE SETUP 3\",\"connection\":{\"ip\":\"192.168.1.227\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1\",\"length\":\"0.6\"}}]}";
+            file = "{\"last_setup\":\"ARTABLE SETUP 1\",\"saved_setups\":[{\"setup_name\":\"ARTABLE SETUP 1\",\"connection\":{\"ip\":\"192.168.104.200\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1.5\",\"length\":\"0.7\"}},{\"setup_name\":\"ARTABLE SETUP 3\",\"connection\":{\"ip\":\"192.168.1.227\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1\",\"length\":\"0.6\"}}]}";
             File.WriteAllText(Application.persistentDataPath + "/saved_setups", file);
         }
 
@@ -132,5 +158,9 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         //actualize IP config for ROS connection
         ROSCommunicationManager.Instance.SetIPConfig(currentSetup.GetIP(), currentSetup.GetPort());
         SaveSetups();
+    }
+
+    public Vector2 GetTableSize() {
+        return new Vector2(float.Parse(currentSetup.GetWidth()), float.Parse(currentSetup.GetLength()));
     }
 }

@@ -13,10 +13,10 @@ public class InstantiateShape : MonoBehaviour {
     }
 
     public void InstantiateShapePrefab() {
-        GameObject shape = Instantiate(Shape);
-        shape.transform.position = GazeManager.Instance.GazeOrigin + GazeManager.Instance.GazeNormal * 1.5f;
+        //GameObject shape = Instantiate(Shape);
+        //shape.transform.position = GazeManager.Instance.GazeOrigin + GazeManager.Instance.GazeNormal * 1.5f;
 
         //shape.transform.parent = worldAnchor.transform;
-
+        CollisionEnvironmentManager.Instance.CreateNewPrimitive(Shape, worldAnchor.transform.InverseTransformPoint(GazeManager.Instance.GazeOrigin + GazeManager.Instance.GazeNormal * 1.5f));
     }
 }

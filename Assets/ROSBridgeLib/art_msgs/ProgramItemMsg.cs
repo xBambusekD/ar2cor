@@ -14,30 +14,31 @@ using ROSBridgeLib.diagnostic_msgs;
 
 namespace ROSBridgeLib {
     namespace art_msgs {
-        public enum program_type : UInt16 {
-            GET_READY = 0,
-            NOP = 1,
-            WAIT_FOR_USER = 50,
-            WAIT_UNTIL_USER_FINISHES = 51,
-            PICK_FROM_POLYGON = 100,
-            PICK_FROM_FEEDER = 101,
-            PICK_OBJECT_ID = 102,
-            PICK_TOOL = 103,
-            PLACE_TO_POSE = 200,
-            PLACE_TO_GRID = 201,
-            PLACE_TOOL = 202,
-            PATH_THROUGH_POINTS = 300,
-            PATH_THROUGH_TRAJECTORY = 301,
-            WELDING_POINTS = 400,
-            WELDING_SEAM = 401,
-            DRILL_POINTS = 600
-        }
+        //public enum program_type : UInt16 {
+        //    GET_READY = 0,
+        //    NOP = 1,
+        //    WAIT_FOR_USER = 50,
+        //    WAIT_UNTIL_USER_FINISHES = 51,
+        //    PICK_FROM_POLYGON = 100,
+        //    PICK_FROM_FEEDER = 101,
+        //    PICK_OBJECT_ID = 102,
+        //    PICK_TOOL = 103,
+        //    PLACE_TO_POSE = 200,
+        //    PLACE_TO_GRID = 201,
+        //    PLACE_TOOL = 202,
+        //    PATH_THROUGH_POINTS = 300,
+        //    PATH_THROUGH_TRAJECTORY = 301,
+        //    WELDING_POINTS = 400,
+        //    WELDING_SEAM = 401,
+        //    DRILL_POINTS = 600
+        //}
 
         public class ProgramItemMsg : ROSBridgeMsg {
             private UInt16 _id;     //id of program
             private UInt16 _on_success;
             private UInt16 _on_failure;
             private string _type;   //type of current operation eg. PICK_FROM_POLYGON=100, PLACE_TO_POSE=200
+            private string _name;
             private List<string> _object = new List<string>();
             private List<PoseStampedMsg> _pose = new List<PoseStampedMsg>();
             private List<PolygonStampedMsg> _polygon = new List<PolygonStampedMsg>();
@@ -51,6 +52,7 @@ namespace ROSBridgeLib {
                 _on_success = UInt16.Parse(msg["on_success"]);
                 _on_failure = UInt16.Parse(msg["on_failure"]);
                 _type = msg["type"];
+                _name = msg["name"];
                 foreach (JSONNode item in msg["object"].AsArray) {
                     _object.Add(item);
                 }
@@ -73,12 +75,13 @@ namespace ROSBridgeLib {
                     _labels.Add(new SceneLabelMsg(item));
                 }
             }
-			
-			public ProgramItemMsg(UInt16 id, UInt16 on_success, UInt16 on_failure, string type, List<string> obj, List<PoseStampedMsg> pose, List<PolygonStampedMsg> polygon, List<UInt16> ref_id, List<KeyValueMsg> flags, List<string> do_not_clear, List<SceneLabelMsg> labels) {
+
+            public ProgramItemMsg(UInt16 id, UInt16 on_success, UInt16 on_failure, string type, string name, List<string> obj, List<PoseStampedMsg> pose, List<PolygonStampedMsg> polygon, List<UInt16> ref_id, List<KeyValueMsg> flags, List<string> do_not_clear, List<SceneLabelMsg> labels) {
                 _id = id;
                 _on_success = on_success;
                 _on_failure = on_failure;
                 _type = type;
+                _name = name;
                 _object = obj;
                 _pose = pose;
                 _polygon = polygon;
@@ -107,7 +110,11 @@ namespace ROSBridgeLib {
             public string GetIType() {
                 return _type;
             }
-            
+
+            public string GetName() {
+                return _name;
+            }
+
             public List<string> GetObject() {
                 return _object;
             }
@@ -174,6 +181,7 @@ namespace ROSBridgeLib {
                     ", on_success=" + _on_success +
                     ", on_failure=" + _on_failure +
                     ", type=\"" + _type + "\"" +
+                    ", name=\"" + _name + "\"" +
                     ", object=[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
                     ", pose=" + poseString +
                     ", polygon=" + polygonString +
@@ -221,6 +229,7 @@ namespace ROSBridgeLib {
                     ", \"on_success\":" + _on_success +
                     ", \"on_failure\":" + _on_failure +
                     ", \"type\":\"" + _type + "\"" +
+                    ", \"name\":\"" + _name + "\"" +
                     ", \"object\":[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
                     ", \"pose\":" + poseString +
                     ", \"polygon\":" + polygonString +

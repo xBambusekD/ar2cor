@@ -162,9 +162,10 @@ MonoBehaviour:
     type: 2}
   UseRemove: 0
   UseAdjust: 1
-  UseHide: 1
+  UseHide: 0
   DisplayType: 0
   State: 0
+  InitialState: 0
   CustomButtonIconProfile: {fileID: 0}
   buttons: []
   buttonParent: {fileID: 4691479528535670}

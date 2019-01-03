@@ -1,24 +1,40 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CalibrationManager : MonoBehaviour {
 
-    public GameObject worldAnchor;
-    public GameObject worldAnchorVisualizationCube;
-    public GameObject worldAnchorRecalibrationButton;
+    //public GameObject worldAnchor;
+    //public GameObject worldAnchorVisualizationCube;
+    //public GameObject worldAnchorHelpCube;
+    //public GameObject worldAnchorRecalibrationButton;
     private ARUWPController _ARUWPController;
+    private ARUWPMarker _ARUWPMarker;
 
     private void Start() {
         _ARUWPController = GetComponent<ARUWPController>();
+        _ARUWPMarker = GetComponent<ARUWPMarker>();
     }
 
-    public IEnumerator Calibrate() {
+    public IEnumerator Calibrate(GameObject worldAnchor) {
+#if !UNITY_EDITOR
+        _ARUWPMarker.SetTarget(worldAnchor);
+#endif
+        GameObject worldAnchorVisualizationCube = worldAnchor.transform.Find("VisualizationCube").gameObject;
+        GameObject worldAnchorRecalibrationButton = null;
+        try {
+            worldAnchorRecalibrationButton = worldAnchorVisualizationCube.transform.Find("RecalibrationButton").gameObject;
+        }
+        catch (NullReferenceException e) {
+            Debug.Log(e);
+        }
+
         _ARUWPController.startCalibration = true;
         //activate calibration cube
         worldAnchorVisualizationCube.gameObject.SetActive(true);
 
-        yield return new WaitForSeconds(10);
+        yield return new WaitForSeconds(15);
 
         _ARUWPController.startCalibration = false;
 #if !UNITY_EDITOR
@@ -33,13 +49,26 @@ public class CalibrationManager : MonoBehaviour {
         //hide calibration cube
         //worldAnchorVisualizationCube.gameObject.SetActive(false);
         //activate recalibration button
-        worldAnchorRecalibrationButton.gameObject.SetActive(true);
+        if(worldAnchorRecalibrationButton != null) 
+            worldAnchorRecalibrationButton.gameObject.SetActive(true);
 
         yield return true;
     }
 
-    public IEnumerator Recalibrate()
+    public IEnumerator Recalibrate(GameObject worldAnchor)
     {
+#if !UNITY_EDITOR
+        _ARUWPMarker.SetTarget(worldAnchor);
+#endif
+        GameObject worldAnchorVisualizationCube = worldAnchor.transform.Find("VisualizationCube").gameObject;
+        GameObject worldAnchorRecalibrationButton = null;
+        try {
+            worldAnchorRecalibrationButton = worldAnchorVisualizationCube.transform.Find("RecalibrationButton").gameObject;
+        }
+        catch (NullReferenceException e) {
+            Debug.Log(e);
+        }
+
 #if !UNITY_EDITOR
         _ARUWPController.Resume();
 #endif
@@ -47,9 +76,10 @@ public class CalibrationManager : MonoBehaviour {
         //activate calibration cube
         worldAnchorVisualizationCube.gameObject.SetActive(true);
         //hide recalibration button
-        worldAnchorRecalibrationButton.gameObject.SetActive(false);
+        if (worldAnchorRecalibrationButton != null)
+            worldAnchorRecalibrationButton.gameObject.SetActive(false);
 
-        yield return new WaitForSeconds(10);
+        yield return new WaitForSeconds(15);
 
         _ARUWPController.startCalibration = false;
 #if !UNITY_EDITOR
@@ -64,7 +94,8 @@ public class CalibrationManager : MonoBehaviour {
         //hide calibration cube
         //worldAnchorVisualizationCube.gameObject.SetActive(false);
         //activate recalibration button
-        worldAnchorRecalibrationButton.gameObject.SetActive(true);
+        if (worldAnchorRecalibrationButton != null)
+            worldAnchorRecalibrationButton.gameObject.SetActive(true);
 
         yield return true;
     }
