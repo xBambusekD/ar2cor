@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 4340268134304576}
   - component: {fileID: 114943343325353934}
   - component: {fileID: 114728254210691434}
+  - component: {fileID: 114294555717444128}
   m_Layer: 0
   m_Name: CubePrefab
   m_TagString: Untagged
@@ -126,6 +127,17 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114294555717444128
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1635451555213648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc079a1c87ebd05449e1725cbacebf7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114728254210691434
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -164,8 +176,8 @@ MonoBehaviour:
   appBarHoverOffsetZ: 0.05
   maxScale: 100
   rotationType: 0
-  handMotionToRotate: 0
-  rotateAroundPivot: 0
+  handMotionToRotate: 1
+  rotateAroundPivot: 1
   useResizeHandles: 1
   boundingBoxPrefab: {fileID: 114030465538688920, guid: 52f4a504e03b0b7499eb414bef45633a,
     type: 2}

@@ -145,6 +145,8 @@ namespace HoloToolkit.Unity.UX
 
         public AppBarStateEnum State = AppBarStateEnum.Default;
 
+        public AppBarStateEnum InitialState = AppBarStateEnum.Default;
+
         /// <summary>
         /// Custom icon profile
         /// If null, the profile in the SquareButtonPrefab object will be used
@@ -174,14 +176,14 @@ namespace HoloToolkit.Unity.UX
 
         public void Reset()
         {
-            State = AppBarStateEnum.Default;
+            State = InitialState;
             FollowBoundingBox(false);
             lastTimeTapped = Time.time + coolDownTime;
         }
 
         public void Start()
         {
-            State = AppBarStateEnum.Default;
+            State = InitialState;
 
             if (interactables.Count == 0)
             {
@@ -198,6 +200,10 @@ namespace HoloToolkit.Unity.UX
             }
 
             helper = new BoundingBoxHelper();
+
+
+            //hide app bar.. it appears after click on the object
+            //gameObject.SetActive(false);
         }
 
         protected override void InputClicked(GameObject obj, InputClickedEventData eventData)
@@ -361,14 +367,17 @@ namespace HoloToolkit.Unity.UX
             {
                 case AppBarStateEnum.Default:
                     targetBarSize = new Vector3(NumDefaultButtons * buttonWidth, buttonWidth, 1f);
+                    backgroundBar.SetActive(true);
                     break;
 
                 case AppBarStateEnum.Hidden:
                     targetBarSize = new Vector3(numHiddenButtons * buttonWidth, buttonWidth, 1f);
+                    backgroundBar.SetActive(false);
                     break;
 
                 case AppBarStateEnum.Manipulation:
                     targetBarSize = new Vector3(NumManipulationButtons * buttonWidth, buttonWidth, 1f);
+                    backgroundBar.SetActive(true);
                     break;
 
                 default:

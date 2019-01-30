@@ -26,7 +26,7 @@ public class TextToSpeechManager : MonoBehaviour {
     }
 
     public void OnCalibrationStart() {
-        textToSpeech.StartSpeaking("Calibration started. Please look directly at the marker.");
+        textToSpeech.StartSpeaking("Marker detection started. Please look directly at the marker.");
     }
 
     public void OnCalibrationEnd() {

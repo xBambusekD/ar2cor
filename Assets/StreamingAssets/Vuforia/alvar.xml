@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="MarkerArtoolkit_14" size="0.038000 0.038000" />
+    <ImageTarget name="MarkerArtoolkit_20" size="0.038000 0.038000" />
+    <ImageTarget name="road" size="0.064000 0.044896" />
+    <ImageTarget name="example_5-star_grayscale" size="0.064000 0.044800" />
+    <ImageTarget name="example_5-star_grayscaleCROPPED" size="0.038000 0.038000" />
+    <ImageTarget name="leaves_5star_bg" size="0.038000 0.038000" />
+    <ImageTarget name="MarkerArtoolkit_10" size="0.090000 0.090000" />
+    <ImageTarget name="MarkerData_13" size="0.118000 0.118000" />
+    <ImageTarget name="MarkerData_171" size="0.038000 0.038000" />
+  </Tracking>
+</QCARConfig>

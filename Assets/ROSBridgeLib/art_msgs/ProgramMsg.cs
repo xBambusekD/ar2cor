@@ -54,7 +54,7 @@ namespace ROSBridgeLib {
                 string blocksString = "[";
                 for (int i = 0; i < _blocks.Count; i++) {
                     blocksString = blocksString + _blocks[i].ToString();
-                    if (_blocks.Count - i <= 1) blocksString += ",";
+                    if (_blocks.Count - i > 1) blocksString += ",";
                 }
                 blocksString += "]";
 
@@ -66,7 +66,7 @@ namespace ROSBridgeLib {
                 string blocksString = "[";
                 for (int i = 0; i < _blocks.Count; i++) {
                     blocksString = blocksString + _blocks[i].ToYAMLString();
-                    if (_blocks.Count - i <= 1) blocksString += ",";
+                    if (_blocks.Count - i > 1) blocksString += ",";
                 }
                 blocksString += "]";
 

@@ -38,7 +38,7 @@ public class VisualizationManager : Singleton<VisualizationManager> {
                                 case visualization_state.VISUALIZATION_RUN:
                                     if (!visualization_running) {
                                         Debug.Log("VISUALIZATION_RUN");
-                                        ProgramManager.Instance.StartVisualization(interfaceStateMsg);
+                                        ProgramManager.Instance.StartVisualization(interfaceStateMsg, hololensStateMsg.GetVisualizeWholeProgram());
                                         //call for service to load current program.. response comes in ROSCommunicationManager's method ServiceCallBack()
                                         ROSCommunicationManager.Instance.ros.CallService("/art/db/program/get", "{\"id\": " + interfaceStateMsg.GetProgramID() + "}");                                        
                                         visualization_running = true;

@@ -48,7 +48,14 @@ public class ObjectsManager : Singleton<ObjectsManager> {
     }
 
     private void createObject(JSONNode objectData) {
-        GameObject detectedObject = Instantiate(m_Prefabs[0]);
+        GameObject detectedObject;
+
+        if (objectData["type"].ToString().Contains("kontejner") || objectData["type"].ToString().Contains("container")) {
+            detectedObject = Instantiate(m_Prefabs[1]);
+        }
+        else {
+            detectedObject = Instantiate(m_Prefabs[0]);
+        }
         detectedObject.transform.parent = worldAnchor.transform;
         
         DetectedObject obj = detectedObject.GetComponent<DetectedObject>();
@@ -60,7 +67,7 @@ public class ObjectsManager : Singleton<ObjectsManager> {
         detectedObject.transform.localRotation = new Quaternion(objectData["orientation"]["x"].AsFloat, objectData["orientation"]["y"].AsFloat, objectData["orientation"]["z"].AsFloat, objectData["orientation"]["w"].AsFloat);
         obj.bbox = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
         detectedObject.transform.localScale = new Vector3(objectData["bbox"]["x"].AsFloat, objectData["bbox"]["y"].AsFloat, objectData["bbox"]["z"].AsFloat);
-        detectedObject.tag = translate(objectData["type"]);
+        detectedObject.name = translate(objectData["type"]);
         objectsList.Add(detectedObject);
     }
 
@@ -118,6 +125,7 @@ public class ObjectsManager : Singleton<ObjectsManager> {
             if (!existingObjectsID.Contains(obj._id)) {
                 Destroy(objectsList[i]);
                 objectsList.Remove(objectsList[i]);
+                i--;
             }
         }
     }
@@ -180,10 +188,23 @@ public class ObjectsManager : Singleton<ObjectsManager> {
         List<GameObject> objectsInPolygon = new List<GameObject>();
 
         foreach (GameObject detectedObject in objectsList) {
-            if(detectedObject.tag.Equals(objectType)) {
+            if(detectedObject.name.Equals(objectType)) {
                 if (PointIsInPolygon(new Vector2(detectedObject.transform.localPosition.x, -detectedObject.transform.localPosition.y), polygon_points)) {
                     objectsInPolygon.Add(detectedObject);
                 }
+            }
+        }
+
+        return objectsInPolygon;
+    }
+
+    //returns list of detected objects that are in given polygon
+    public List<GameObject> GetObjectsFromPolygon(List<Vector2> polygon_points) {
+        List<GameObject> objectsInPolygon = new List<GameObject>();
+
+        foreach (GameObject detectedObject in objectsList) {
+            if (PointIsInPolygon(new Vector2(detectedObject.transform.localPosition.x, -detectedObject.transform.localPosition.y), polygon_points)) {
+                objectsInPolygon.Add(detectedObject);
             }
         }
 
@@ -195,7 +216,7 @@ public class ObjectsManager : Singleton<ObjectsManager> {
         List<GameObject> objectsInPolygon = new List<GameObject>();
 
         foreach (GameObject detectedObject in virtualObjectList) {
-            if (detectedObject.tag.Equals(objectType)) {
+            if (detectedObject.name.Equals(objectType)) {
                 if (PointIsInPolygon(new Vector2(detectedObject.transform.localPosition.x, -detectedObject.transform.localPosition.y), polygon_points)) {
                     objectsInPolygon.Add(detectedObject);
                 }

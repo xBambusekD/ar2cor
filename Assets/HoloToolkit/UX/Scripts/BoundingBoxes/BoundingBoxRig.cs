@@ -203,6 +203,14 @@ namespace HoloToolkit.Unity.UX
             appBarInstance = Instantiate(appBarPrefab) as AppBar;
             appBarInstance.BoundingBox = boxInstance;
             appBarInstance.HoverOffsetZ = appBarHoverOffsetZ;
+
+            try {
+                gameObject.GetComponent<AppBarDisplay>().SetAppBarInstance(appBarInstance);
+            }
+            catch (NullReferenceException e) {
+                Debug.Log(e);
+            }
+
             //appBarInstance.transform.parent = this.gameObject.transform;
             try {
                 gameObject.GetComponentInParent<CollisionPrimitive>().SetAppBar(appBarInstance);

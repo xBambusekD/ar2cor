@@ -12,32 +12,40 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
     
     public List<GameObject> collisionPrefabs = new List<GameObject>();
 
+    public bool manipulatingWithObject;
+
     private List<GameObject> collisionPrimitives = new List<GameObject>();
     private List<string> existingPrimitives = new List<string>();
 
     private CollisionObjectsMsg collisionObjectsMsg;
     private CollisionObjectsMsg newCollisionObjectsMsg;
     private GameObject worldAnchor;
+
+    private List<string> nonManipulatableObjects = new List<string>() { "table", "rf-front", "rf-middle", "rf-rear", "kinect-n1", "kinect-n2" };
     
     // Use this for initialization
     void Start () {
         newCollisionObjectsMsg = new CollisionObjectsMsg(new List<CollisionPrimitiveMsg>() { });
         worldAnchor = GameObject.FindGameObjectWithTag("world_anchor");
+        manipulatingWithObject = false;
     }
 	
 	// Update is called once per frame
 	void Update () {
         if (SystemStarter.Instance.calibrated) {
-            if (collisionObjectsMsg != null) {
-                existingPrimitives.Clear();
-                foreach (CollisionPrimitiveMsg primitiveMsg in collisionObjectsMsg.GetPrimitives()) {
-                    //get all existing primitives names
-                    existingPrimitives.Add(primitiveMsg.GetName());
+            if(!manipulatingWithObject) {
+                if (collisionObjectsMsg != null) {
+                    Debug.Log(collisionObjectsMsg.ToYAMLString());
+                    existingPrimitives.Clear();
+                    foreach (CollisionPrimitiveMsg primitiveMsg in collisionObjectsMsg.GetPrimitives()) {
+                        //get all existing primitives names
+                        existingPrimitives.Add(primitiveMsg.GetName());
 
-                    UpdatePrimitive(primitiveMsg);
+                        UpdatePrimitive(primitiveMsg);
+                    }
+                    DeleteRemovedPrimitives();
+                    collisionObjectsMsg = null;
                 }
-                DeleteRemovedPrimitives();
-                collisionObjectsMsg = null;
             }
         }
     }
@@ -50,6 +58,8 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
                 colPrimitive.DestroyAppBar();
                 Destroy(collisionPrimitives[i]);
                 collisionPrimitives.Remove(collisionPrimitives[i]);
+                Debug.Log("Removing " + colPrimitive.collisionPrimitiveMsg.GetName());
+                i--;
             }
         }
     }
@@ -73,6 +83,11 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
             // TODO pick correct prefab due to collision primitive (cube, sphere..)
             collisionPrimitive.InitNewPrimitive(primitiveMsg, collisionPrefabs[0]);
             collisionPrimitives.Add(new_primitive);
+
+            // remove AppBarDisplay to not to show the app bar in order to disable manipulation with specified objects
+            if (nonManipulatableObjects.Contains(primitiveMsg.GetName())) {
+                Destroy(new_primitive.GetComponentInChildren<AppBarDisplay>());
+            }
         }
     }
 
@@ -127,5 +142,12 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
 
     public void RemoveDestroyedPrimitive(GameObject primitive) {
         collisionPrimitives.Remove(primitive);
+    }
+
+    //hides or shows collision environment - if hide_env == true - environment hides, else it shows
+    public void HideCollisionEnvironment(bool hide_env) {
+        foreach(GameObject primitive in collisionPrimitives) {
+            primitive.SetActive(!hide_env);
+        }
     }
 }
