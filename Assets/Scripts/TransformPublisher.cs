@@ -37,7 +37,7 @@ public class TransformPublisher : MonoBehaviour {
                 new TransformMsg(new Vector3Msg(relativePositionToParent.x, -relativePositionToParent.y, relativePositionToParent.z), 
                     new QuaternionMsg(-relativeRotationToParent.x, relativeRotationToParent.y, -relativeRotationToParent.z, relativeRotationToParent.w)))});
 
-            ROSCommunicationManager.Instance.ros.Publish(TFPublisher.GetMessageTopic(), tfMsg);
+            ROSCommunicationManager.Instance.ros.Publish(TFPublisher.GetMessageTopic(), tfMsg, debug_log:false);
         }
 	}
 }

@@ -49,7 +49,10 @@ namespace HoloToolkit.Unity.UX
         private bool rotateAroundPivot = false;
 
         [SerializeField]
-        private bool useResizeHandles = false;
+        private bool useResizeHandles = true;
+
+        [SerializeField]
+        private bool useScaleHandles = true;
 
         [Header("Preset Components")]
         [SerializeField]
@@ -160,9 +163,10 @@ namespace HoloToolkit.Unity.UX
                 {
                     rotateHandles[i].SetActive(rotateHandles[i].gameObject == handle);
                 }
-                for (int i = 0; i < cornerHandles.Length; ++i)
-                {
-                    cornerHandles[i].SetActive(cornerHandles[i].gameObject == handle);
+                if(useScaleHandles) {
+                    for (int i = 0; i < cornerHandles.Length; ++i) {
+                        cornerHandles[i].SetActive(cornerHandles[i].gameObject == handle);
+                    }
                 }
                 if(useResizeHandles) {
                     for (int i = 0; i < resizeHandles.Length; ++i) {
@@ -176,9 +180,10 @@ namespace HoloToolkit.Unity.UX
                 {
                     rotateHandles[i].SetActive(true);
                 }
-                for (int i = 0; i < cornerHandles.Length; ++i)
-                {
-                    cornerHandles[i].SetActive(true);
+                if(useScaleHandles) {
+                    for (int i = 0; i < cornerHandles.Length; ++i) {
+                        cornerHandles[i].SetActive(true);
+                    }
                 }
                 if(useResizeHandles) {
                     for (int i = 0; i < resizeHandles.Length; ++i) {
@@ -246,7 +251,9 @@ namespace HoloToolkit.Unity.UX
         private void CreateHandles()
         {
             ClearHandles();
-            UpdateCornerHandles();
+
+            if(useScaleHandles) 
+                UpdateCornerHandles();
 
             //resize handles for individual axes
             if(useResizeHandles)
@@ -422,7 +429,8 @@ namespace HoloToolkit.Unity.UX
 
         private void UpdateHandles()
         {
-            UpdateCornerHandles();
+            if(useScaleHandles)
+                UpdateCornerHandles();
 
             //resize handles for individual axes
             if (useResizeHandles)
@@ -477,7 +485,8 @@ namespace HoloToolkit.Unity.UX
 
         private void ClearHandles()
         {
-            ClearCornerHandles();
+            if(useScaleHandles)
+                ClearCornerHandles();
 
             if (useResizeHandles)
                 ClearResizeHandles();

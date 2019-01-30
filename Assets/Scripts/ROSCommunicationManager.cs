@@ -26,6 +26,8 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
     public static string saveAllCollisionPrimitiveService = "/art/collision_env/artificial/save_all";
     public static string clearAllCollisionPrimitiveService = "/art/collision_env/artificial/clear/all";
     public static string reloadAllCollisionPrimitiveService = "/art/collision_env/artificial/reload";
+    public static string robotLookAtLeftFeederService = "/art/robot/look_at/left_feeder";
+    public static string robotLookAtRightFeederService = "/art/robot/look_at/right_feeder";
 
     private float awake_counter = 0f;
 
@@ -105,6 +107,14 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             JSONNode node = JSONNode.Parse(yaml);
             //Debug.Log(node);
         }
+        //if (service == robotLookAtLeftFeederService) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
+        //if (service == robotLookAtRightFeederService) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
     }
 
     public void SetIPConfig(string ip, string portStr) {
@@ -194,9 +204,11 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
         InterfaceStateMsg Imsg = (InterfaceStateMsg) msg;
 
         VisualizationManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        InteractiveEditManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        PickFromPolygonIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        PlaceToPoseIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        //InteractiveEditManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        //PickFromPolygonIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        //PlaceToPoseIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
+
+        InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
 
         //Debug.Log(Imsg.ToYAMLString());
         //Debug.Log(Imsg.GetSystemState());

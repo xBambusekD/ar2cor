@@ -342,11 +342,12 @@ namespace ROSBridgeLib {
             }
         }
 
-        public void Publish(String topic, ROSBridgeMsg msg) {
+        public void Publish(String topic, ROSBridgeMsg msg, bool debug_log = true) {
 #if UNITY_EDITOR
             if (_ws != null) {
                 string s = ROSBridgeMsg.Publish(topic, msg.ToYAMLString());
-                Debug.Log ("Sending " + s);
+                if (debug_log)
+                    Debug.Log ("Sending " + s);
                 _ws.Send(s);
             }
 #endif

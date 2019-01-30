@@ -17,6 +17,8 @@ TagManager:
   - VISUAL_INSPECTION
   - PLACE_TO_CONTAINER
   - speech_input_source
+  - cursor
+  - manipulatable_object
   layers:
   - Default
   - TransparentFX
