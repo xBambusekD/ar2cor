@@ -7,17 +7,19 @@ I am using Unity 2017.4.7f1 version.
 <img src=/images/artableHoloFinal.jpg />
 
 ### Calibration
-HoloLens needs to be calibrated due to the ARCOR system (world origin is in the table's right bottom corner). For calibration, Vuforia's image tracking was used. Markers can be found in [ARCOR repo](https://github.com/robofit/arcor/tree/master/art_calibration/markers). When HoloLens detects marker, it draws virtual cube on it; when satisfied with detection, click on the cube to confirm it's position. Markers has to be placed as follows:
+HoloLens needs to be calibrated due to the ARCOR system (world origin is in the table's right bottom corner). For calibration, Vuforia's image tracking was used. Markers can be found in [ARCOR repo](https://github.com/robofit/arcor/tree/master/art_calibration/markers). When HoloLens detects marker, it draws virtual cube on it; when satisfied with detection, click on the cube to confirm it's position. Only three markers are used, which have to be placed as follows:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Robot
 
-11---------------------------------12
+11--------------------------------(12)
 
 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
 
 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
 
 10---------------------------------13
+
+<img src=/images/calib1.jpg width="400" /> <img src=/images/calib2.jpg width="400" />
 
 ### Features
  - Visualization of detected objects
