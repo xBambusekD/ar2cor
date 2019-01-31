@@ -8,7 +8,6 @@ using Vuforia;
 
 public class SystemStarter : Singleton<SystemStarter> {
     
-    //public CalibrationManager calibrationManager;
     public bool calibrated;
     public GameObject worldAnchor;
     public GameObject worldAnchorVisualizationCube;
@@ -116,19 +115,6 @@ public class SystemStarter : Singleton<SystemStarter> {
         worldAnchor.transform.Rotate(180f, 0f, 0f, Space.Self);
 
 
-        //PROBABLY USELESS BULLSHIT
-        //worldAnchor.transform.rotation = XLookRotation(marker13.transform.position - worldAnchor.transform.position);
-
-        ////worldAnchor.transform.rotation = new Quaternion(YLookRotation(marker11.transform.position - worldAnchor.transform.position).x, 
-        ////    worldAnchor.transform.rotation.y, worldAnchor.transform.rotation.z, worldAnchor.transform.rotation.w);
-        ////worldAnchor.transform.rotation *= YLookRotation(marker11.transform.position - worldAnchor.transform.position);
-        //float angle = 0.0f;
-        //Vector3 axis = Vector3.right;
-        //YLookRotation(marker11.transform.position - worldAnchor.transform.position).ToAngleAxis(out angle, out axis);
-        ////YLookRotation(marker11.transform.position - worldAnchor.transform.position).
-        //worldAnchor.transform.Rotate(angle, 0, 0, Space.Self);
-
-
         //apply offset to anchor due to marker paper
         worldAnchorVisualizationCube.transform.localPosition = new Vector3(-0.208f, 0.121f, 0f);
         worldAnchor.transform.position = worldAnchorVisualizationCube.transform.position;
@@ -168,87 +154,6 @@ public class SystemStarter : Singleton<SystemStarter> {
             childrenToHide.Clear();
         }
     }
-
-    //private IEnumerator startCalibration() {
-    //    helpAnchorVisualizationCube.gameObject.SetActive(true);
-
-    //    //wait in case that Zira is still speaking
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-    //    //announce that calibration will start
-    //    speechManager.OnFirstCalibration();
-    //    //wait until Zira stops speaking
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-    //    yield return new WaitForSeconds(1);
-    //    speechManager.OnCalibrationStart();
-
-    //    yield return StartCoroutine(calibrationManager.Calibrate(worldAnchor));
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-
-    //    //START HELP CUBE DETECTION
-    //    speechManager.Say("Please move and place the marker to the right bottom corner of the table.");
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-    //    speechManager.OnCalibrationStart();
-
-    //    yield return StartCoroutine(calibrationManager.Recalibrate(helpAnchor));
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-
-    //    ApplyOffsetToWorldAnchor();
-
-    //    //worldAnchor.transform.position += new Vector3(-worldAnchorOffset, worldAnchorOffset, -worldAnchorOffset);
-    //    //worldAnchorVisualizationCube.transform.localPosition += new Vector3(-worldAnchorOffset, worldAnchorOffset, -worldAnchorOffset);
-    //    WorldAnchorManager.Instance.AttachAnchor(worldAnchor.gameObject);
-    //    calibrated = true;
-    //    helpAnchorVisualizationCube.gameObject.SetActive(false);
-
-    //    speechManager.OnCalibrationEnd();
-    //    calibration_launched = false;
-    //}
-
-    //private IEnumerator startRecalibration() {
-    //    helpAnchorVisualizationCube.gameObject.SetActive(true);
-
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-    //    yield return new WaitForSeconds(1);
-    //    speechManager.OnCalibrationStart();
-
-    //    calibrated = false;
-
-    //    WorldAnchorManager.Instance.RemoveAnchor(worldAnchor.gameObject);
-
-    //    yield return StartCoroutine(calibrationManager.Recalibrate(worldAnchor));
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-
-    //    //START HELP CUBE DETECTION
-    //    speechManager.Say("Please move and place the marker to the right bottom corner of the table.");
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-    //    speechManager.OnCalibrationStart();
-
-    //    yield return StartCoroutine(calibrationManager.Recalibrate(helpAnchor));
-    //    yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-
-    //    ApplyOffsetToWorldAnchor();
-
-    //    //worldAnchor.transform.position += new Vector3(-worldAnchorOffset, worldAnchorOffset, -worldAnchorOffset);;
-    //    //worldAnchorVisualizationCube.transform.localPosition += new Vector3(-worldAnchorOffset, worldAnchorOffset, -worldAnchorOffset);
-    //    WorldAnchorManager.Instance.AttachAnchor(worldAnchor.gameObject);
-    //    calibrated = true;
-    //    helpAnchorVisualizationCube.gameObject.SetActive(false);
-
-    //    speechManager.OnCalibrationEnd();
-    //    calibration_launched = false;
-    //}
-
-    //private void ApplyOffsetToWorldAnchor() {
-    //    //adjust world anchor position
-    //    Vector3 oldCubeLocalPosition = worldAnchorVisualizationCube.transform.localPosition;
-    //    worldAnchorVisualizationCube.transform.localScale = new Vector3(1, 1, 1);
-    //    worldAnchorVisualizationCube.transform.localPosition += new Vector3(-worldAnchorOffset, worldAnchorOffset, -worldAnchorOffset - 0.02f);
-    //    worldAnchorVisualizationCube.transform.rotation = XLookRotation(helpAnchor.transform.position - worldAnchor.transform.position);
-
-    //    ARUWPUtils.SetMatrix4x4ToGameObject(ref worldAnchor, worldAnchorVisualizationCube.transform.localToWorldMatrix);
-    //    worldAnchorVisualizationCube.transform.localScale = new Vector3(0.09f, 0.09f, 0.09f);
-    //    worldAnchorVisualizationCube.transform.localPosition = oldCubeLocalPosition;
-    //}
 
     //look at in X direction pointing forward .. takes parameter of direction of looking (target - actual_position)
     private Quaternion XLookRotation(Vector3 direction) {

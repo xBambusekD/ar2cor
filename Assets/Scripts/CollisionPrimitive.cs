@@ -100,14 +100,6 @@ public class CollisionPrimitive : MonoBehaviour {
         //primitive.transform.hasChanged = false;
     }
 
-    public void OnDestroy() {
-        // Destroy the target object, Bounding Box, Bounding Box Rig and App Bar
-        //boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
-        //Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
-        //Destroy(boundingBox.Target);
-        //Destroy(gameObject);
-        
-    }
 
     public void SetAppBar(AppBar appBar) {
         appBarInstance = appBar;
