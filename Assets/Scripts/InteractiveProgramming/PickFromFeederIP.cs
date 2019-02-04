@@ -16,11 +16,12 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
     public GameObject BasicObjectManipulatablePrefab;
 
     private GameObject cursor;
-    private GameObject pointedArea;
+    private Transform pointedArea;
     private GameObject world_anchor;
 
     private Vector3 robotArmPosition;
     private Quaternion robotArmRotation;
+    private string objectTypeToPick;
 
     public GameObject arm;
     private GameObject objectToPlace;
@@ -54,11 +55,11 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
 
     public void MarkClickedArea(DetectedObject detectedObject) {
-        if (pointedArea == null) {
-            pointedArea = Instantiate(pointerToSpawn, cursor.transform.position, cursor.transform.rotation);
+        if (objectToPlace == null) {
+            pointedArea = cursor.transform;
 
-            robotArmPosition = world_anchor.transform.InverseTransformPoint(pointedArea.transform.position + pointedArea.transform.forward * 0.2f);            
-            robotArmRotation = Quaternion.Inverse(world_anchor.transform.rotation) * pointedArea.transform.rotation;
+            robotArmPosition = world_anchor.transform.InverseTransformPoint(pointedArea.position + pointedArea.forward * 0.2f);            
+            robotArmRotation = Quaternion.Inverse(world_anchor.transform.rotation) * pointedArea.rotation;
 
 
             objectToPlace = Instantiate(BasicObjectManipulatablePrefab, detectedObject.position, detectedObject.rotation);
@@ -66,7 +67,8 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             objectToPlace.transform.GetChild(0).GetComponent<Collider>().enabled = false;
             objectToPlace.transform.parent = cursor.transform;
             objectToPlace.transform.localPosition = new Vector3(0, 0, detectedObject.bbox.x/2);
-
+        
+            objectTypeToPick = detectedObject.type;
 
             //GameObject robot_arm = Instantiate(arm, world_anchor.transform.position, world_anchor.transform.rotation);
             //robot_arm.transform.localPosition = robotArmPosition;
@@ -82,9 +84,9 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
             //ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), msg);
         }
-        else {
-            pointedArea.transform.position = cursor.transform.position;
-            pointedArea.transform.rotation = cursor.transform.rotation;
-        }
+    }
+
+    public void SaveToROS() {
+
     }
 }

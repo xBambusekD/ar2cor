@@ -7,7 +7,10 @@ using System.IO;
 using Vuforia;
 
 public class SystemStarter : Singleton<SystemStarter> {
-    
+
+    public delegate void SystemStartedAction();
+    public event SystemStartedAction OnSystemStarted;
+
     public bool calibrated;
     public GameObject worldAnchor;
     public GameObject worldAnchorVisualizationCube;
@@ -30,8 +33,11 @@ public class SystemStarter : Singleton<SystemStarter> {
 
 #if UNITY_EDITOR
         calibrated = true;
+        if (OnSystemStarted != null) {
+            OnSystemStarted();
+        }
 #endif
-        
+
     }
     	
 	// Update is called once per frame
@@ -49,6 +55,10 @@ public class SystemStarter : Singleton<SystemStarter> {
 
                     anchorLoaded = true;
                     calibrated = true;
+
+                    if(OnSystemStarted != null) {
+                        OnSystemStarted();
+                    }
                 }
                 else {
                     StartCoroutine(startCalibration());
@@ -126,6 +136,10 @@ public class SystemStarter : Singleton<SystemStarter> {
 
         calibrated = true;
         calibration_launched = false;
+
+        if (OnSystemStarted != null) {
+            OnSystemStarted();
+        }
 
         HideActiveChildrenObjects(false, worldAnchor);
 

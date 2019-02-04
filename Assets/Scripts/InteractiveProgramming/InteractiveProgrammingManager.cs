@@ -13,9 +13,15 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
 
     private bool interfaceStateChanged;
 
+    private GameObject world_anchor;
+
+    //private GameObject tableDeskPrefab;
+    //private GameObject tableDesk;
+
     // Use this for initialization
     void Start () {
         interfaceStateChanged = false;
+        world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
     }
 	
 	// Update is called once per frame
@@ -25,7 +31,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                 //state learning
                 if (interfaceStateMsg.GetSystemState() == 2) {
                     StateLearning = true;
-
+                    
                     //TODO: kontrola jestli se interfaceState zmenil..
                     if (interfaceStateChanged) {
                         Debug.Log("InterfaceState changed!");
@@ -65,4 +71,9 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
             interfaceStateChanged = false;
         }
     }
+
+    //private void SpawnTableArea() {
+    //    tableDesk = Instantiate(tableDeskPrefab, world_anchor.transform);
+    //    tableDesk.GetComponent<TableDeskInit>().InitTable();
+    //}
 }

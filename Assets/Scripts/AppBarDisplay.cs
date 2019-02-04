@@ -12,6 +12,7 @@ public class AppBarDisplay : MonoBehaviour, IInputHandler {
 
     private void Start() {
         colPrimitive = GetComponentInParent<CollisionPrimitive>();
+        appBarInstance = GetComponent<BoundingBoxRig>().appBarInstance;
     }
 
     public void OnInputDown(InputEventData eventData) {
@@ -26,9 +27,5 @@ public class AppBarDisplay : MonoBehaviour, IInputHandler {
     public void OnInputUp(InputEventData eventData) {
         CollisionEnvironmentManager.Instance.manipulatingWithObject = false;
         colPrimitive.UpdatePositionToROS();
-    }
-
-    public void SetAppBarInstance(AppBar appBar) {
-        appBarInstance = appBar;
     }
 }

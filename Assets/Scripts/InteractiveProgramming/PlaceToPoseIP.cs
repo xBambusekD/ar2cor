@@ -10,19 +10,14 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
     private ProgramItemMsg programItemMsg;
 
     public bool StateLearning = false;
-
-    public GameObject pointerToSpawn;
-
-    private GameObject cursor;
-    private GameObject pointedArea;
+    
     private GameObject world_anchor;
 
-    private GameObject objectToPlace;
-    private Vector3 snapLocalPosition;
+    private Vector3 PlacePosition;
+    private Quaternion PlaceOrientation;
 
     // Use this for initialization
     void Start () {
-        cursor = GameObject.FindGameObjectWithTag("cursor");
         world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
     }
 	
@@ -47,31 +42,16 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         programItemMsg = msg.GetProgramCurrentItem();
     }
 
-    public void MarkClickedArea() {
-        if (objectToPlace == null) {
-            //pointedArea = Instantiate(pointerToSpawn, cursor.transform.position, cursor.transform.rotation);
+    public void SaveObjectPosition(Vector3 position, Quaternion rotation) {
+        PlacePosition = position;
+        PlaceOrientation = rotation;
 
-            foreach(Transform tr in cursor.transform) {
-                if (tr.tag == "manipulatable_object") {
-                    objectToPlace = tr.gameObject;
-                }
-            }
+        SaveToROS();
+    }
 
-            snapLocalPosition = objectToPlace.transform.localPosition;
+    public void SaveToROS() {
+        //save instruction to ROS
 
-        }
-
-        if (objectToPlace.transform.parent == cursor.transform) {
-
-            objectToPlace.transform.parent = world_anchor.transform;
-            objectToPlace.transform.GetChild(0).GetComponent<Collider>().enabled = true;
-            //pointedArea.transform.position = cursor.transform.position;
-            //pointedArea.transform.rotation = cursor.transform.rotation;
-        }
-        else {
-            objectToPlace.transform.parent = cursor.transform;
-            objectToPlace.transform.GetChild(0).GetComponent<Collider>().enabled = false;
-            objectToPlace.transform.localPosition = snapLocalPosition;
-        }
+        PickFromFeederIP.Instance.SaveToROS();
     }
 }

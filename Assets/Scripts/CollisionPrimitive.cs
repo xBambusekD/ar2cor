@@ -83,6 +83,7 @@ public class CollisionPrimitive : MonoBehaviour {
 
     private void CreateNewPrimitive() {
         primitive = Instantiate(primitivePrefab, gameObject.transform);
+        appBarInstance = GetComponentInChildren<BoundingBoxRig>().appBarInstance;
         SetPrimitiveTransform(collisionPrimitiveMsg);
     }
 
@@ -98,11 +99,6 @@ public class CollisionPrimitive : MonoBehaviour {
         lastRotation = primitive.transform.localRotation;
         paramsSet = true;
         //primitive.transform.hasChanged = false;
-    }
-
-
-    public void SetAppBar(AppBar appBar) {
-        appBarInstance = appBar;
     }
 
     public void DestroyAppBar() {

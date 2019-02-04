@@ -16,6 +16,9 @@ namespace HoloToolkit.Unity.UX
     /// </summary>
     public class AppBar : InteractionReceiver
     {
+        public delegate void ClickAction();
+        public event ClickAction OnDoneClicked;
+
         private float buttonWidth = 1.50f;
 
         /// <summary>
@@ -254,6 +257,10 @@ namespace HoloToolkit.Unity.UX
                     State = AppBarStateEnum.Default;
                     // Deactivate BoundingBoxRig
                     boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+
+                    //custom informing other object about Done clicked
+                    if(OnDoneClicked != null)
+                        OnDoneClicked();
                     break;
 
                 default:

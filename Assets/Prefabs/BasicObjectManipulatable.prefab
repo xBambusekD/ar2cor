@@ -39,7 +39,6 @@ GameObject:
   - component: {fileID: 4340268134304576}
   - component: {fileID: 114943343325353934}
   - component: {fileID: 114728254210691434}
-  - component: {fileID: 114294555717444128}
   - component: {fileID: 114977429453787300}
   m_Layer: 0
   m_Name: BasicObjectManipulatable
@@ -128,17 +127,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114294555717444128
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1635451555213648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc079a1c87ebd05449e1725cbacebf7b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &114728254210691434
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -183,7 +171,7 @@ MonoBehaviour:
   useScaleHandles: 0
   boundingBoxPrefab: {fileID: 114030465538688920, guid: 52f4a504e03b0b7499eb414bef45633a,
     type: 2}
-  appBarPrefab: {fileID: 114050950401502068, guid: aa610ada334bff640a535f0d23a9a15c,
+  appBarPrefab: {fileID: 114050950401502068, guid: 820e5243a5454af41a051e4bc55f11af,
     type: 2}
   appBarInstance: {fileID: 0}
 --- !u!114 &114977429453787300

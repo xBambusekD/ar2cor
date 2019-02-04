@@ -209,21 +209,6 @@ namespace HoloToolkit.Unity.UX
             appBarInstance.BoundingBox = boxInstance;
             appBarInstance.HoverOffsetZ = appBarHoverOffsetZ;
 
-            try {
-                gameObject.GetComponent<AppBarDisplay>().SetAppBarInstance(appBarInstance);
-            }
-            catch (NullReferenceException e) {
-                Debug.Log(e);
-            }
-
-            //appBarInstance.transform.parent = this.gameObject.transform;
-            try {
-                gameObject.GetComponentInParent<CollisionPrimitive>().SetAppBar(appBarInstance);
-            }
-            catch (NullReferenceException e) {
-                Debug.Log(e);
-            }
-
             boxInstance.IsVisible = false;
         }
 
@@ -578,23 +563,20 @@ namespace HoloToolkit.Unity.UX
                         boxInstance.IsVisible = value;
                     }
 
-                    if (cornerHandles != null && rotateHandles != null)
-                    {
-                        foreach (GameObject handle in cornerHandles)
-                        {
+                    if (cornerHandles != null) {
+                        foreach (GameObject handle in cornerHandles) {
                             handle.SetActive(value);
                         }
-
-                        if(resizeHandles != null) {
-                            foreach (GameObject handle in resizeHandles) {
-                                handle.SetActive(value);
-                            }
-                        }
-
-                        foreach (GameObject handle in rotateHandles)
-                        {
+                    }
+                    if (rotateHandles != null) {
+                        foreach (GameObject handle in rotateHandles) {
                             handle.SetActive(value);
                         }
+                    }
+                    if (resizeHandles != null) {
+                        foreach (GameObject handle in resizeHandles) {
+                            handle.SetActive(value);
+                        } 
                     }
 
                     showRig = value;
