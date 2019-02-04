@@ -159,19 +159,11 @@ public class DetectedObjectsSubscriber : ROSBridgeSubscriber {
         return "std_msgs/String";
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        //Debug.Log("ParseMessage in DetectedObjectsSubscriber");
-
-        //JSONNode json_msg = JSON.Parse(new StringMsg(msg).GetData());
-
-        ////send data from ROS to objects manager
-        //ObjectsManager.setDataFromROS(json_msg);
-        
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {        
         return new StringMsg(msg);
     }
 
     public new static void CallBack(ROSBridgeMsg msg) {
-        //Debug.Log(GetMessageTopic() + " received");
 
         JSONNode json_msg = JSON.Parse(((StringMsg)msg).GetData());
 
@@ -191,15 +183,10 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        //Debug.Log("ParseMessage in InterfaceStateSubscriber");
-        //Debug.Log(msg);
-        //InterfaceStateMsg Imsg = new InterfaceStateMsg(msg);
-        //Debug.Log(Imsg.GetProgramID());
         return new InterfaceStateMsg(msg);
     }
 
     public new static void CallBack(ROSBridgeMsg msg) {
-        //Debug.Log(GetMessageTopic() + " received");
 
         InterfaceStateMsg Imsg = (InterfaceStateMsg) msg;
 
@@ -210,13 +197,6 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
 
         InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
 
-        //Debug.Log(Imsg.ToYAMLString());
-        //Debug.Log(Imsg.GetSystemState());
-
-        //funkcni volani sluzby
-        //ROSCommunicationManager.Instance.ros.CallService("/art/db/program/get", "{\"id\": " + Imsg.GetProgramID() + "}");
-
-        //CallService("/art/db/program/get", "\"id: 22\"");
     }
 }
 
@@ -238,10 +218,6 @@ public class HololensStateSubscriber : ROSBridgeSubscriber {
 
         VisualizationManager.Instance.SetHololensStateMsgFromROS(Hmsg);
 
-        //Debug.Log(Hmsg.ToYAMLString());
-        //if(Hmsg.GetHololensState() == hololens_state.STATE_VISUALIZING) {
-        //    Debug.Log("VISUALIZING " + Hmsg.GetVisualizationState());
-        //}
     }
 }
 

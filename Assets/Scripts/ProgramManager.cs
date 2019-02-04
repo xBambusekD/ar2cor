@@ -23,8 +23,6 @@ public class ProgramManager : Singleton<ProgramManager> {
     private bool visualize_program;
     private bool visualize_block;
     private ProgramBlockMsg programBlockMsg;
-    //private Dictionary<UInt16, GameObject> programToVisualize = new Dictionary<UInt16, GameObject>();
-    //private Dictionary<UInt16, UInt16> programOrderHelper = new Dictionary<UInt16, UInt16>();
 
     //<blockID, block<itemID,instruction>>
     private Dictionary<UInt16, Dictionary<UInt16, GameObject>> program = new Dictionary<UInt16, Dictionary<UInt16, GameObject>>();
@@ -502,163 +500,7 @@ public class ProgramManager : Singleton<ProgramManager> {
                 }
             }
         }
-        ////foreach(var programItem in programToVisualize.Values) {
-        //for (int i=0; i < programToVisualize.Count; i++) {
-        //    GameObject programItem = programToVisualize.ElementAt(i).Value;
-        //    switch (programItem.gameObject.tag) {
-        //        case "PICK_FROM_POLYGON":
-        //            Debug.Log("Starting pick from polygon");
-        //            PickFromPolygon pfg = programItem.GetComponent<PickFromPolygon>();
-        //            //sends change of interface to ARTable - for states switching during visualization
-        //            SendInterfaceStateChangeToROS(pfg.programItem);
-        //            currentProgramItem = pfg.programItem;
-        //            pfg.Run();
-        //            //wait until instruction finishes or until user says "Next" or "Previous"
-        //            yield return new WaitWhile(() => pfg.IsRunning() && !next && !previous);
-        //            //if Next is said, instruction skips to its end state
-        //            if(next) {
-        //                pfg.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            //if Previous is said, instruction skips to its initial state and decrements iterator twice to play previous instruction
-        //            if(previous) {
-        //                pfg.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending pick from polygon");
-        //            break;
-        //        case "PICK_FROM_FEEDER":
-        //            Debug.Log("Starting pick from feeder");
-        //            PickFromFeeder pff = programItem.GetComponent<PickFromFeeder>();
-        //            SendInterfaceStateChangeToROS(pff.programItem);
-        //            currentProgramItem = pff.programItem;
-        //            pff.Run();
-        //            yield return new WaitWhile(() => pff.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                pff.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                pff.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending pick from feeder");
-        //            break;
-        //        case "PLACE_TO_POSE":
-        //            Debug.Log("Starting place to pose");
-        //            PlaceToPose ptp = programItem.GetComponent<PlaceToPose>();
-        //            SendInterfaceStateChangeToROS(ptp.programItem);
-        //            currentProgramItem = ptp.programItem;
-        //            ptp.Run();
-        //            yield return new WaitWhile(() => ptp.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                ptp.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                ptp.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending place to pose");
-        //            break;
-        //        case "DRILL_POINTS":
-        //            Debug.Log("Starting drill points");
-        //            DrillPoints dp = programItem.GetComponent<DrillPoints>();
-        //            SendInterfaceStateChangeToROS(dp.programItem);
-        //            currentProgramItem = dp.programItem;
-        //            dp.Run();
-        //            yield return new WaitWhile(() => dp.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                dp.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                dp.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending drill points");
-        //            break;
-        //        case "GET_READY":
-        //            Debug.Log("Starting get ready");
-        //            GetReady gr = programItem.GetComponent<GetReady>();
-        //            SendInterfaceStateChangeToROS(gr.programItem);
-        //            currentProgramItem = gr.programItem;
-        //            gr.Run();
-        //            yield return new WaitWhile(() => gr.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                gr.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                gr.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending get ready");
-        //            break;
-        //        case "WAIT_UNTIL_USER_FINISHES":
-        //            Debug.Log("Starting wait until user finishes");
-        //            WaitUntilUserFinishes wuuf = programItem.GetComponent<WaitUntilUserFinishes>();
-        //            SendInterfaceStateChangeToROS(wuuf.programItem);
-        //            currentProgramItem = wuuf.programItem;
-        //            wuuf.Run();
-        //            yield return new WaitWhile(() => wuuf.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                wuuf.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                wuuf.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending wait until user finishes");
-        //            break;
-        //        case "VISUAL_INSPECTION":
-        //            Debug.Log("Starting visual inspection");
-        //            VisualInspection vs = programItem.GetComponent<VisualInspection>();
-        //            SendInterfaceStateChangeToROS(vs.programItem);
-        //            currentProgramItem = vs.programItem;
-        //            vs.Run();
-        //            yield return new WaitWhile(() => vs.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                vs.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                vs.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending visual inspection");
-        //            break;
-        //        case "PLACE_TO_CONTAINER":
-        //            Debug.Log("Starting place to container");
-        //            PlaceToContainer ptc = programItem.GetComponent<PlaceToContainer>();
-        //            SendInterfaceStateChangeToROS(ptc.programItem);
-        //            currentProgramItem = ptc.programItem;
-        //            ptc.Run();
-        //            yield return new WaitWhile(() => ptc.IsRunning() && !next && !previous);
-        //            if (next) {
-        //                ptc.OnNextInstruction();
-        //                next = false;
-        //            }
-        //            if (previous) {
-        //                ptc.OnPreviousInstruction();
-        //                i = GetCorrectIndexOfPreviousInstruction(i);
-        //                previous = false;
-        //            }
-        //            Debug.Log("Ending place to container");
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //}
-
+        
         speechManager.Say("Visualization of block " + interfaceStateMsg.GetBlockID().ToString() + " in program " + interfaceStateMsg.GetProgramID().ToString() + " ended.");
         visualization_running = false;
         start_visualization = false;
@@ -677,6 +519,7 @@ public class ProgramManager : Singleton<ProgramManager> {
         ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), msg);
     }
 
+    //TODO cannot jump by index, but through dictionary
     //private int GetCorrectIndexOfPreviousInstruction(int i) {
     //    //1st decrement - replay current instruction
     //    //2nd decrement - replay previous instruction
