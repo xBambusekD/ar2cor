@@ -14,24 +14,27 @@ namespace ROSBridgeLib {
 	namespace art_msgs {
         public class ObjectTypeMsg : ROSBridgeMsg {           
 
-            private String _name;
+            private string _name;
             private SolidPrimitiveMsg _bbox;
+            private bool _container;
 
             public ObjectTypeMsg(JSONNode msg) {
                 _name = msg["name"];
                 _bbox = new SolidPrimitiveMsg(msg["bbox"]);
+                _container = bool.Parse(msg["container"]);
             }
 			
-			public ObjectTypeMsg(String name, SolidPrimitiveMsg bbox) {
+			public ObjectTypeMsg(string name, SolidPrimitiveMsg bbox, bool container) {
                 _name = name;
                 _bbox = bbox;
+                _container = container;
 			}
 
             public static string GetMessageType() {
 				return "art_msgs/ObjectType";
 			}
 			
-            public String GetName() {
+            public string GetName() {
                 return _name;
             }
 
@@ -39,14 +42,20 @@ namespace ROSBridgeLib {
                 return _bbox;
             }
 
+            public bool GetContainer() {
+                return _container;
+            }
+
             public override string ToString() {
                 return "ObjectType [name=" + _name +
-                    ", bbox=" + _bbox.ToString() + "]";
+                    ", bbox=" + _bbox.ToString() + 
+                    ", container=" + _container + "]";
 			}
             
             public override string ToYAMLString() {
-                return "{\"name\":" + _name +
-                    ", \"bbox\":" + _bbox.ToYAMLString() + "}";
+                return "{\"name\":\"" + _name + 
+                    "\", \"bbox\":" + _bbox.ToYAMLString() +
+                    ", \"container\":" + _container + "}";
             }
 		}
 	}

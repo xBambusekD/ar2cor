@@ -12,8 +12,13 @@ using ROSBridgeLib.diagnostic_msgs;
 * @author Daniel Bambušek
 */
 
+
+
 namespace ROSBridgeLib {
     namespace art_msgs {
+
+
+
         //public enum program_type : UInt16 {
         //    GET_READY = 0,
         //    NOP = 1,
@@ -32,6 +37,27 @@ namespace ROSBridgeLib {
         //    WELDING_SEAM = 401,
         //    DRILL_POINTS = 600
         //}
+
+        public class ProgramTypes {
+            public const string GET_READY = "GetReady";
+            public const string NOP = "NOP";
+            public const string WAIT_FOR_USER = "WaitForUser";
+            public const string WAIT_UNTIL_USER_FINISHES = "WaitUntilUserFinishes";
+            public const string PICK_FROM_POLYGON = "PickFromPolygon";
+            public const string PICK_FROM_FEEDER = "PickFromFeeder";
+            public const string PICK_OBJECT_ID = "PickObjectId";
+            public const string PICK_TOOL = "PickTool";
+            public const string PLACE_TO_POSE = "PlaceToPose";
+            public const string PLACE_TO_GRID = "PlaceToGrid";
+            public const string PLACE_TOOL = "PlaceTool";
+            public const string PATH_THROUGH_POINTS = "PathThroughPoints";
+            public const string PATH_THROUGH_TRAJECTORY = "PathThroughTrajectory";
+            public const string WELDING_POINTS = "WeldingPoints";
+            public const string WELDING_SEAM = "WeldingSeam";
+            public const string DRILL_POINTS = "DrillPoints";
+            public const string VISUAL_INSPECTION = "VisualInspection";
+            public const string PLACE_TO_CONTAINER = "PlaceToContainer";
+        }
 
         public class ProgramItemMsg : ROSBridgeMsg {
             private UInt16 _id;     //id of program
