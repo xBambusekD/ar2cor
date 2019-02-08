@@ -260,7 +260,7 @@ public class PickFromPolygon : ProgramInstruction {
         InitObjectToPick();
         InitRobotGripper();
 
-        arm_rotation = Quaternion.Euler(-90f, 90f, 0f);         
+        arm_rotation = Quaternion.Euler(-90f, -90f, 0f);      
 
         base.Run();
         //speechManager.Say("Running pick from polygon instruction.");

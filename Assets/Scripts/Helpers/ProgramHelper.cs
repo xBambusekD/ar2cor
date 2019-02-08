@@ -1,0 +1,83 @@
+﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
+using ROSBridgeLib.diagnostic_msgs;
+using ROSBridgeLib.geometry_msgs;
+using ROSBridgeLib.std_msgs;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public static class ProgramHelper {
+
+    public delegate void InterfaceStateChangedAction(InterfaceStateMsg msg);
+    public static event InterfaceStateChangedAction OnInterfaceStateChanged;
+
+    private static bool LoadingProgram = false;
+    
+    private static ProgramMsg currentProgram;
+    private static InterfaceStateMsg interfaceStateMsg = new InterfaceStateMsg("", 0, new TimeMsg(0, 0), 0, 0,
+                                new ProgramItemMsg(0, 0, 0, "", "", new List<string>(), new List<PoseStampedMsg>(),
+                                    new List<PolygonStampedMsg>(), new List<ushort>(), new List<KeyValueMsg>(), new List<string>(), new List<SceneLabelMsg>()),
+                                new List<KeyValueMsg>(), false, 0, 0);
+
+    public static ProgramItemMsg GetProgramItemById(ushort ref_id) {
+        ProgramItemMsg item = null;
+        foreach(ProgramBlockMsg block in currentProgram.GetBlocks()) {
+            item = block.GetProgramItemByID(ref_id);
+            if (item != null)
+                break;
+        }
+        return item;
+    }
+
+    public static bool ItemLearned(ushort block_id, ushort item_id) {
+        ProgramItemMsg item = currentProgram.GetBlockByID(block_id).GetProgramItemByID(item_id);
+
+        return InstructionHelper.InstructionLearned(item);
+    }
+
+    public static bool ItemLearned(ProgramItemMsg item) {
+        return InstructionHelper.InstructionLearned(item);
+    }
+
+    public static bool CheckIfInterfaceStateChanged(InterfaceStateMsg currentState, InterfaceStateMsg newState) {
+
+        return !(currentState.GetSystemState() == newState.GetSystemState() &&
+            currentState.GetProgramID() == newState.GetProgramID() &&
+            currentState.GetBlockID() == newState.GetBlockID() &&
+            currentState.GetEditEnabled() == newState.GetEditEnabled() &&
+            currentState.GetProgramCurrentItem().ToYAMLString().Equals(newState.GetProgramCurrentItem().ToYAMLString()));
+    }
+
+    public static void SetInterfaceStateMsgFromROS(InterfaceStateMsg msg) {
+        if (CheckIfInterfaceStateChanged(interfaceStateMsg, msg)) {
+            //Debug.Log("PH interface state changed");
+            //Debug.Log(interfaceStateMsg.GetProgramID() != msg.GetProgramID());
+            //Debug.Log(interfaceStateMsg.GetProgramID());
+            //Debug.Log(msg.GetProgramID());
+            //load new program if current has changed
+            if (interfaceStateMsg.GetProgramID() != msg.GetProgramID()) {
+                LoadingProgram = true;
+                ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.programGetService, "{\"id\": " + msg.GetProgramID() + "}");
+            }
+            interfaceStateMsg = msg;
+
+            //if currently loading program.. call the action after program was successfully loaded (e.g. in SetProgramMsgFromROS())
+            if(OnInterfaceStateChanged != null && !LoadingProgram) {
+                OnInterfaceStateChanged(interfaceStateMsg);
+            }
+        }
+    }
+
+    public static void SetProgramMsgFromROS(ProgramMsg msg) {
+        LoadingProgram = false;
+
+        //Debug.Log("PH new program loaded");
+        currentProgram = msg;
+
+        if (OnInterfaceStateChanged != null) {
+            OnInterfaceStateChanged(interfaceStateMsg);
+        }
+    }
+}

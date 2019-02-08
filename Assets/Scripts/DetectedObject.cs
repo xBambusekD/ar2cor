@@ -30,13 +30,13 @@ public class DetectedObject : MonoBehaviour, IFocusable {
 	}
 
     public void OnFocusEnter() {
-        if(PickFromFeederIP.Instance.StateLearning) {
+        if(InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
             wireframeMat.SetColor("_WireColor", blue);
         }
     }
 
     public void OnFocusExit() {
-        if (PickFromFeederIP.Instance.StateLearning) {
+        if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
             wireframeMat.SetColor("_WireColor", green);
         }
     }

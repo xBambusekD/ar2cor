@@ -462,7 +462,7 @@ public class DrillPoints : ProgramInstruction {
         InitRobotGripper();
         InitDrillingPoses();
 
-        arm_rotation = Quaternion.Euler(-90f, 90f, 0f);
+        arm_rotation = Quaternion.Euler(-90f, -90f, 0f);
 
         base.Run();
         //speechManager.Say("Running drill points instruction.");

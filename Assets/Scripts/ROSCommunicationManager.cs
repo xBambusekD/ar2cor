@@ -21,6 +21,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
     public static string programGetService = "/art/db/program/get";
     public static string objectGetService = "/art/db/object_type/get";
+    public static string getAllObjectTypesService = "/art/db/object_type/get_all";
     public static string addCollisionPrimitiveService = "/art/collision_env/artificial/add/primitive";
     public static string deleteCollisionPrimitiveService = "/art/collision_env/artificial/clear/name";
     public static string saveAllCollisionPrimitiveService = "/art/collision_env/artificial/save_all";
@@ -73,45 +74,50 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
     //callback which calls when service is received
     public static void ServiceCallBack(string service, string yaml) {
-        //Debug.Log("SERVICE CALLBACK");
-        if (service == programGetService) {
-            JSONNode node = JSONNode.Parse(yaml);
+        Debug.Log("SERVICE CALLBACK " + service);
+        if (service.Equals(programGetService)) {
+            JSONNode node = JSONNode.Parse(yaml);            
             ProgramMsg programMsg = new ProgramMsg(node["program"]);
+            //Debug.Log(programMsg.ToYAMLString());
             ProgramManager.Instance.SetProgramMsgFromROS(programMsg);
-            PlaceToPoseIE.Instance.SetProgramMsgFromROS(programMsg);
+            ProgramHelper.SetProgramMsgFromROS(programMsg);
         }
         //1. moznost jak ziskat velikosti objektu .. asi se nebude pouzivat
-        if (service == objectGetService) {
+        if (service.Equals(objectGetService)) {
             JSONNode node = JSONNode.Parse(yaml);
             ObjectTypeMsg objectTypeMsg = new ObjectTypeMsg(node["object_type"]);
             ObjectsManager.Instance.SetObjectTypeMsgFromROS(objectTypeMsg);
-            Debug.Log(objectTypeMsg.ToYAMLString());
+            //Debug.Log(objectTypeMsg.ToYAMLString());
         }
-        if(service == addCollisionPrimitiveService) {
+        if (service.Equals(getAllObjectTypesService)) {
+            JSONNode node = JSONNode.Parse(yaml);
+            ObjectsManager.Instance.SetObjectTypesFromROS(node);
+        }
+        if (service.Equals(addCollisionPrimitiveService)) {
             JSONNode node = JSONNode.Parse(yaml);
             //Debug.Log(node);
         }
-        if(service == deleteCollisionPrimitiveService) {
+        if(service.Equals(deleteCollisionPrimitiveService)) {
             JSONNode node = JSONNode.Parse(yaml);
             //Debug.Log(node);
         }
-        if (service == saveAllCollisionPrimitiveService) {
+        if (service.Equals(saveAllCollisionPrimitiveService)) {
             JSONNode node = JSONNode.Parse(yaml);
             //Debug.Log(node);
         }
-        if (service == clearAllCollisionPrimitiveService) {
+        if (service.Equals(clearAllCollisionPrimitiveService)) {
             JSONNode node = JSONNode.Parse(yaml);
             //Debug.Log(node);
         }
-        if (service == reloadAllCollisionPrimitiveService) {
+        if (service.Equals(reloadAllCollisionPrimitiveService)) {
             JSONNode node = JSONNode.Parse(yaml);
             //Debug.Log(node);
         }
-        //if (service == robotLookAtLeftFeederService) {
+        //if (service.Equals(robotLookAtLeftFeederService)) {
         //    JSONNode node = JSONNode.Parse(yaml);
         //    //Debug.Log(node);
         //}
-        //if (service == robotLookAtRightFeederService) {
+        //if (service.Equals(robotLookAtRightFeederService)) {
         //    JSONNode node = JSONNode.Parse(yaml);
         //    //Debug.Log(node);
         //}
@@ -195,8 +201,8 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
         //PickFromPolygonIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
         //PlaceToPoseIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
 
-        InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
-
+        //InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        ProgramHelper.SetInterfaceStateMsgFromROS(Imsg);
     }
 }
 

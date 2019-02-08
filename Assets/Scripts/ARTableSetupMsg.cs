@@ -55,6 +55,14 @@ public class ARTableSetupMsg {
         return _length;
     }
 
+    public float GetTableWidth() {
+        return float.Parse(_width);
+    }
+    
+    public float GetTableLength() {
+        return float.Parse(_length);
+    }
+
     public void ActualizeIPConfig(string ip, string port) {
         _ip = ip;
         _port = port;

@@ -43,6 +43,17 @@ public class SystemStarter : Singleton<SystemStarter> {
 	// Update is called once per frame
 	void Update() {
         if(ROSCommunicationManager.Instance.connectedToROS) {
+
+            //Load known object types from database
+            if (!ObjectsManager.Instance.objectReloadInitiated) {
+                ObjectsManager.Instance.ReloadObjectTypes();
+                ObjectsManager.Instance.objectReloadInitiated = true;
+            }
+
+            if(!ObjectsManager.Instance.objectTypesLoaded) {
+                return;
+            }
+
             if (!anchorLoaded && !calibrated && !calibration_launched && (WorldAnchorManager.Instance.AnchorStore != null)) {
                 string[] ids = WorldAnchorManager.Instance.AnchorStore.GetAllIds();
                 //world anchor is present

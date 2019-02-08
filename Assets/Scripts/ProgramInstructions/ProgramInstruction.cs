@@ -47,8 +47,7 @@ public abstract class ProgramInstruction : MonoBehaviour {
 
     //places the robot gripper into initial position
     public void PlaceRobotGripperToInit() {
-        pr2_arm.transform.localPosition = new Vector3(0.75f, -0.5f, 0.5f);
-        pr2_arm.transform.localEulerAngles = new Vector3(90f, -90f, 0f);
+        pr2_arm.GetComponent<PR2GripperController>().PlaceGripperToInit();
     }
 
     public void OnNextInstruction() {

@@ -14,11 +14,18 @@ public class ObjectsManager : Singleton<ObjectsManager> {
 
     public List<GameObject> objectsList = new List<GameObject>();
 
+    //list of all object types stored in ARTable database
+    private List<ObjectTypeMsg> allObjectTypes = new List<ObjectTypeMsg>();
+
     //list of known objects and their dimensions
+    //TODO remove this list and use just allObjectTypes list
     private List<ObjectTypeMsg> knownObjects = new List<ObjectTypeMsg>();
     private List<int> existingObjectsID = new List<int>();
 
     private JSONNode dataFromROS;
+
+    public bool objectReloadInitiated = false;
+    public bool objectTypesLoaded = false;
 
     // Use this for initialization
     void Start() {
@@ -26,6 +33,7 @@ public class ObjectsManager : Singleton<ObjectsManager> {
 
     // Update is called once per frame
     void Update() {
+        
         if (SystemStarter.Instance.calibrated) {
             if (dataFromROS != null) {
                 existingObjectsID.Clear();
@@ -264,5 +272,34 @@ public class ObjectsManager : Singleton<ObjectsManager> {
         }
 
         return false;
+    }
+
+    public Vector3 GetObjectTypeDimensions(string name) {
+        Vector3 dimensions = Vector3.zero;
+
+        foreach (ObjectTypeMsg objectType in allObjectTypes) {
+            //Debug.Log("FINDING: " + name + " .. FOUND: " + objectType.GetName());
+            if (objectType.GetName().Equals(name)) {
+                if (objectType.GetBBox().GetPrimitiveType() == ROSBridgeLib.shape_msgs.primitive_type.BOX) {
+                    dimensions = new Vector3(objectType.GetBBox().GetDimesions()[0], objectType.GetBBox().GetDimesions()[1], objectType.GetBBox().GetDimesions()[2]);
+                    break;
+                }
+            }
+        }
+
+        return dimensions;
+    }
+
+    public void SetObjectTypesFromROS(JSONNode msg) {
+        //Debug.Log("SETTING UP OBJECTS");
+        foreach (JSONNode item in msg["object_types"].AsArray) {
+            allObjectTypes.Add(new ObjectTypeMsg(item));
+        }
+        objectTypesLoaded = true;
+    }
+
+    public void ReloadObjectTypes() {
+        allObjectTypes.Clear();
+        ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.getAllObjectTypesService, "{}");
     }
 }

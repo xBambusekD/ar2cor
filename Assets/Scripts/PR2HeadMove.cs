@@ -25,7 +25,7 @@ public class PR2HeadMove : MonoBehaviour {
             }
 
 
-            if (PickFromFeederIP.Instance.StateLearning) {
+            if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
                 // look on the left feeder
                 if (world_anchor.transform.InverseTransformPoint(Cursor.transform.position).x < half_table_width) {
                     if (!robot_looking_left) {

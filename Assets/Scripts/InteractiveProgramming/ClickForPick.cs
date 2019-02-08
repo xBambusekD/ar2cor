@@ -5,19 +5,10 @@ using UnityEngine;
 
 public class ClickForPick : MonoBehaviour, IInputClickHandler {
 
-
     public void OnInputClicked(InputClickedEventData eventData) {
-        PickFromFeederIP.Instance.MarkClickedArea(GetComponent<DetectedObject>());
-
-        //if(PickFromFeederIP.Instance.StateLearning) {
-        //    if (pointedArea == null) {
-        //        pointedArea = Instantiate(pointerToSpawn, cursor.transform.position, cursor.transform.rotation);
-        //    }
-        //    else {
-        //        pointedArea.transform.position = cursor.transform.position;
-        //        pointedArea.transform.rotation = cursor.transform.rotation;
-        //    }
-        //}
+        if(InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
+            PickFromFeederIP.Instance.MarkClickedArea(GetComponent<DetectedObject>());
+        }
     }
 
 }

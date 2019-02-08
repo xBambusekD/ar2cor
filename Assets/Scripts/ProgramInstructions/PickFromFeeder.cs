@@ -151,10 +151,10 @@ public class PickFromFeeder : ProgramInstruction {
         //determine from which feeder the robot is going to grab.. if it's on the left side of the table (<1m) then left feeder and vice versa
         left_feeder = programItem.GetPose()[0].GetPose().GetPosition().GetX() < 1f;
         if (left_feeder) {
-            arm_rotation = Quaternion.Euler(90f, 90f, 0f);
+            arm_rotation = Quaternion.Euler(-90f, -90f, 0f);
         }
         else {
-            arm_rotation = Quaternion.Euler(-90f, 90f, 0f);
+            arm_rotation = Quaternion.Euler(90f, -90f, 0f);
         }
         gripper_pose = programItem.GetPose()[0].GetPose();
         gripper_init_pose = new Vector3(gripper_pose.GetPosition().GetX(), -gripper_pose.GetPosition().GetY(), gripper_pose.GetPosition().GetZ());

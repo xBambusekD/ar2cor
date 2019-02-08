@@ -132,8 +132,7 @@ public class ProgramManager : Singleton<ProgramManager> {
         foreach (var programItem in programBlock.GetProgramItems()) {
             Debug.Log(programItem.GetType());
             switch (programItem.GetIType()) {
-                //case program_type.PICK_FROM_POLYGON:
-                case "PickFromPolygon":
+                case ProgramTypes.PICK_FROM_POLYGON:
                     //1. moznost jak zjistit rozmery aktualniho objektu .. nutno ale pockat na odpoved
                     //2. moznost bude to napevno naprat do kodu
                     ROSCommunicationManager.Instance.ros.CallService("/art/db/object_type/get", "{\"name\": \"" + programItem.GetObject()[0] + "\"}");
@@ -155,8 +154,7 @@ public class ProgramManager : Singleton<ProgramManager> {
                     Debug.Log("PICK_FROM_POLYGON Instruction created");
 
                     break;
-                //case program_type.PICK_FROM_FEEDER:
-                case "PickFromFeeder":
+                case ProgramTypes.PICK_FROM_FEEDER:
                     Debug.Log("Building PICK_FROM_FEEDER");
                     GameObject pickFromFeederInstr = new GameObject();
                     pickFromFeederInstr.AddComponent<PickFromFeeder>();
@@ -189,8 +187,7 @@ public class ProgramManager : Singleton<ProgramManager> {
                     Debug.Log("PICK_FROM_FEEDER Instruction created");
 
                     break;
-                //case program_type.PLACE_TO_POSE:
-                case "PlaceToPose":
+                case ProgramTypes.PLACE_TO_POSE:
                     GameObject placeToPoseInstr = new GameObject();
                     placeToPoseInstr.AddComponent<PlaceToPose>();
                     placeToPoseInstr.transform.parent = gameObject.transform;
@@ -209,8 +206,7 @@ public class ProgramManager : Singleton<ProgramManager> {
 
                     Debug.Log("PLACE_TO_POSE Instruction created");
                     break;
-                //case program_type.DRILL_POINTS:
-                case "DrillPoints":
+                case ProgramTypes.DRILL_POINTS:
                     ROSCommunicationManager.Instance.ros.CallService("/art/db/object_type/get", "{\"name\": \"" + programItem.GetObject()[0] + "\"}");
                     yield return new WaitUntil(() => ObjectsManager.Instance.ObjectIsKnown(programItem.GetObject()[0]));
 
@@ -228,8 +224,7 @@ public class ProgramManager : Singleton<ProgramManager> {
 
                     Debug.Log("DRILL_POINTS Instruction created");
                     break;
-                //case program_type.GET_READY:
-                case "GetReady":
+                case ProgramTypes.GET_READY:
                     GameObject getReadyInstr = new GameObject();
                     getReadyInstr.AddComponent<GetReady>();
                     getReadyInstr.transform.parent = gameObject.transform;
@@ -242,8 +237,7 @@ public class ProgramManager : Singleton<ProgramManager> {
                     programOrderHelper.Add(programItem.GetID(), programItem.GetOnSuccess());
                     Debug.Log("GET_READY Instruction created");
                     break;
-                //case program_type.WAIT_UNTIL_USER_FINISHES:
-                case "WaitUntilUserFinishes":
+                case ProgramTypes.WAIT_UNTIL_USER_FINISHES:
                     GameObject waitUntilUserFinishesInstr = new GameObject();
                     waitUntilUserFinishesInstr.AddComponent<WaitUntilUserFinishes>();
                     waitUntilUserFinishesInstr.transform.parent = gameObject.transform;
@@ -256,7 +250,7 @@ public class ProgramManager : Singleton<ProgramManager> {
                     programOrderHelper.Add(programItem.GetID(), programItem.GetOnSuccess());
                     Debug.Log("WAIT_UNTIL_USER_FINISHES Instruction created");
                     break;
-                case "VisualInspection":
+                case ProgramTypes.VISUAL_INSPECTION:
                     GameObject visualInspectionInstr = new GameObject();
                     visualInspectionInstr.AddComponent<VisualInspection>();
                     visualInspectionInstr.transform.parent = gameObject.transform;
@@ -275,7 +269,7 @@ public class ProgramManager : Singleton<ProgramManager> {
 
                     Debug.Log("VISUAL_INSPECTION Instruction created");
                     break;
-                case "PlaceToContainer":
+                case ProgramTypes.PLACE_TO_CONTAINER:
                     GameObject placeToContainerInstr = new GameObject();
                     placeToContainerInstr.AddComponent<PlaceToContainer>();
                     placeToContainerInstr.transform.parent = gameObject.transform;

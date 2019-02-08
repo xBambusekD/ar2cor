@@ -35,7 +35,7 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
         if (SystemStarter.Instance.calibrated) {
             if(!manipulatingWithObject) {
                 if (collisionObjectsMsg != null) {
-                    Debug.Log(collisionObjectsMsg.ToYAMLString());
+                    //Debug.Log(collisionObjectsMsg.ToYAMLString());
                     existingPrimitives.Clear();
                     foreach (CollisionPrimitiveMsg primitiveMsg in collisionObjectsMsg.GetPrimitives()) {
                         //get all existing primitives names

@@ -6,74 +6,89 @@ using UnityEngine;
 
 public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingManager> {
 
-    public bool StateLearning = false;
-
-    private InterfaceStateMsg interfaceStateMsg;
-    private ProgramItemMsg programItemMsg;
-
-    private bool interfaceStateChanged;
+    public enum ProgrammingManagerState {
+        pick_from_feeder_learn,
+        place_to_pose_learn,
+        pick_from_feeder_vis,
+        place_to_pose_vis,
+        def
+    }
+    
+    public ProgrammingManagerState CurrentState { get; private set; }
 
     private GameObject world_anchor;
+    
 
-    //private GameObject tableDeskPrefab;
-    //private GameObject tableDesk;
+    private void OnEnable() {
+        ProgramHelper.OnInterfaceStateChanged += InterfaceStateChanged;
+    }
+
+    private void OnDisable() {
+        ProgramHelper.OnInterfaceStateChanged -= InterfaceStateChanged;
+    }
 
     // Use this for initialization
     void Start () {
-        interfaceStateChanged = false;
         world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
+        CurrentState = ProgrammingManagerState.def;
     }
 	
 	// Update is called once per frame
 	void Update () {
-        if (SystemStarter.Instance.calibrated) {
-            if (interfaceStateMsg != null) {
-                //state learning
-                if (interfaceStateMsg.GetSystemState() == 2) {
-                    StateLearning = true;
-                    
-                    //TODO: kontrola jestli se interfaceState zmenil..
-                    if (interfaceStateChanged) {
-                        Debug.Log("InterfaceState changed!");
+
+    }
 
 
-                        //already handled current interface state
-                        interfaceStateChanged = false;
+    private void InterfaceStateChanged(InterfaceStateMsg interfaceStateMsg) {
+        if(CurrentState != ProgrammingManagerState.def) {
+            VisualizationClear();
+        }
+
+        if(interfaceStateMsg.GetSystemState() == 2) {
+            switch(interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
+                case ProgramTypes.PICK_FROM_FEEDER:
+                    PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
+                    if (interfaceStateMsg.GetEditEnabled()) {
+                        CurrentState = ProgrammingManagerState.pick_from_feeder_learn;
+                        PickFromFeederIP.Instance.StartLearning();
                     }
-                }
-                else {
-                    StateLearning = false;
-                }
+                    else {
+                        CurrentState = ProgrammingManagerState.pick_from_feeder_vis;
+                        PickFromFeederIP.Instance.Visualize();
+                    }
+                    break;
+                case ProgramTypes.PLACE_TO_POSE:
+                    PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
+                    if (interfaceStateMsg.GetEditEnabled()) {
+                        CurrentState = ProgrammingManagerState.place_to_pose_learn;
+                        PlaceToPoseIP.Instance.StartLearning();
+                    }
+                    else {
+                        CurrentState = ProgrammingManagerState.place_to_pose_vis;
+                        PlaceToPoseIP.Instance.Visualize();
+                    }
+                    break;
+                default:
+                    CurrentState = ProgrammingManagerState.def;
+                    break;
             }
         }
-    }
-
-    private bool InterfaceStateChanged(InterfaceStateMsg currentState, InterfaceStateMsg newState) {
-
-        return !(currentState.GetSystemState() == newState.GetSystemState() &&
-            currentState.GetProgramID() == newState.GetProgramID() &&
-            currentState.GetBlockID() == newState.GetBlockID() &&
-            currentState.GetEditEnabled() == newState.GetEditEnabled() &&
-            currentState.GetProgramCurrentItem().ToYAMLString().Equals(newState.GetProgramCurrentItem().ToYAMLString()));
-    }
-
-    public void SetInterfaceStateMsgFromROS(InterfaceStateMsg msg) {
-        if ((interfaceStateMsg == null) || InterfaceStateChanged(interfaceStateMsg, msg)) {
-            Debug.Log("TRUE InterfaceState changed!");
-            interfaceStateMsg = msg;
-            interfaceStateChanged = true;
-
-            PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(msg);
-            PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(msg);
-        }
         else {
-            Debug.Log("FALSE InterfaceState did not changed!");
-            interfaceStateChanged = false;
+            CurrentState = ProgrammingManagerState.def;
         }
     }
 
-    //private void SpawnTableArea() {
-    //    tableDesk = Instantiate(tableDeskPrefab, world_anchor.transform);
-    //    tableDesk.GetComponent<TableDeskInit>().InitTable();
-    //}
+    private void VisualizationClear() {
+        switch(CurrentState) {
+            case ProgrammingManagerState.pick_from_feeder_vis:
+                PickFromFeederIP.Instance.VisualizeClear();
+                break;
+            case ProgrammingManagerState.place_to_pose_vis:
+                PlaceToPoseIP.Instance.VisualizeClear();
+                break;
+            default:
+                break;
+        }
+    }
+
 }

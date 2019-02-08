@@ -30,15 +30,18 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
 
     //called whenever user clicks on the table in order to place virtual object
     private void PlaceObject() {
-        if (object_attached) {
-            object_attached = false;
+        //TODO change to place_to_pose_learn
+        if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
+            if (object_attached) {
+                object_attached = false;
 
-            snapLocalPosition = transform.localPosition;
+                snapLocalPosition = transform.localPosition;
 
-            transform.parent = world_anchor.transform;
-            transform.GetChild(0).GetComponent<Collider>().enabled = true;
+                transform.parent = world_anchor.transform;
+                transform.GetChild(0).GetComponent<Collider>().enabled = true;
 
-            EnableRotation();
+                EnableRotation();
+            }
         }
     }
 
