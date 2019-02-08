@@ -80,8 +80,7 @@ namespace ROSBridgeLib {
         private List<Type> _subscribers; // our subscribers
         private List<Type> _publishers; //our publishers
         private Type _serviceResponse; // to deal with service responses
-        private string _serviceName = null;
-        private string _serviceValues = null;
+        private Dictionary<string, string> _serviceNameValues = new Dictionary<string, string>();
         private List<RenderTask> _taskQ = new List<RenderTask>();
 
         private object _queueLock = new object();
@@ -314,8 +313,7 @@ namespace ROSBridgeLib {
                 }
                 else if ("service_response".Equals(op)) {
                     Debug.Log("Got service response " + node.ToString());
-                    _serviceName = node["service"];
-                    _serviceValues = (node["values"] == null) ? "" : node["values"].ToString();
+                    _serviceNameValues.Add(node["service"], (node["values"] == null) ? "" : node["values"].ToString());
                 }
                 else
                     Debug.Log("Must write code here for other messages");
@@ -335,10 +333,13 @@ namespace ROSBridgeLib {
             if (newTask != null)
                 Update(newTask.getSubscriber(), newTask.getMsg());
 
-            if (_serviceName != null && _serviceValues != null) {
+            if (_serviceNameValues.Count > 0) {
+                var e = _serviceNameValues.GetEnumerator();
+                e.MoveNext();
+                string _serviceName = e.Current.Key;
+                string _serviceValues = _serviceNameValues[_serviceName];
                 ServiceResponse(_serviceResponse, _serviceName, _serviceValues);
-                _serviceName = null;
-                _serviceValues = null;
+                _serviceNameValues.Remove(_serviceName);
             }
         }
 
