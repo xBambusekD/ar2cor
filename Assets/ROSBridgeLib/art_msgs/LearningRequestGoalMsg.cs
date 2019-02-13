@@ -41,11 +41,11 @@ namespace ROSBridgeLib {
             
 
             public override string ToString() {
-                return "LearningRequestGoal [request=" + _request.ToString() + "]";
+                return "LearningRequestGoal [request=" + (UInt16) _request + "]";
 			}
             
             public override string ToYAMLString() {
-                return "{\"request\":" + _request.ToString() + "}";
+                return "{\"request\":" + (UInt16) _request + "}";
             }
 		}
 	}

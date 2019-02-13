@@ -203,17 +203,31 @@ namespace ROSBridgeLib {
                     _ref_idSTR.Add(id.ToString());
                 }
 
+                string objectString = "[";
+                for (int i = 0; i < _object.Count; i++) {
+                    objectString = objectString + "\"" + _object[i] + "\"";
+                    if (_object.Count - i > 1) objectString += ",";
+                }
+                objectString += "]";
+
+                string doNotClearString = "[";
+                for (int i = 0; i < _do_not_clear.Count; i++) {
+                    doNotClearString = doNotClearString + "\"" + _do_not_clear[i] + "\"";
+                    if (_do_not_clear.Count - i > 1) doNotClearString += ",";
+                }
+                doNotClearString += "]";
+
                 return "ProgramItem [id=" + _id +
                     ", on_success=" + _on_success +
                     ", on_failure=" + _on_failure +
                     ", type=\"" + _type + "\"" +
                     ", name=\"" + _name + "\"" +
-                    ", object=[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
+                    ", object=" + objectString +
                     ", pose=" + poseString +
                     ", polygon=" + polygonString +
                     ", ref_id=[" + string.Join(",", _ref_idSTR.ToArray()) + "]" +
                     ", flags=" + flagsString +
-                    ", do_not_clear=[\"" + string.Join("\",\"", _do_not_clear.ToArray()) + "\"]" +
+                    ", do_not_clear=" + doNotClearString +
                     ", labels=" + labelsString + "]";
             }
 
@@ -251,17 +265,31 @@ namespace ROSBridgeLib {
                     _ref_idSTR.Add(id.ToString());
                 }
 
+                string objectString = "[";
+                for (int i = 0; i < _object.Count; i++) {
+                    objectString = objectString + "\"" + _object[i] + "\"";
+                    if (_object.Count - i > 1) objectString += ",";
+                }
+                objectString += "]";
+
+                string doNotClearString = "[";
+                for (int i = 0; i < _do_not_clear.Count; i++) {
+                    doNotClearString = doNotClearString + "\"" + _do_not_clear[i] + "\"";
+                    if (_do_not_clear.Count - i > 1) doNotClearString += ",";
+                }
+                doNotClearString += "]";
+
                 return "{\"id\":" + _id +
                     ", \"on_success\":" + _on_success +
                     ", \"on_failure\":" + _on_failure +
                     ", \"type\":\"" + _type + "\"" +
                     ", \"name\":\"" + _name + "\"" +
-                    ", \"object\":[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
+                    ", \"object\":" + objectString +
                     ", \"pose\":" + poseString +
                     ", \"polygon\":" + polygonString +
                     ", \"ref_id\":[" + string.Join(",", _ref_idSTR.ToArray()) + "]" +
                     ", \"flags\":" + flagsString +
-                    ", \"do_not_clear\":[\"" + string.Join("\",\"", _do_not_clear.ToArray()) + "\"]" +
+                    ", \"do_not_clear\":" + doNotClearString +
                     ", \"labels\":" + labelsString + "}";
             }
 		}
