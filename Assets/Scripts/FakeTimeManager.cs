@@ -7,11 +7,11 @@ public class FakeTimeManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        UnbiasedTime.Init();
+        UnbiasedTime.Init("time.windows.com");
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        Debug.Log(UnbiasedTime.Instance.dateTime);
+        //Debug.Log(UnbiasedTime.Instance.dateTime);
 	}
 }

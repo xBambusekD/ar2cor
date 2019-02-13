@@ -86,7 +86,10 @@ namespace UnbiasedTimeManager
         private DataWriter writer;
         //private StreamWriter writer;
         //private StreamReader reader;
+        
+        [NonSerialized]
         public bool timeReceived = false;
+        [NonSerialized]
         public ulong milliseconds = 0;
         private bool dgramSocketConnected = false;
 #endif
@@ -95,7 +98,7 @@ namespace UnbiasedTimeManager
 #endregion
 
 #region Option Variables
-        public ulong refreshInterval = 64;
+        public ulong refreshInterval = 5;
         public int maxRetry = 3;
         int trycount = 0;
 #endregion
@@ -390,6 +393,14 @@ namespace UnbiasedTimeManager
 
             args.GetDataReader().ReadBytes(ntpData);
             receivedBytes = ntpData.Length;
+
+
+            Debug.Log("Message received!");
+            //Debug.Log(receivedBytes);
+            //Debug.Log(ntpData);
+            //Debug.Log(System.Text.Encoding.UTF8.GetString(ntpData));
+            //Debug.Log(ntpData[0]);
+
 
             if (receivedBytes == 48) {
                 ulong intPart = (ulong)ntpData[40] << 24 | (ulong)ntpData[41] << 16 | (ulong)ntpData[42] << 8 | (ulong)ntpData[43];
