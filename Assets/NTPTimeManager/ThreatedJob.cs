@@ -102,7 +102,12 @@ namespace UnbiasedTimeManager
 #endif
 #if !UNITY_EDITOR
             task = new Task(() => {
-                time = timeManager.TryToGetTime(out isSuccess);
+                timeManager.TryToGetTime();
+                while(!timeManager.timeReceived) {
+                    time = timeManager.milliseconds;
+                    isSuccess = timeManager.timeReceived;
+                }
+                timeManager.timeReceived = false;
             });
                 //Task.Run(() => time = timeManager.TryToGetTime(out isSuccess));
 #endif

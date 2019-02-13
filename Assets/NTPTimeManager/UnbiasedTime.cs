@@ -32,6 +32,8 @@ using System.Net.Sockets;
 #if !UNITY_EDITOR
 using Windows.Networking.Sockets;
 using Windows.Networking;
+using System.Text;
+using Windows.Storage.Streams;
 #endif
 
 namespace UnbiasedTimeManager
@@ -71,19 +73,25 @@ namespace UnbiasedTimeManager
 
         private static string ntpServer = "time.google.com";
 
-        #endregion
+#endregion
 
-        #region Network Variables
+#region Network Variables
+
 #if UNITY_EDITOR
         Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         IPEndPoint ipEndPoint;
 #endif
 #if !UNITY_EDITOR
-        StreamSocket socket;
-        private StreamWriter writer;
-        private StreamReader reader;
+        DatagramSocket socket;
+        private DataWriter writer;
+        //private StreamWriter writer;
+        //private StreamReader reader;
+        public bool timeReceived = false;
+        public ulong milliseconds = 0;
+        private bool dgramSocketConnected = false;
 #endif
         bool hasIp;
+
 #endregion
 
 #region Option Variables
@@ -126,7 +134,7 @@ namespace UnbiasedTimeManager
 
 #endregion
 
-        public static void Init(string ntp_server)
+        public static void Init(string ntp_server = "time.google.com")
         {
             ntpServer = ntp_server;
             GameObject newObject = new GameObject("UnbiasedTimeManager", typeof(UnbiasedTime));
@@ -209,14 +217,17 @@ namespace UnbiasedTimeManager
 
 #if !UNITY_EDITOR
         async void ConnectUWP() {
-            socket = new StreamSocket();
+            socket = new DatagramSocket();
             await socket.ConnectAsync(new HostName(ntpServer), "123");
 
-            Stream streamOut = socket.OutputStream.AsStreamForWrite();
-            writer = new StreamWriter(streamOut) { AutoFlush = true };
+            //writer = new StreamWriter(socket.OutputStream.AsStreamForWrite()) { AutoFlush = true };
+            IOutputStream outStream = await socket.GetOutputStreamAsync(new HostName(ntpServer), "123");
+            writer = new DataWriter(outStream);
 
-            Stream streamIn = socket.InputStream.AsStreamForRead();
-            reader = new StreamReader(streamIn);
+            //Stream streamIn = socket.InputStream.AsStreamForRead();
+            //reader = new StreamReader(streamIn);
+            socket.MessageReceived += OnReceivedMsg;
+            dgramSocketConnected = true;
         }
 #endif
 
@@ -264,24 +275,7 @@ namespace UnbiasedTimeManager
             }
 #endif
 #if !UNITY_EDITOR
-            //if (socket.) {
-            //    bool connectionStatus;
-            //    bool blockingState = socket.Blocking;
-            //    try {
-            //        var ntpData = new byte[1];
-            //        ntpData[0] = 0x00;
-            //        socket.Send(ntpData);
-            //        connectionStatus = true;
-            //    }
-            //    catch (SocketException) {
-            //        connectionStatus = false;
-            //    }
-            //    return connectionStatus;
-            //}
-            //else {
-            //    return false;
-            //}
-            return true;
+            return dgramSocketConnected;
 #endif
         }
 
@@ -310,6 +304,7 @@ namespace UnbiasedTimeManager
             }
         }
 
+#if UNITY_EDITOR
         public ulong TryToGetTime(out bool isSucces, float timeout = 3)
         {
             if (SatisfyConnection())
@@ -330,16 +325,27 @@ namespace UnbiasedTimeManager
                 return 0;
             }
         }
+#endif
+
+#if !UNITY_EDITOR
+        public void TryToGetTime(float timeout = 3)
+        {
+            if (SatisfyConnection())
+            {
+                GetNetworkTimeMillis(timeout);
+            }
+        }
+#endif
 
 
-
+#if UNITY_EDITOR
         public ulong GetNetworkTimeMillis(out bool success, float timeout = 6)
         {
             Debug.Log("Getting Time From Server: " + ntpServer);
             var ntpData = new byte[48];
             ntpData[0] = 0x1B;
             int recievedBytes;
-#if UNITY_EDITOR
+
             try
             {
                 socket.ReceiveTimeout = (int)(timeout * 1000);
@@ -352,22 +358,8 @@ namespace UnbiasedTimeManager
                 success = false;
                 return 0;
             }
-#endif
-#if !UNITY_EDITOR
-            //try {
-            //    socket.ReceiveTimeout = (int)(timeout * 1000);
-            //    socket.SendTimeout = (int)(timeout * 1000);
-            //    socket.Send(ntpData);
-            //    recievedBytes = socket.Receive(ntpData);
 
-            //}
-            //catch (SocketException) {
-            //    success = false;
-            //    return 0;
-            //}
-            recievedBytes = 50;
-#endif
-
+            
             if (recievedBytes == 48)
                 success = true;
             else
@@ -377,9 +369,43 @@ namespace UnbiasedTimeManager
             ulong fractPart = (ulong)ntpData[44] << 24 | (ulong)ntpData[45] << 16 | (ulong)ntpData[46] << 8 | (ulong)ntpData[47];
 
             ulong milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
+
             return milliseconds;
         }
+#endif
+#if !UNITY_EDITOR
+        public async void GetNetworkTimeMillis(float timeout = 6) {
+            Debug.Log("Getting Time From Server: " + ntpServer);
+            var ntpData = new byte[48];
+            ntpData[0] = 0x1B;
 
+            writer.WriteBytes(ntpData);
+            await writer.StoreAsync();
+        }
+
+        private void OnReceivedMsg(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args) {
+            var ntpData = new byte[48];
+            ntpData[0] = 0x1B;
+            int receivedBytes = 0;
+
+            args.GetDataReader().ReadBytes(ntpData);
+            receivedBytes = ntpData.Length;
+
+            if (receivedBytes == 48) {
+                ulong intPart = (ulong)ntpData[40] << 24 | (ulong)ntpData[41] << 16 | (ulong)ntpData[42] << 8 | (ulong)ntpData[43];
+                ulong fractPart = (ulong)ntpData[44] << 24 | (ulong)ntpData[45] << 16 | (ulong)ntpData[46] << 8 | (ulong)ntpData[47];
+
+                ulong _milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
+
+                timeReceived = true;
+                milliseconds = _milliseconds;
+            }
+            else {
+                timeReceived = false;
+                milliseconds = 0;
+            }
+        }
+#endif
         public static DateTime GetDateTime(ulong milliseconds)
         {
             return (new DateTime(1900, 1, 1)).AddMilliseconds((long)milliseconds);
