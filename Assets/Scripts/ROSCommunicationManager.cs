@@ -8,6 +8,7 @@ using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.tf2_msgs;
 using System;
 using HoloToolkit.Unity;
+using UnbiasedTimeManager;
 
 public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
@@ -47,6 +48,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ros.AddPublisher(typeof(InterfaceStatePublisher));
             ros.AddPublisher(typeof(CollisionEnvPublisher));
             ros.AddPublisher(typeof(TFPublisher));
+            ros.AddPublisher(typeof(LearningRequestActionGoalPublisher));
             ros.AddServiceResponse(typeof(ROSCommunicationManager));
             ros.Connect();
 
@@ -62,9 +64,17 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             //every 5 secs publish activity msg
             if (awake_counter <= 0f) {
                 ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true));
+
                 awake_counter = 5f;
             }
             awake_counter -= Time.deltaTime;
+
+            try {
+                Debug.Log(ROSTimeHelper.GetCurrentTime().ToYAMLString());
+            } catch(Exception e) {
+
+            }
+
         }
 
         if(!ros._connected) {
@@ -317,5 +327,23 @@ public class TFPublisher : ROSBridgePublisher {
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new TFMessageMsg(msg);
+    }
+}
+
+public class LearningRequestActionGoalPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/art/brain/learning_request/goal";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/LearningRequestActionGoal";
+    }
+
+    public static string ToYAMLString(LearningRequstActionGoalMsg msg) {
+        return msg.ToYAMLString();
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new LearningRequstActionGoalMsg(msg);
     }
 }

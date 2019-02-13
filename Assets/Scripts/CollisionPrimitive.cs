@@ -102,7 +102,11 @@ public class CollisionPrimitive : MonoBehaviour {
     }
 
     public void DestroyAppBar() {
-        appBarInstance.DestroyThis();
+        try {
+            appBarInstance.DestroyThis();
+        } catch(Exception e) {
+            Debug.Log(e);
+        }
     }
 
     public void DestroyThis() {

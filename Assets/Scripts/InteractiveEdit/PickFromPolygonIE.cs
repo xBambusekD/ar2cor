@@ -50,7 +50,7 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {
                 //pick from polygon editing
-                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PickFromPolygon" &&
+                if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING && programItemMsg.GetIType() == "PickFromPolygon" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
                     
                     //if no object is selected

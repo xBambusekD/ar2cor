@@ -30,8 +30,7 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
 
     //called whenever user clicks on the table in order to place virtual object
     private void PlaceObject() {
-        //TODO change to place_to_pose_learn
-        if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
+        if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.place_to_pose_learn) {
             if (object_attached) {
                 object_attached = false;
 
@@ -60,6 +59,7 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
         appBarInstance.OnDoneClicked -= ConfirmRotation;
 
         PlaceToPoseIP.Instance.SaveObjectPosition(transform.position, transform.rotation);
+        DestroyItself();
     }
 
     //called whenever user clicks on this object
@@ -75,6 +75,13 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
             transform.localPosition = snapLocalPosition;
         }
 
-        //PlaceToPoseIP.Instance.MarkClickedArea();
+    }
+
+    private void DestroyItself() {
+        gameObject.GetComponent<BoundingBoxRig>().Deactivate();
+        gameObject.GetComponent<BoundingBoxRig>().DestroyBoxInstance();
+        Destroy(gameObject.GetComponent<BoundingBoxRig>().appBarInstance.gameObject);
+        Destroy(gameObject.GetComponent<BoundingBoxRig>());
+        Destroy(gameObject);
     }
 }

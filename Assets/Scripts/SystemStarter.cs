@@ -5,6 +5,7 @@ using HoloToolkit.Unity;
 using SimpleJSON;
 using System.IO;
 using Vuforia;
+using UnbiasedTimeManager;
 
 public class SystemStarter : Singleton<SystemStarter> {
 
@@ -24,6 +25,8 @@ public class SystemStarter : Singleton<SystemStarter> {
     private bool calibration_launched;
     private List<GameObject> childrenToHide = new List<GameObject>();
 
+    private bool ntpTimeSet = false;
+
     // Use this for initialization
     void Start() {
         worldAnchorRecalibrationButton.gameObject.SetActive(true);
@@ -37,12 +40,16 @@ public class SystemStarter : Singleton<SystemStarter> {
             OnSystemStarted();
         }
 #endif
-
     }
     	
 	// Update is called once per frame
 	void Update() {
         if(ROSCommunicationManager.Instance.connectedToROS) {
+
+            if(!ntpTimeSet) {
+                ntpTimeSet = true;
+                UnbiasedTime.Init(MainMenuManager.Instance.currentSetup.GetIP());
+            }
 
             //Load known object types from database
             if (!ObjectsManager.Instance.objectReloadInitiated) {

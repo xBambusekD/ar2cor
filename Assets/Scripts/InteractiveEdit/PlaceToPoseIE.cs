@@ -46,7 +46,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {
                 //pick from polygon editing
-                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PlaceToPose" &&
+                if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING && programItemMsg.GetIType() == "PlaceToPose" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
 
                     //check that object type is set
@@ -153,7 +153,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
     public void SetProgramMsgFromROS(ProgramMsg msg) {
         //set only if system is really in edit mode of this particullar instruction
         if (interfaceStateMsg != null) {
-            if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PlaceToPose" &&
+            if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING && programItemMsg.GetIType() == "PlaceToPose" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
                 programMsg = msg;
             }

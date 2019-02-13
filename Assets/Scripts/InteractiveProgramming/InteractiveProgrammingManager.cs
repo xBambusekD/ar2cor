@@ -17,6 +17,8 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
     public ProgrammingManagerState CurrentState { get; private set; }
 
     private GameObject world_anchor;
+
+    //public bool PlaceToPoseLearningOverride = false;
     
 
     private void OnEnable() {
@@ -44,7 +46,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
             VisualizationClear();
         }
 
-        if(interfaceStateMsg.GetSystemState() == 2) {
+        if(interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
             switch(interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
                 case ProgramTypes.PICK_FROM_FEEDER:
                     PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
@@ -59,7 +61,8 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                     break;
                 case ProgramTypes.PLACE_TO_POSE:
                     PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
-                    if (interfaceStateMsg.GetEditEnabled()) {
+                    if (interfaceStateMsg.GetEditEnabled()) { // || PlaceToPoseLearningOverride
+                        //PlaceToPoseLearningOverride = false;
                         CurrentState = ProgrammingManagerState.place_to_pose_learn;
                         PlaceToPoseIP.Instance.StartLearning();
                     }

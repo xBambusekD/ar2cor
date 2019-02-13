@@ -633,5 +633,14 @@ namespace HoloToolkit.Unity.UX
 
             return BoundingBox.FlattenModeEnum.DoNotFlatten;
         }
+
+        public void DestroyBoxInstance() {
+            try {
+                Destroy(boxInstance.gameObject);
+            }
+            catch (Exception e) {
+                Debug.Log(e);
+            }
+        }
     }
 }

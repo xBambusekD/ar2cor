@@ -21,7 +21,7 @@ public class InteractiveEditManager : Singleton<InteractiveEditManager> {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {                 
                 //state learning
-                if (interfaceStateMsg.GetSystemState() == 2) {
+                if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
                     //TODO: kontrola jestli se interfaceState zmenil..
                     if (interfaceStateChanged) {
                         Debug.Log("InterfaceState changed!");
