@@ -61,6 +61,11 @@ public class SystemStarter : Singleton<SystemStarter> {
                 return;
             }
 
+            //wait until time synchronizes with ntp
+            if (!UnbiasedTime.Instance.TimeSynchronized) {
+                return;
+            }
+
             if (!anchorLoaded && !calibrated && !calibration_launched && (WorldAnchorManager.Instance.AnchorStore != null)) {
                 string[] ids = WorldAnchorManager.Instance.AnchorStore.GetAllIds();
                 //world anchor is present

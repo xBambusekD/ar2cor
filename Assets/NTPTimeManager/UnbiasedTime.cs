@@ -34,6 +34,7 @@ using Windows.Networking.Sockets;
 using Windows.Networking;
 using System.Text;
 using Windows.Storage.Streams;
+using System.Threading.Tasks;
 #endif
 
 namespace UnbiasedTimeManager
@@ -84,8 +85,6 @@ namespace UnbiasedTimeManager
 #if !UNITY_EDITOR
         DatagramSocket socket;
         private DataWriter writer;
-        //private StreamWriter writer;
-        //private StreamReader reader;
         
         [NonSerialized]
         public bool timeReceived = false;
@@ -98,7 +97,7 @@ namespace UnbiasedTimeManager
 #endregion
 
 #region Option Variables
-        public ulong refreshInterval = 5;
+        public ulong refreshInterval = 64;
         public int maxRetry = 3;
         int trycount = 0;
 #endregion
@@ -125,6 +124,7 @@ namespace UnbiasedTimeManager
 
         private bool isUpdating;
         public bool failed;
+        public bool TimeSynchronized = false;
 
         /// <summary>
         /// This event triggers when time received from server succesfully or failed during process.
@@ -206,20 +206,25 @@ namespace UnbiasedTimeManager
 #endif
         }
 
+#if UNITY_EDITOR
         void Connect()
         {
             Debug.Log("Connecting");
-#if UNITY_EDITOR
+
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             socket.Connect(ipEndPoint);
+        }
 #endif
 #if !UNITY_EDITOR
-            ConnectUWP();              
-#endif
+        async Task Connect() {
+            Debug.Log("Connecting");
+            await ConnectUWP();
         }
+#endif
+        
 
 #if !UNITY_EDITOR
-        async void ConnectUWP() {
+        async Task ConnectUWP() {
             socket = new DatagramSocket();
             await socket.ConnectAsync(new HostName(ntpServer), "123");
 
@@ -240,18 +245,29 @@ namespace UnbiasedTimeManager
             socket.Close();
 #endif
 #if !UNITY_EDITOR
+            writer.DetachStream();
+            writer.Dispose();
             socket.Dispose();
             socket = null;
+            dgramSocketConnected = false;
 #endif
         }
 
+#if UNITY_EDITOR
         void Reconnect()
         {
             Debug.Log("Reconnecting");
             Disconnect();
             Connect();
         }
-
+#endif
+#if !UNITY_EDITOR
+        async Task Reconnect() {
+            Debug.Log("Reconnecting");
+            Disconnect();
+            await Connect();
+        }
+#endif
         public bool IsConnected()
         {
 #if UNITY_EDITOR
@@ -282,6 +298,7 @@ namespace UnbiasedTimeManager
 #endif
         }
 
+#if UNITY_EDITOR
         bool SatisfyConnection()
         {
             if (IsConnected())
@@ -306,6 +323,28 @@ namespace UnbiasedTimeManager
                 }
             }
         }
+#endif
+
+#if !UNITY_EDITOR
+        async Task<bool> SatisfyConnection() {
+            if (IsConnected()) {
+                return true;
+            }
+            else if (hasIp) {
+                await Reconnect();
+                return IsConnected();
+            }
+            else {
+                if (RequestIPEndpoint()) {
+                    await Connect();
+                    return IsConnected();
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+#endif
 
 #if UNITY_EDITOR
         public ulong TryToGetTime(out bool isSucces, float timeout = 3)
@@ -331,9 +370,9 @@ namespace UnbiasedTimeManager
 #endif
 
 #if !UNITY_EDITOR
-        public void TryToGetTime(float timeout = 3)
-        {
-            if (SatisfyConnection())
+        public async void TryToGetTime(float timeout = 3) {     
+            bool connected = await SatisfyConnection();
+            if (connected)
             {
                 GetNetworkTimeMillis(timeout);
             }
@@ -396,11 +435,6 @@ namespace UnbiasedTimeManager
 
 
             Debug.Log("Message received!");
-            //Debug.Log(receivedBytes);
-            //Debug.Log(ntpData);
-            //Debug.Log(System.Text.Encoding.UTF8.GetString(ntpData));
-            //Debug.Log(ntpData[0]);
-
 
             if (receivedBytes == 48) {
                 ulong intPart = (ulong)ntpData[40] << 24 | (ulong)ntpData[41] << 16 | (ulong)ntpData[42] << 8 | (ulong)ntpData[43];
@@ -434,6 +468,8 @@ namespace UnbiasedTimeManager
                 if (onTimeReceive != null)
                     onTimeReceive(true, time);
                 isUpdating = false;
+                trycount = 0;
+                TimeSynchronized = true;
             }
             else
             {
