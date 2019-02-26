@@ -34,7 +34,7 @@ namespace ROSBridgeLib {
 								_data = System.Convert.FromBase64String(msg ["data"]); // Converts the JSONNode to a byte array
 
 								if (print) {
-										string time = FromUnixTime(_header.GetTimeMsg().GetSecs()).ToString("hh:mm:ss");
+										string time = FromUnixTime((long)_header.GetTimeMsg().GetSecs()).ToString("hh:mm:ss");
 
 										int middleIndex = (int)(_point_step * _width * (int)_height / 2 + (int)_width / 2 * _point_step);
 										float middleZ = System.BitConverter.ToSingle (_data,  middleIndex + 8);

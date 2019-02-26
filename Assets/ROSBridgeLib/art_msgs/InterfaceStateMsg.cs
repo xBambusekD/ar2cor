@@ -20,10 +20,11 @@ namespace ROSBridgeLib {
                 STATE_INITIALIZING = 0,
                 STATE_IDLE = 1,
                 STATE_LEARNING = 2,
-                STATE_PROGRAM_RUNNING = 3,
-                STATE_PROGRAM_STOPPED = 4,
-                STATE_PROGRAM_FINISHED = 5,
-                STATE_VISUALIZE = 6
+                STATE_LEARNING_RUNNING = 3,
+                STATE_PROGRAM_RUNNING = 4,
+                STATE_PROGRAM_STOPPED = 5,
+                STATE_PROGRAM_FINISHED = 6,
+                STATE_VISUALIZE = 7
             }
 
             public enum ErrorSeverity:Int32 {

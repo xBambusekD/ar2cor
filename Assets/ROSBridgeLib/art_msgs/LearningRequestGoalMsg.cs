@@ -20,14 +20,14 @@ namespace ROSBridgeLib {
             DONE = 3,
         }
 
-        public class LearningRequstGoalMsg : ROSBridgeMsg {
+        public class LearningRequestGoalMsg : ROSBridgeMsg {
             private learning_request_goal _request;
 
-			public LearningRequstGoalMsg(JSONNode msg) {
+			public LearningRequestGoalMsg(JSONNode msg) {
                 _request = (learning_request_goal) UInt16.Parse(msg["request"]);
             }
 			
-			public LearningRequstGoalMsg(learning_request_goal request) {
+			public LearningRequestGoalMsg(learning_request_goal request) {
                 _request = request;
 			}
 

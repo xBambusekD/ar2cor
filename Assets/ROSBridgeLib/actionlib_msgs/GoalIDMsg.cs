@@ -14,7 +14,7 @@ namespace ROSBridgeLib {
 	namespace actionlib_msgs {
 		public class GoalIDMsg : ROSBridgeMsg {
             private TimeMsg _stamp;
-            string _id;
+            private string _id;
 
 			public GoalIDMsg(JSONNode msg) {
                 _stamp = new TimeMsg(msg["stamp"]);
@@ -37,7 +37,7 @@ namespace ROSBridgeLib {
             public string GetID() {
                 return _id;
             }
-
+            
             public override string ToString() {
                 return "GoalID [stamp=" + _stamp.ToString() +
                     ", id=" + _id + "]";

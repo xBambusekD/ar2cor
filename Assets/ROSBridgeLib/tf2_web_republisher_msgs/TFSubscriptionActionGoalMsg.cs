@@ -12,26 +12,26 @@ using ROSBridgeLib.actionlib_msgs;
  */
 
 namespace ROSBridgeLib {
-	namespace art_msgs {
-		public class LearningRequestActionGoalMsg : ROSBridgeMsg {
+	namespace tf2_web_republisher_msgs {
+		public class TFSubscriptionActionGoalMsg : ROSBridgeMsg {
             private HeaderMsg _header;
             private GoalIDMsg _goal_id;
-            private LearningRequestGoalMsg _goal;
+            private TFSubscriptionGoalMsg _goal;
 
-			public LearningRequestActionGoalMsg(JSONNode msg) {
+			public TFSubscriptionActionGoalMsg(JSONNode msg) {
                 _header = new HeaderMsg(msg["header"]);
                 _goal_id = new GoalIDMsg(msg["goal_id"]);
-                _goal = new LearningRequestGoalMsg(msg["goal"]);
+                _goal = new TFSubscriptionGoalMsg(msg["goal"]);
             }
 			
-			public LearningRequestActionGoalMsg(HeaderMsg header, GoalIDMsg goal_id, LearningRequestGoalMsg goal) {
+			public TFSubscriptionActionGoalMsg(HeaderMsg header, GoalIDMsg goal_id, TFSubscriptionGoalMsg goal) {
                 _header = header;
                 _goal_id = goal_id;
                 _goal = goal;
 			}
 
             public static string GetMessageType() {
-				return "art_msgs/LearningRequestActionGoal";
+				return "tf2_web_republisher/TFSubscriptionActionGoal";
 			}
 		
             public HeaderMsg GetHeader() {
@@ -42,13 +42,13 @@ namespace ROSBridgeLib {
                 return _goal_id;
             }
 
-            public LearningRequestGoalMsg GetGoal() {
+            public TFSubscriptionGoalMsg GetGoal() {
                 return _goal;
             }
 
 
             public override string ToString() {
-                return "LearningRequestActionGoal [header=" + _header.ToString() +
+                return "TFSubscriptionActionGoal [header=" + _header.ToString() +
                     ", goal_id=" + _goal_id.ToString() +
                     ", goal=" + _goal.ToString() + "]";
 			}
