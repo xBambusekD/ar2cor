@@ -109,7 +109,7 @@ namespace UnbiasedTimeManager
 
         private ulong timeSinceLastUpdate
         {
-            get { return (ulong)(UnityEngine.Time.unscaledTime * 1000) - lastUpdatedGameTime; }
+            get { return (ulong)(UnityEngine.Time.realtimeSinceStartup * 1000) - lastUpdatedGameTime; }
         }
 
         public ulong time
@@ -121,6 +121,44 @@ namespace UnbiasedTimeManager
         {
             get { return GetDateTime(time); }
         }
+
+        //TRY OF MANIPULATING WITH NTP TIME VALUES DIRECTLY
+        //public ulong timeIntPart {
+        //    get {
+        //        ulong IntPart = intPart + timeSinceLastUpdate / 1000;
+        //        ulong FractPart = fractPart + timeSinceLastUpdate % 1000;
+        //        ulong FractSum = FractPart + (timeSinceLastUpdate % 1000) / 1000 * 0x100000000L;
+        //        IntPart += FractSum / 0x100000000L;
+        //        FractPart += FractSum % 0x100000000L;
+
+        //        return IntPart;
+        //    }
+        //}
+
+        //public ulong timeFractPart {
+        //    get {
+        //        ulong IntPart = intPart + timeSinceLastUpdate / 1000;
+        //        ulong last_update = timeSinceLastUpdate % 1000;
+        //        double digits_in_frac = Math.Floor(Math.Log10(fractPart) + 1);
+        //        double digits_in_last_update = Math.Floor(Math.Log10(last_update) + 1);
+
+        //        ulong FractPart = fractPart + last_update * (ulong)Math.Pow(10, digits_in_frac - digits_in_last_update);
+        //        //Debug.Log(fractPart);
+        //        //Debug.Log(timeSinceLastUpdate % 1000);
+        //        //Debug.Log((ulong)Math.Pow(10, digits_in_frac - digits_in_last_update));
+        //        //Debug.Log(FractPart);
+        //        ulong FractSum = FractPart + (timeSinceLastUpdate % 1000) / 1000 * 0x100000000L;
+        //        //Debug.Log(FractSum);
+        //        //Debug.Log(FractSum % 0x100000000L);
+        //        IntPart += FractSum / 0x100000000L;
+        //        FractPart = FractSum % 0x100000000L;
+
+        //        return FractPart;
+        //    }
+        //}
+
+        //private ulong intPart;
+        //private ulong fractPart;
 
         private bool isUpdating;
         public bool failed;
@@ -434,26 +472,26 @@ namespace UnbiasedTimeManager
             receivedBytes = ntpData.Length;
 
 
-            Debug.Log("Message received!");
-
             if (receivedBytes == 48) {
+                Debug.Log("Message received!");
+
                 ulong intPart = (ulong)ntpData[40] << 24 | (ulong)ntpData[41] << 16 | (ulong)ntpData[42] << 8 | (ulong)ntpData[43];
                 ulong fractPart = (ulong)ntpData[44] << 24 | (ulong)ntpData[45] << 16 | (ulong)ntpData[46] << 8 | (ulong)ntpData[47];
 
                 ulong _milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
-
-                timeReceived = true;
+                
                 milliseconds = _milliseconds;
+                timeReceived = true;
             }
             else {
-                timeReceived = false;
                 milliseconds = 0;
+                timeReceived = false;
             }
         }
 #endif
         public static DateTime GetDateTime(ulong milliseconds)
         {
-            return (new DateTime(1900, 1, 1)).AddMilliseconds((long)milliseconds);
+            return (new DateTime(1900, 1, 1)).AddMilliseconds(milliseconds);
         }
 
         IEnumerator RequestTime()
@@ -470,13 +508,14 @@ namespace UnbiasedTimeManager
                 isUpdating = false;
                 trycount = 0;
                 TimeSynchronized = true;
+                //Debug.Log(ROSTimeHelper.GetCurrentTime().ToYAMLString());
             }
             else
             {
                 if (trycount < maxRetry)
                 {
                     Debug.Log("Retrying to get server time");
-                    StartCoroutine(RequestTime());
+                    //StartCoroutine(RequestTime());
                 }
                 else
                 {

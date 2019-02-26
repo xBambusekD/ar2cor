@@ -103,9 +103,11 @@ namespace UnbiasedTimeManager
                 Debug.Log("TASK STARTED");
                 timeManager.TryToGetTime();
                 while(!timeManager.timeReceived) {
-                    time = timeManager.milliseconds;
-                    isSuccess = timeManager.timeReceived;
+                    Debug.Log("Waiting for time...." + isSuccess);
                 }
+                time = timeManager.milliseconds;
+                isSuccess = timeManager.timeReceived;
+
                 Debug.Log("TIME RECEIVED!");
                 timeManager.timeReceived = false;
             });
