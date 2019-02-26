@@ -6,6 +6,7 @@ using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.std_msgs;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 //using System.Threading;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
     public GameObject pointerToSpawn;
 
     public GameObject BasicObjectManipulatablePrefab;
-    public GameObject BasicObjectUnmanipulatablePrefab;
+    //public GameObject BasicObjectUnmanipulatablePrefab;
 
     private GameObject cursor;
     private Transform pointedArea;
@@ -29,7 +30,10 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
     public GameObject robotArm;
     private GameObject objectToPick;
-    private GameObject objectToPickUnmanipulatable;
+    //private GameObject objectToPickUnmanipulatable;
+
+    private bool waiting_for_action_response = false;
+    private string currentRequestID;
 
     // Use this for initialization
     void Start () {
@@ -44,36 +48,15 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
 
     public void StartLearning() {
-        //TODO READY request se posle z GUI artablu
-        //LearningRequstActionGoalMsg getReadyMsg = new LearningRequstActionGoalMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), ""), new GoalIDMsg(ROSTimeHelper.GetCurrentTime(), ""), 
-        //    new LearningRequstGoalMsg(learning_request_goal.GET_READY));
 
-        //change interface state to learning enabled
-        //InterfaceStateMsg msg = new InterfaceStateMsg(
-        //    "HOLOLENS", 
-        //    InterfaceStateMsg.SystemState.STATE_LEARNING, 
-        //    ROSTimeHelper.GetCurrentTime(), 
-        //    interfaceStateMsg.GetProgramID(), 
-        //    interfaceStateMsg.GetBlockID(), 
-        //    programItemMsg, 
-        //    interfaceStateMsg.GetFlags(), 
-        //    true, 
-        //    InterfaceStateMsg.ErrorSeverity.NONE, 
-        //    InterfaceStateMsg.ErrorCode.ERROR_UNKNOWN);
-        //ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), msg);
-
-
-        //TODO pri ukonceni learningu poslat request DONE
-        //LearningRequstActionGoalMsg doneMsg = new LearningRequstActionGoalMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), ""), new GoalIDMsg(ROSTimeHelper.GetCurrentTime(), ""),
-        //    new LearningRequstGoalMsg(learning_request_goal.DONE));
     }
 
     public void Visualize() {
         if(ProgramHelper.ItemLearned(programItemMsg)) {
             Debug.Log("Visualizing PICK_FROM_FEEDER");
 
-            if (objectToPickUnmanipulatable != null)
-                Destroy(objectToPickUnmanipulatable);
+            //if (objectToPickUnmanipulatable != null)
+            //    Destroy(objectToPickUnmanipulatable);
 
             //convert ros coordinate system to unity coordinate system
             Vector3 robotArmPosition = ROSUnityCoordSystemTransformer.ConvertVector(programItemMsg.GetPose()[0].GetPose().GetPosition().GetPoint());
@@ -90,10 +73,18 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
                 (robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2f ? FakeFeederObjectsPositions.FeederType.right_feeder : FakeFeederObjectsPositions.FeederType.left_feeder));
             Vector3 objectDims = ObjectsManager.Instance.GetObjectTypeDimensions(programItemMsg.GetObject()[0]);
 
-            objectToPickUnmanipulatable = Instantiate(BasicObjectUnmanipulatablePrefab, world_anchor.transform);
-            objectToPickUnmanipulatable.transform.localPosition = ROSUnityCoordSystemTransformer.ConvertVector(objectPosition);
-            objectToPickUnmanipulatable.transform.localRotation = ROSUnityCoordSystemTransformer.ConvertQuaternion(objectOrientation);
-            objectToPickUnmanipulatable.transform.GetChild(0).transform.localScale = objectDims;
+            //objectToPickUnmanipulatable = Instantiate(BasicObjectUnmanipulatablePrefab, world_anchor.transform);
+            //objectToPickUnmanipulatable.transform.localPosition = ROSUnityCoordSystemTransformer.ConvertVector(objectPosition);
+            //objectToPickUnmanipulatable.transform.localRotation = ROSUnityCoordSystemTransformer.ConvertQuaternion(objectOrientation);
+            //objectToPickUnmanipulatable.transform.GetChild(0).transform.localScale = objectDims;
+
+            if(objectToPick == null) {
+                objectToPick = Instantiate(BasicObjectManipulatablePrefab, world_anchor.transform);
+            }
+            objectToPick.GetComponent<ObjectManipulationEnabler>().DisableManipulation();
+            objectToPick.transform.localPosition = ROSUnityCoordSystemTransformer.ConvertVector(objectPosition);
+            objectToPick.transform.localRotation = ROSUnityCoordSystemTransformer.ConvertQuaternion(objectOrientation);
+            objectToPick.transform.GetChild(0).transform.localScale = objectDims;
         }
     }
 
@@ -102,8 +93,13 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             robotArm.GetComponent<PR2GripperController>().PlaceGripperToInit();
             robotArm.GetComponent<PR2GripperController>().SetArmActive(false);
 
-            if (objectToPickUnmanipulatable != null)
-                Destroy(objectToPickUnmanipulatable);
+            //if (objectToPickUnmanipulatable != null)
+            //    Destroy(objectToPickUnmanipulatable);
+            if (objectToPick != null) {
+                objectToPick.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
+                objectToPick.GetComponent<PlaceRotateConfirm>().DestroyItself();
+                objectToPick = null;
+            }
         }
     }
      
@@ -114,37 +110,55 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
 
     public void MarkClickedArea(DetectedObject detectedObject) {
-        if (objectToPick != null) {
-            Destroy(objectToPick);
-        }
+        //if (objectToPick != null) {
+        //    Destroy(objectToPick);
+        //}
 
         pointedArea = cursor.transform;
 
-        robotArmPosition = world_anchor.transform.InverseTransformPoint(pointedArea.position + pointedArea.forward * 0.3f);            
-        robotArmRotation = Quaternion.Inverse(world_anchor.transform.rotation) * pointedArea.rotation;
+        //TODO mozna zalezi na strane feederu s tim forward vektorem..
+        robotArmPosition = world_anchor.transform.InverseTransformPoint(pointedArea.localPosition + pointedArea.forward * 0.3f);
+        robotArmRotation = Quaternion.Inverse(world_anchor.transform.localRotation) * pointedArea.localRotation;
+
         //rotate gripper to face feeder
-        robotArmRotation.eulerAngles += new Vector3(90f, 90f, 0);
+        //picking from right feeder
+        if(robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth()/2) {
+            Debug.Log("PICKING FROM RIGHT FEEDER");
+            robotArmRotation.eulerAngles += new Vector3(90, 0, 0);
+        }
+        //picking from left feeder
+        else {
+            Debug.Log("PICKING FROM LEFT FEEDER");
+            robotArmRotation.eulerAngles += new Vector3(-90, 0, 0);
+        }
 
 
         objectToPick = Instantiate(BasicObjectManipulatablePrefab, detectedObject.position, detectedObject.rotation);
+        objectToPick.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
         objectToPick.transform.GetChild(0).transform.localScale = detectedObject.bbox;
         objectToPick.transform.GetChild(0).GetComponent<Collider>().enabled = false;
         objectToPick.transform.parent = cursor.transform;
         objectToPick.transform.localPosition = new Vector3(0, 0, detectedObject.bbox.x/2);
+        objectToPick.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
+        objectToPick.GetComponent<PlaceRotateConfirm>().Arm = 
+            (robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? RobotRadiusHelper.RobotArm.LEFT_ARM : RobotRadiusHelper.RobotArm.RIGHT_ARM;
         
         objectTypeToPick = detectedObject.type;
 
-        SaveToROS();        
+        StartCoroutine(SaveToROS());
     }
 
-    public void SaveToROS() {
+    private IEnumerator SaveToROS() {
+        ROSActionHelper.OnLearningActionResult += OnLearningActionResult;
+
         Debug.Log("PICK FROM FEEDER SAVED");
 
         //Save parameters for PICK_FROM_FEEDER
+        TimeMsg currentTime = ROSTimeHelper.GetCurrentTime();
         InterfaceStateMsg i_msg = new InterfaceStateMsg(
             "HOLOLENS", 
-            InterfaceStateMsg.SystemState.STATE_LEARNING, 
-            ROSTimeHelper.GetCurrentTime(), 
+            InterfaceStateMsg.SystemState.STATE_LEARNING,
+            currentTime, 
             interfaceStateMsg.GetProgramID(), 
             interfaceStateMsg.GetBlockID(), 
             new ProgramItemMsg(
@@ -155,7 +169,7 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
                 programItemMsg.GetName(), 
                 new List<string>() {objectTypeToPick}, 
                 new List<PoseStampedMsg>() {
-                    new PoseStampedMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), "marker"), 
+                    new PoseStampedMsg(new HeaderMsg(0, currentTime, "marker"), 
                     new PoseMsg(new PointMsg(ROSUnityCoordSystemTransformer.ConvertVector(robotArmPosition)), 
                                 new QuaternionMsg(ROSUnityCoordSystemTransformer.ConvertQuaternion(robotArmRotation)))) },
                 new List<PolygonStampedMsg>(),
@@ -169,35 +183,64 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             InterfaceStateMsg.ErrorCode.ERROR_UNKNOWN);
         ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), i_msg);
 
-        //Request brain for goal DONE
-        LearningRequstActionGoalMsg requestMsg = new LearningRequstActionGoalMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), ""), new GoalIDMsg(ROSTimeHelper.GetCurrentTime(), ""),
-            new LearningRequstGoalMsg(learning_request_goal.DONE));
-        ROSCommunicationManager.Instance.ros.Publish(LearningRequestActionGoalPublisher.GetMessageTopic(), requestMsg);
+        yield return new WaitForSecondsRealtime(0.1f);
 
-        //TODO POCKAT NA ODPOVED OD ACTION GOALU
-        //Thread.Sleep(100);
+        //Request brain for goal DONE
+        currentTime = ROSTimeHelper.GetCurrentTime();
+        currentRequestID = ROSActionHelper.GenerateUniqueGoalID((int)learning_request_goal.DONE, ROSTimeHelper.ToSec(currentTime));
+        LearningRequestActionGoalMsg requestMsg = new LearningRequestActionGoalMsg(new HeaderMsg(0, currentTime, ""), 
+            new GoalIDMsg(ROSTimeHelper.GetCurrentTime(), currentRequestID),
+            new LearningRequestGoalMsg(learning_request_goal.DONE));
+        ROSCommunicationManager.Instance.ros.Publish(LearningRequestActionGoalPublisher.GetMessageTopic(), requestMsg);
+        waiting_for_action_response = true;
+
+        //Wait for action server response
+        yield return new WaitWhile(() => waiting_for_action_response == true);
+        Debug.Log("SERVER RESPONDED!");
+        yield return new WaitForSecondsRealtime(0.1f);
 
         //Switch to next instruction (should be PLACE_TO_POSE)
         //InteractiveProgrammingManager.Instance.PlaceToPoseLearningOverride = true;
+        currentTime = ROSTimeHelper.GetCurrentTime();
         i_msg = new InterfaceStateMsg(
             "HOLOLENS",
             InterfaceStateMsg.SystemState.STATE_LEARNING,
-            ROSTimeHelper.GetCurrentTime(),
+            currentTime,
             interfaceStateMsg.GetProgramID(),
             interfaceStateMsg.GetBlockID(),
-            ProgramHelper.GetProgramItemById(programItemMsg.GetOnSuccess()),
+            ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetOnSuccess()),
             interfaceStateMsg.GetFlags(),
             false,
             InterfaceStateMsg.ErrorSeverity.NONE,
             InterfaceStateMsg.ErrorCode.ERROR_UNKNOWN);
         ROSCommunicationManager.Instance.ros.Publish(InterfaceStatePublisher.GetMessageTopic(), i_msg);
 
-        //Request brain for goal GET_READY for learning PLACE_TO_POSE
-        requestMsg = new LearningRequstActionGoalMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), ""), new GoalIDMsg(ROSTimeHelper.GetCurrentTime(), ""),
-            new LearningRequstGoalMsg(learning_request_goal.GET_READY_WITHOUT_ROBOT));
-        ROSCommunicationManager.Instance.ros.Publish(LearningRequestActionGoalPublisher.GetMessageTopic(), requestMsg);
+        yield return new WaitForSecondsRealtime(0.1f);
 
+        //Request brain for goal GET_READY for learning PLACE_TO_POSE
+        currentTime = ROSTimeHelper.GetCurrentTime();
+        currentRequestID = ROSActionHelper.GenerateUniqueGoalID((int)learning_request_goal.GET_READY_WITHOUT_ROBOT, ROSTimeHelper.ToSec(currentTime));
+        requestMsg = new LearningRequestActionGoalMsg(new HeaderMsg(0, currentTime, ""), 
+            new GoalIDMsg(currentTime, currentRequestID),
+            new LearningRequestGoalMsg(learning_request_goal.GET_READY_WITHOUT_ROBOT));
+        ROSCommunicationManager.Instance.ros.Publish(LearningRequestActionGoalPublisher.GetMessageTopic(), requestMsg);
+        waiting_for_action_response = true;
+
+        //Wait for action server response
+        yield return new WaitWhile(() => waiting_for_action_response == true);
+        Debug.Log("SERVER RESPONDED!");
+
+        yield return new WaitForSecondsRealtime(0.1f);
+
+        ROSActionHelper.OnLearningActionResult -= OnLearningActionResult;
+        yield return null;
     }
 
-
+    private void OnLearningActionResult(LearningRequestActionResultMsg msg) {
+        //if result ID is identical with request ID
+        if(msg.GetStatus().GetGoalID().GetID().Equals(currentRequestID) && msg.GetStatus().GetStatus() == GoalStatusMsg.Status.SUCCEEDED
+            && msg.GetResult().GetSuccess() == true) {
+            waiting_for_action_response = false;
+        }
+    }
 }

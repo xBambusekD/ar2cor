@@ -8,11 +8,13 @@ public class TableDeskInit : MonoBehaviour {
     //private GameObject world_anchor;
 
     private void OnEnable() {
-        SystemStarter.Instance.OnSystemStarted += InitTable;
+        if (SystemStarter.Instance != null)
+            SystemStarter.Instance.OnSystemStarted += InitTable;
     }
 
     private void OnDisable() {
-        SystemStarter.Instance.OnSystemStarted -= InitTable;
+        if (SystemStarter.Instance != null)
+            SystemStarter.Instance.OnSystemStarted -= InitTable;
     }
 
     //private void Start() {

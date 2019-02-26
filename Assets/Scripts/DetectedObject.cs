@@ -36,9 +36,7 @@ public class DetectedObject : MonoBehaviour, IFocusable {
     }
 
     public void OnFocusExit() {
-        if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
-            wireframeMat.SetColor("_WireColor", green);
-        }
+        wireframeMat.SetColor("_WireColor", green);
     }
 
 }

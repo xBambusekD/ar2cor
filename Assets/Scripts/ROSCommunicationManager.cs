@@ -9,6 +9,8 @@ using ROSBridgeLib.tf2_msgs;
 using System;
 using HoloToolkit.Unity;
 using UnbiasedTimeManager;
+using ROSBridgeLib.tf2_web_republisher_msgs;
+using ROSBridgeLib.actionlib_msgs;
 
 public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
@@ -30,6 +32,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
     public static string reloadAllCollisionPrimitiveService = "/art/collision_env/artificial/reload";
     public static string robotLookAtLeftFeederService = "/art/robot/look_at/left_feeder";
     public static string robotLookAtRightFeederService = "/art/robot/look_at/right_feeder";
+    public static string rosparamGetService = "/rosparam_get";
 
     private float awake_counter = 0f;
 
@@ -44,11 +47,18 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ros.AddSubscriber(typeof(InterfaceStateSubscriber));
             ros.AddSubscriber(typeof(HololensStateSubscriber));
             ros.AddSubscriber(typeof(CollisionEnvSubscriber));
+            ros.AddSubscriber(typeof(LearningRequestActionResultSubscriber));
             ros.AddPublisher(typeof(HoloLensActivityPublisher));
+            ros.AddPublisher(typeof(HoloLensLearningPublisher));
             ros.AddPublisher(typeof(InterfaceStatePublisher));
             ros.AddPublisher(typeof(CollisionEnvPublisher));
             ros.AddPublisher(typeof(TFPublisher));
             ros.AddPublisher(typeof(LearningRequestActionGoalPublisher));
+
+            ros.AddPublisher(typeof(TF2WebRepublisherGoalPublisher));
+            ros.AddPublisher(typeof(TF2WebRepublisherCancelPublisher));
+            ros.AddSubscriber(typeof(TF2WebRepublisherFeedbackSubscriber));
+
             ros.AddServiceResponse(typeof(ROSCommunicationManager));
             ros.Connect();
 
@@ -63,17 +73,21 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
             //every 5 secs publish activity msg
             if (awake_counter <= 0f) {
-                ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true));
+                ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true), debug_log:false);
+                ros.Publish(HoloLensLearningPublisher.GetMessageTopic(), new BoolMsg(InteractiveProgrammingManager.Instance.holoLearningEnabled), debug_log:false);
 
                 awake_counter = 5f;
             }
             awake_counter -= Time.deltaTime;
 
-            try {
-                Debug.Log(ROSTimeHelper.GetCurrentTime().ToYAMLString());
-            } catch(Exception e) {
+            //if(UnbiasedTime.Instance.TimeSynchronized) {
+            //    try {
+            //        Debug.Log(ROSTimeHelper.GetCurrentTime().ToYAMLString());
+            //    }
+            //    catch (Exception e) {
 
-            }
+            //    }
+            //}
 
         }
 
@@ -103,26 +117,38 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             JSONNode node = JSONNode.Parse(yaml);
             ObjectsManager.Instance.SetObjectTypesFromROS(node);
         }
-        if (service.Equals(addCollisionPrimitiveService)) {
+        if (service.Equals(rosparamGetService)) {
             JSONNode node = JSONNode.Parse(yaml);
-            //Debug.Log(node);
+            try {
+                JSONNode parsed = JSONNode.Parse(node["message"]);
+                if (parsed["arms"] != null) {
+                    RobotRadiusHelper.SetRobotRadiusParam(parsed["arms"]);
+                }
+            }
+            catch(NullReferenceException e) {
+                Debug.Log(e);
+            }
         }
-        if(service.Equals(deleteCollisionPrimitiveService)) {
-            JSONNode node = JSONNode.Parse(yaml);
-            //Debug.Log(node);
-        }
-        if (service.Equals(saveAllCollisionPrimitiveService)) {
-            JSONNode node = JSONNode.Parse(yaml);
-            //Debug.Log(node);
-        }
-        if (service.Equals(clearAllCollisionPrimitiveService)) {
-            JSONNode node = JSONNode.Parse(yaml);
-            //Debug.Log(node);
-        }
-        if (service.Equals(reloadAllCollisionPrimitiveService)) {
-            JSONNode node = JSONNode.Parse(yaml);
-            //Debug.Log(node);
-        }
+        //if (service.Equals(addCollisionPrimitiveService)) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
+        //if(service.Equals(deleteCollisionPrimitiveService)) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
+        //if (service.Equals(saveAllCollisionPrimitiveService)) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
+        //if (service.Equals(clearAllCollisionPrimitiveService)) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
+        //if (service.Equals(reloadAllCollisionPrimitiveService)) {
+        //    JSONNode node = JSONNode.Parse(yaml);
+        //    //Debug.Log(node);
+        //}
         //if (service.Equals(robotLookAtLeftFeederService)) {
         //    JSONNode node = JSONNode.Parse(yaml);
         //    //Debug.Log(node);
@@ -188,31 +214,40 @@ public class DetectedObjectsSubscriber : ROSBridgeSubscriber {
     }
 }
 
-
-public class InterfaceStateSubscriber : ROSBridgeSubscriber {
+#region hololens
+public class HoloLensActivityPublisher : ROSBridgePublisher {
     public new static string GetMessageTopic() {
-        return "/art/interface/state";
+        return "/art/interface/hololens/active";
     }
 
     public new static string GetMessageType() {
-        return "art_msgs/InterfaceState";
+        return "std_msgs/Bool";
+    }
+
+    public static string ToYAMLString(BoolMsg msg) {
+        return msg.ToYAMLString();
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        return new InterfaceStateMsg(msg);
+        return new BoolMsg(msg);
+    }
+}
+
+public class HoloLensLearningPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/art/interface/hololens/learning";
     }
 
-    public new static void CallBack(ROSBridgeMsg msg) {
+    public new static string GetMessageType() {
+        return "std_msgs/Bool";
+    }
 
-        InterfaceStateMsg Imsg = (InterfaceStateMsg) msg;
+    public static string ToYAMLString(BoolMsg msg) {
+        return msg.ToYAMLString();
+    }
 
-        VisualizationManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        //InteractiveEditManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        //PickFromPolygonIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        //PlaceToPoseIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
-
-        //InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
-        ProgramHelper.SetInterfaceStateMsgFromROS(Imsg);
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new BoolMsg(msg);
     }
 }
 
@@ -233,7 +268,73 @@ public class HololensStateSubscriber : ROSBridgeSubscriber {
         HololensStateMsg Hmsg = (HololensStateMsg)msg;
 
         VisualizationManager.Instance.SetHololensStateMsgFromROS(Hmsg);
+    }
+}
+#endregion
 
+#region interface_state
+public class InterfaceStatePublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/art/interface/state_evt";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/InterfaceState";
+    }
+
+    public static string ToYAMLString(InterfaceStateMsg msg) {
+        return msg.ToYAMLString();
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new InterfaceStateMsg(msg);
+    }
+}
+
+public class InterfaceStateSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/art/interface/state";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/InterfaceState";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new InterfaceStateMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+
+        InterfaceStateMsg Imsg = (InterfaceStateMsg)msg;
+
+        VisualizationManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        //InteractiveEditManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        //PickFromPolygonIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        //PlaceToPoseIE.Instance.SetInterfaceStateMsgFromROS(Imsg);
+
+        //InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
+        ProgramHelper.SetInterfaceStateMsgFromROS(Imsg);
+    }
+}
+#endregion
+
+#region collision_environment
+public class CollisionEnvPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/art/collision_env/artificial";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/CollisionObjects";
+    }
+
+    public static string ToYAMLString(CollisionObjectsMsg msg) {
+        return msg.ToYAMLString();
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new CollisionObjectsMsg(msg);
     }
 }
 
@@ -256,65 +357,110 @@ public class CollisionEnvSubscriber : ROSBridgeSubscriber {
         CollisionEnvironmentManager.Instance.SetCollisionObjectsMsgFromROS(Cmsg);
     }
 }
+#endregion
 
-public class HoloLensActivityPublisher : ROSBridgePublisher {
+#region learning_request action
+public class LearningRequestActionGoalPublisher : ROSBridgePublisher {
     public new static string GetMessageTopic() {
-        return "/art/interface/hololens/active";
+        return "/art/brain/learning_request/goal";
     }
 
     public new static string GetMessageType() {
-        return "std_msgs/Bool";
+        return "art_msgs/LearningRequestActionGoal";
     }
 
-    public static string ToYAMLString(BoolMsg msg) {
+    public static string ToYAMLString(LearningRequestActionGoalMsg msg) {
         return msg.ToYAMLString();
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        return new BoolMsg(msg);
-    }
+        return new LearningRequestActionGoalMsg(msg);
+    }       
 }
 
-public class InterfaceStatePublisher : ROSBridgePublisher {
+public class LearningRequestActionResultSubscriber : ROSBridgeSubscriber {
     public new static string GetMessageTopic() {
-        return "/art/interface/state_evt";
+        return "/art/brain/learning_request/result";
     }
 
     public new static string GetMessageType() {
-        return "art_msgs/InterfaceState";
+        return "art_msgs/LearningRequestActionResult";
     }
 
-    public static string ToYAMLString(InterfaceStateMsg msg) {
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new LearningRequestActionResultMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        LearningRequestActionResultMsg Lmsg = (LearningRequestActionResultMsg)msg;
+
+        ROSActionHelper.SetLearningRequestActionResult(Lmsg);
+    }
+}
+#endregion
+
+#region tf2_web_republisher action
+public class TF2WebRepublisherGoalPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/tf2_web_republisher/goal";
+    }
+
+    public new static string GetMessageType() {
+        return "tf2_web_republisher/TFSubscriptionActionGoal";
+    }
+
+    public static string ToYAMLString(TFSubscriptionActionGoalMsg msg) {
         return msg.ToYAMLString();
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        return new InterfaceStateMsg(msg);
+        return new TFSubscriptionActionGoalMsg(msg);
     }
 }
 
-public class CollisionEnvPublisher : ROSBridgePublisher {
+public class TF2WebRepublisherCancelPublisher : ROSBridgePublisher {
     public new static string GetMessageTopic() {
-        return "/art/collision_env/artificial";
+        return "/tf2_web_republisher/cancel";
     }
 
     public new static string GetMessageType() {
-        return "art_msgs/CollisionObjects";
+        return "actionlib_msgs/GoalID";
     }
 
-    public static string ToYAMLString(CollisionObjectsMsg msg) {
+    public static string ToYAMLString(GoalIDMsg msg) {
         return msg.ToYAMLString();
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        return new CollisionObjectsMsg(msg);
+        return new GoalIDMsg(msg);
     }
 }
 
+public class TF2WebRepublisherFeedbackSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/tf2_web_republisher/feedback";
+    }
+
+    public new static string GetMessageType() {
+        return "tf2_web_republisher/TFSubscriptionActionFeedback";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new TFSubscriptionActionFeedbackMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        TFSubscriptionActionFeedbackMsg TFmsg = (TFSubscriptionActionFeedbackMsg)msg;
+        RobotRadiusHelper.SetTF2Feedback(TFmsg);
+    }
+}
+#endregion
+
+#region tf
 public class TFPublisher : ROSBridgePublisher {
     public new static string GetMessageTopic() {
-        return "/remote_device_tf";
-        //return "/tf";
+        //return "/remote_device_tf";
+        return "/tf";
     }
 
     public new static string GetMessageType() {
@@ -329,21 +475,4 @@ public class TFPublisher : ROSBridgePublisher {
         return new TFMessageMsg(msg);
     }
 }
-
-public class LearningRequestActionGoalPublisher : ROSBridgePublisher {
-    public new static string GetMessageTopic() {
-        return "/art/brain/learning_request/goal";
-    }
-
-    public new static string GetMessageType() {
-        return "art_msgs/LearningRequestActionGoal";
-    }
-
-    public static string ToYAMLString(LearningRequstActionGoalMsg msg) {
-        return msg.ToYAMLString();
-    }
-
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
-        return new LearningRequstActionGoalMsg(msg);
-    }
-}
+#endregion

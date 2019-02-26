@@ -26,6 +26,7 @@ public class SystemStarter : Singleton<SystemStarter> {
     private List<GameObject> childrenToHide = new List<GameObject>();
 
     private bool ntpTimeSet = false;
+    private bool robotRadiusCalled = false;
 
     // Use this for initialization
     void Start() {
@@ -33,13 +34,6 @@ public class SystemStarter : Singleton<SystemStarter> {
         anchorLoaded = false;
         calibrated = false;
         calibration_launched = false;
-
-#if UNITY_EDITOR
-        calibrated = true;
-        if (OnSystemStarted != null) {
-            OnSystemStarted();
-        }
-#endif
     }
     	
 	// Update is called once per frame
@@ -63,9 +57,33 @@ public class SystemStarter : Singleton<SystemStarter> {
 
             //wait until time synchronizes with ntp
             if (!UnbiasedTime.Instance.TimeSynchronized) {
+                //Debug.Log("TIME STILL NOT SYNCHRONIZED");
                 return;
             }
 
+            //Load robot reach radius
+            if (!robotRadiusCalled) {
+                robotRadiusCalled = true;
+                RobotRadiusHelper.LoadRobotRadius();
+                RobotRadiusHelper.LoadTableSize();
+            }
+
+#if UNITY_EDITOR
+            if (!calibrated) {
+                calibrated = true;
+                //GameObject super_root = new GameObject("super_root");
+                //super_root.transform.position = Vector3.zero;
+                //worldAnchor.transform.parent = super_root.transform;
+                //super_root.transform.eulerAngles = new Vector3(-90f, 0f, 0f);
+                worldAnchor.transform.eulerAngles = new Vector3(-90f, 0f, 0f);
+                //worldAnchor.transform.Rotate(180f, 0f, 0f, Space.Self);
+
+                if (OnSystemStarted != null) {
+                    OnSystemStarted();
+                }
+            }
+#endif
+#if !UNITY_EDITOR
             if (!anchorLoaded && !calibrated && !calibration_launched && (WorldAnchorManager.Instance.AnchorStore != null)) {
                 string[] ids = WorldAnchorManager.Instance.AnchorStore.GetAllIds();
                 //world anchor is present
@@ -88,6 +106,7 @@ public class SystemStarter : Singleton<SystemStarter> {
                     calibration_launched = true;
                 }
             }
+#endif
         }
     }
 
@@ -160,13 +179,13 @@ public class SystemStarter : Singleton<SystemStarter> {
         calibrated = true;
         calibration_launched = false;
 
-        if (OnSystemStarted != null) {
-            OnSystemStarted();
-        }
-
         HideActiveChildrenObjects(false, worldAnchor);
 
         speechManager.WaitAndSay("Calibration completed.");
+
+        if (OnSystemStarted != null) {
+            OnSystemStarted();
+        }
 
         SetVuforiaActive(false);
     }

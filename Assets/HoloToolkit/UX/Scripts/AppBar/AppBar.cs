@@ -227,8 +227,9 @@ namespace HoloToolkit.Unity.UX
                     boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
                     Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
                     Destroy(boundingBox.Target);
+                    Destroy(boundingBox.gameObject);
                     //destroy also parent of target gameobject
-                    if(boundingBox.Target.transform.parent != null) {
+                    if (boundingBox.Target.transform.parent != null) {
                         boundingBox.Target.GetComponentInParent<CollisionPrimitive>().DestroyThis();
                         //Destroy(boundingBox.Target.transform.parent.gameObject);
                     }
@@ -271,8 +272,10 @@ namespace HoloToolkit.Unity.UX
         public void DestroyThis() {
             // Destroy the target object, Bounding Box, Bounding Box Rig and App Bar
             boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+            boundingBox.Target.GetComponent<BoundingBoxRig>().DestroyBoxInstance();
             Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
             Destroy(boundingBox.Target);
+            Destroy(boundingBox.gameObject);
             Destroy(gameObject);
         }
 

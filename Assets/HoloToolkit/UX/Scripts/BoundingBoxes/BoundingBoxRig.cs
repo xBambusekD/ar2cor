@@ -637,6 +637,7 @@ namespace HoloToolkit.Unity.UX
         public void DestroyBoxInstance() {
             try {
                 Destroy(boxInstance.gameObject);
+                Destroy(transformRig);
             }
             catch (Exception e) {
                 Debug.Log(e);

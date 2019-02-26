@@ -13,27 +13,47 @@ public static class ROSTimeHelper {
 
     // Update is called once per frame
     public static TimeMsg GetCurrentTime() {
-        //double seconds = (DateTime.UtcNow - epochStart).TotalSeconds;
         double seconds = (UnbiasedTime.Instance.dateTime - epochStart).TotalSeconds;
-        var values = seconds.ToString().Split('.');
-        int secs = int.Parse(values[0]);
-        int nsecs = int.Parse(values[1]);
-
-        //Debug.Log("secs: " + secs + " .. nsecs: " + nsecs);
-
-        return new TimeMsg(secs, nsecs);
+        return FromSec(seconds);
     }
 
     public static TimeMsg GetUnsyncCurrentTime() {
         double seconds = (DateTime.UtcNow - epochStart).TotalSeconds;
-        //double seconds = (UnbiasedTime.Instance.dateTime - epochStart).TotalSeconds;
-        var values = seconds.ToString().Split('.');
-        int secs = int.Parse(values[0]);
-        int nsecs = int.Parse(values[1]);
+        return FromSec(seconds);
+    }
 
-        //Debug.Log("secs: " + secs + " .. nsecs: " + nsecs);
+    public static TimeMsg FromSec(double seconds) {
+        int secs = 0;
+        try {
+            secs = (int)seconds;
+        }
+        catch (IndexOutOfRangeException e) {
+            Debug.Log(e);
+        }
+        int nsecs = 0;
+        try {
+            nsecs = (int)((seconds - secs) * 1000000000);
+        }
+        catch (IndexOutOfRangeException e) {
+            Debug.Log(e);
+        }
 
         return new TimeMsg(secs, nsecs);
     }
 
+    public static double ToSec(int secs, int nsecs) {
+        return (double)secs + (double)nsecs / 1e9;
+    }
+
+    public static double ToSec(TimeMsg time) {
+        return (double)time.GetSecs() + (double)time.GetNsecs() / 1e9;
+    }
+
+    public static double ToNsec(int secs, int nsecs) {
+        return secs * (double)1e9 + nsecs;
+    }
+
+    public static double ToNsec(TimeMsg time) {
+        return time.GetSecs() * (double)1e9 + time.GetNsecs();
+    }
 }

@@ -77,8 +77,10 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
         }
         //if primitive wasn't updated, meaning it doesn't exists.. so create new one
         if(!updated) {
-            GameObject new_primitive = Instantiate(new GameObject(), worldAnchor.transform);
-            new_primitive.name = "CollisionObj-" + primitiveMsg.GetName();
+            GameObject new_primitive = new GameObject("CollisionObj-" + primitiveMsg.GetName());
+            new_primitive.transform.parent = worldAnchor.transform;
+            new_primitive.transform.localPosition = Vector3.zero;
+            new_primitive.transform.localEulerAngles = Vector3.zero;
             CollisionPrimitive collisionPrimitive = new_primitive.AddComponent<CollisionPrimitive>();
             // TODO pick correct prefab due to collision primitive (cube, sphere..)
             collisionPrimitive.InitNewPrimitive(primitiveMsg, collisionPrefabs[0]);

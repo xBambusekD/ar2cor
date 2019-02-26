@@ -1,5 +1,6 @@
 ﻿using HoloToolkit.Unity;
 using ROSBridgeLib.art_msgs;
+using ROSBridgeLib.std_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
 
     public enum ProgrammingManagerState {
         pick_from_feeder_learn,
+        place_to_pose_learn_followed,
         place_to_pose_learn,
         pick_from_feeder_vis,
         place_to_pose_vis,
@@ -18,8 +20,8 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
 
     private GameObject world_anchor;
 
-    //public bool PlaceToPoseLearningOverride = false;
-    
+    public bool followedLearningPlacePoseOverride = false;
+    public bool holoLearningEnabled = true;
 
     private void OnEnable() {
         ProgramHelper.OnInterfaceStateChanged += InterfaceStateChanged;
@@ -50,23 +52,30 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
             switch(interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
                 case ProgramTypes.PICK_FROM_FEEDER:
                     PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
-                    if (interfaceStateMsg.GetEditEnabled()) {
+                    if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled) {
                         CurrentState = ProgrammingManagerState.pick_from_feeder_learn;
                         PickFromFeederIP.Instance.StartLearning();
+                        followedLearningPlacePoseOverride = true;
                     }
-                    else {
+                    else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
                         CurrentState = ProgrammingManagerState.pick_from_feeder_vis;
                         PickFromFeederIP.Instance.Visualize();
                     }
                     break;
                 case ProgramTypes.PLACE_TO_POSE:
                     PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
-                    if (interfaceStateMsg.GetEditEnabled()) { // || PlaceToPoseLearningOverride
-                        //PlaceToPoseLearningOverride = false;
+                    if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && followedLearningPlacePoseOverride && 
+                        CurrentState != ProgrammingManagerState.place_to_pose_learn_followed) {
+                        CurrentState = ProgrammingManagerState.place_to_pose_learn_followed;
+                        PlaceToPoseIP.Instance.StartLearningContinuous();
+                        //followedLearningPlacePoseOverride = false;
+                    }
+                    else if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && !followedLearningPlacePoseOverride &&
+                        CurrentState != ProgrammingManagerState.place_to_pose_learn) {
                         CurrentState = ProgrammingManagerState.place_to_pose_learn;
                         PlaceToPoseIP.Instance.StartLearning();
                     }
-                    else {
+                    else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
                         CurrentState = ProgrammingManagerState.place_to_pose_vis;
                         PlaceToPoseIP.Instance.Visualize();
                     }
@@ -78,7 +87,9 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
         }
         else {
             CurrentState = ProgrammingManagerState.def;
+            followedLearningPlacePoseOverride = false;
         }
+        Debug.Log(CurrentState);
     }
 
     private void VisualizationClear() {
@@ -90,8 +101,15 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                 PlaceToPoseIP.Instance.VisualizeClear();
                 break;
             default:
+                //PickFromFeederIP.Instance.VisualizeClear();
+                //PlaceToPoseIP.Instance.VisualizeClear();
                 break;
         }
+    }
+
+    public void EnableHoloLearning(bool holoEnabled) {
+        holoLearningEnabled = holoEnabled;
+        ROSCommunicationManager.Instance.ros.Publish(HoloLensLearningPublisher.GetMessageTopic(), new BoolMsg(holoLearningEnabled), debug_log: false);
     }
 
 }

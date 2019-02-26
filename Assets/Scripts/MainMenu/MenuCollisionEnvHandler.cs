@@ -1,4 +1,5 @@
 ﻿using HoloToolkit.Unity.InputModule;
+using ROSBridgeLib.std_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,10 +10,12 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
     public Text InfoMessage;
     public Text ShowHideButtonText;
     public Text VoiceCommandsButtonText;
+    public Text LearningButtonText;
 
     private float timer;
     private bool env_hidden;
     private bool commands_disabled;
+    private bool learning_disabled;
     public SpeechInputSource speechInputSource;
 
     // Use this for initialization
@@ -20,6 +23,7 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
         timer = 5f;
         env_hidden = false;
         commands_disabled = true;
+        learning_disabled = false;
     }
 	
 	// Update is called once per frame
@@ -77,6 +81,20 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
             speechInputSource.enabled = false;
             commands_disabled = true;
         }
+    }
+
+    public void DisableHoloLearning() {
+        //enable voice commands and change text to future disable option
+        if (learning_disabled) {
+            LearningButtonText.text = "DISABLE LEARNING";
+            learning_disabled = false;
+        }
+        //disable voice commands and change text to future enable option
+        else {
+            LearningButtonText.text = "ENABLE LEARNING";
+            learning_disabled = true;
+        }
+        InteractiveProgrammingManager.Instance.EnableHoloLearning(!learning_disabled);
     }
 
 }

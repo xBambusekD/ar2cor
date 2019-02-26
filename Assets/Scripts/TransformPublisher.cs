@@ -26,7 +26,7 @@ public class TransformPublisher : MonoBehaviour {
 
             
 
-            tfMsg = new TFMessageMsg(new List<TransformStampedMsg>() {new TransformStampedMsg(new HeaderMsg(0, new TimeMsg(0, 0), frame_id), child_frame_id,
+            tfMsg = new TFMessageMsg(new List<TransformStampedMsg>() {new TransformStampedMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), frame_id), child_frame_id,
                 new TransformMsg(new Vector3Msg(relativePositionToParent.x, -relativePositionToParent.y, relativePositionToParent.z), 
                     new QuaternionMsg(-relativeRotationToParent.x, relativeRotationToParent.y, -relativeRotationToParent.z, relativeRotationToParent.w)))});
 

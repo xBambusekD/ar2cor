@@ -14,6 +14,7 @@ public static class ProgramHelper {
     public static event InterfaceStateChangedAction OnInterfaceStateChanged;
 
     private static bool LoadingProgram = false;
+    public static bool LoadProgram = true;
     
     private static ProgramMsg currentProgram;
     private static InterfaceStateMsg interfaceStateMsg = new InterfaceStateMsg("", InterfaceStateMsg.SystemState.STATE_UNKNOWN, new TimeMsg(0, 0), 0, 0,
@@ -21,12 +22,12 @@ public static class ProgramHelper {
                                     new List<PolygonStampedMsg>(), new List<ushort>(), new List<KeyValueMsg>(), new List<string>(), new List<SceneLabelMsg>()),
                                 new List<KeyValueMsg>(), false, InterfaceStateMsg.ErrorSeverity.NONE, InterfaceStateMsg.ErrorCode.ERROR_UNKNOWN);
 
-    public static ProgramItemMsg GetProgramItemById(ushort ref_id) {
+    public static ProgramItemMsg GetProgramItemById(ushort block_id, ushort ref_id) {
         ProgramItemMsg item = null;
-        foreach(ProgramBlockMsg block in currentProgram.GetBlocks()) {
-            item = block.GetProgramItemByID(ref_id);
-            if (item != null)
-                break;
+        try {
+            item = currentProgram.GetBlockByID(block_id).GetProgramItemByID(ref_id);
+        } catch(NullReferenceException e) {
+            Debug.Log(e);
         }
         return item;
     }
@@ -42,9 +43,9 @@ public static class ProgramHelper {
     }
 
     public static bool CheckIfInterfaceStateChanged(InterfaceStateMsg currentState, InterfaceStateMsg newState) {
-        Debug.Log("CHECKING INTERFACE STATE CHANGE");
-        Debug.Log("old_state: " + currentState.ToYAMLString());
-        Debug.Log("new_state: " + newState.ToYAMLString());
+        //Debug.Log("CHECKING INTERFACE STATE CHANGE");
+        //Debug.Log("old_state: " + currentState.ToYAMLString());
+        //Debug.Log("new_state: " + newState.ToYAMLString());
         return !(currentState.GetSystemState() == newState.GetSystemState() &&
             currentState.GetProgramID() == newState.GetProgramID() &&
             currentState.GetBlockID() == newState.GetBlockID() &&
@@ -59,10 +60,10 @@ public static class ProgramHelper {
             //Debug.Log(interfaceStateMsg.GetProgramID());
             //Debug.Log(msg.GetProgramID());
             //load new program if current has changed
-            //if (interfaceStateMsg.GetProgramID() != msg.GetProgramID()) {
+            if (LoadProgram) {
                 LoadingProgram = true;
                 ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.programGetService, "{\"id\": " + msg.GetProgramID() + "}");
-            //}
+            }
             interfaceStateMsg = msg;
 
             //if currently loading program.. call the action after program was successfully loaded (e.g. in SetProgramMsgFromROS())

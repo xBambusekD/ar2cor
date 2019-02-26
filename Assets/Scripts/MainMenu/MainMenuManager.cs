@@ -46,7 +46,7 @@ public class MainMenuManager : Singleton<MainMenuManager> {
     void Update() {
         if(SystemStarter.Instance.calibrated && !positionSet) {
             gameObject.transform.parent = worldAnchor.transform;
-            gameObject.transform.localPosition = new Vector3(1.4f, -1f, 0.7f);
+            gameObject.transform.localPosition = new Vector3(1.4f, -1f, 1.0f);
             gameObject.transform.localRotation = Quaternion.Euler(124f, -90f, -90f);
             positionSet = true;
         }
