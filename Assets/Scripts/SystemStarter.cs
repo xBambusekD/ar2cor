@@ -28,6 +28,8 @@ public class SystemStarter : Singleton<SystemStarter> {
     private bool ntpTimeSet = false;
     private bool robotRadiusCalled = false;
 
+    public SpeechManager SpeechManagerAzure;
+
     // Use this for initialization
     void Start() {
         worldAnchorRecalibrationButton.gameObject.SetActive(true);
@@ -81,6 +83,8 @@ public class SystemStarter : Singleton<SystemStarter> {
                 if (OnSystemStarted != null) {
                     OnSystemStarted();
                 }
+                SpeechManagerAzure.Speak("Ahoj, já jsem Váš průvodce tímto programem. Musíte kliknout na objekt a poté na stůl. To je vše. A nečum.");
+                //SpeechManagerAzure.Speak("Ahoj, ja som Váš sprievodca týmto programom. Musíte kliknúť na objekt a potom na stôl. To je všetko. A nečum.");
             }
 #endif
 #if !UNITY_EDITOR
@@ -119,9 +123,12 @@ public class SystemStarter : Singleton<SystemStarter> {
         //if it's recalibration.. remove current world anchor
         WorldAnchorManager.Instance.RemoveAnchor(worldAnchor.gameObject);
 
-        speechManager.WaitAndSay("System is going to calibrate. Please put the markers to the corners of the table.");
-        yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-        speechManager.WaitAndSay("Marker detection started. Please look directly at each one of the markers and click on the cubes to confirm calibration.");
+        //speechManager.WaitAndSay("System is going to calibrate. Please put the markers to the corners of the table.");
+        SpeechManagerAzure.Speak("Systém je potřeba zkalibrovat. Prosím položte markery do rohů stolu.");
+        //yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
+        yield return new WaitWhile(() => SpeechManagerAzure.isSpeaking);
+        //speechManager.WaitAndSay("Marker detection started. Please look directly at each one of the markers and click on the cubes to confirm calibration.");
+        SpeechManagerAzure.Speak("Detekce markerů začala. Prosím, dívejte se přímo na každý z nich a klikněte na virtuální kostky pro potvrzení kalibrace.");
 
         yield return new WaitWhile(() => CalibManager.Instance.allMarkersDetected == false);
 
@@ -181,7 +188,8 @@ public class SystemStarter : Singleton<SystemStarter> {
 
         HideActiveChildrenObjects(false, worldAnchor);
 
-        speechManager.WaitAndSay("Calibration completed.");
+        //speechManager.WaitAndSay("Calibration completed.");
+        SpeechManagerAzure.Speak("Kalibrace je hotova.");
 
         if (OnSystemStarted != null) {
             OnSystemStarted();

@@ -59,6 +59,8 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ros.AddPublisher(typeof(TF2WebRepublisherCancelPublisher));
             ros.AddSubscriber(typeof(TF2WebRepublisherFeedbackSubscriber));
 
+            ros.AddSubscriber(typeof(GuiNotificationsSubscriber));
+
             ros.AddServiceResponse(typeof(ROSCommunicationManager));
             ros.Connect();
 
@@ -214,6 +216,7 @@ public class DetectedObjectsSubscriber : ROSBridgeSubscriber {
     }
 }
 
+
 #region hololens
 public class HoloLensActivityPublisher : ROSBridgePublisher {
     public new static string GetMessageTopic() {
@@ -315,6 +318,27 @@ public class InterfaceStateSubscriber : ROSBridgeSubscriber {
 
         //InteractiveProgrammingManager.Instance.SetInterfaceStateMsgFromROS(Imsg);
         ProgramHelper.SetInterfaceStateMsgFromROS(Imsg);
+    }
+}
+#endregion
+
+#region gui notifications
+public class GuiNotificationsSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/art/interface/projected_gui/notifications";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/GuiNotification";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new GuiNotificationMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        GuiNotificationMsg GNmsg = (GuiNotificationMsg)msg;
+        ROSTextToSpeech.Instance.SetGuiNotificationMsg(GNmsg);
     }
 }
 #endregion
