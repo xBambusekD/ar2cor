@@ -7,8 +7,6 @@ public abstract class ProgramInstruction : MonoBehaviour {
     public bool run;
 
     public float runTime;
-    public GameObject speechManagerObj;
-    public TextToSpeechManager speechManager;
     public GameObject pr2_arm;
     public Animator pr2_animator;
 
@@ -17,8 +15,6 @@ public abstract class ProgramInstruction : MonoBehaviour {
 
     //has to be called from child .. base.Awake()
     public virtual void Awake() {
-        speechManagerObj = GameObject.FindGameObjectWithTag("speech_manager");
-        speechManager = speechManagerObj.GetComponent<TextToSpeechManager>();
         run = false;
         next = false;
         previous = false;

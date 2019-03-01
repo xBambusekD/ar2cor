@@ -54,7 +54,7 @@ public class PlaceToPose : ProgramInstruction {
             }
             //normal run
             else {
-                if (!placedToPose || speechManager.IsSpeakingOrInQueue()) {
+                if (!placedToPose) {
                     runTime += Time.deltaTime;
 
                     if (objectToPlace != null) {
@@ -139,7 +139,6 @@ public class PlaceToPose : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         objectToPlace.transform.localPosition = placePosition;
         objectToPlace.transform.localRotation = placeQuaternion;
         if (pr2_arm.transform.parent != world_anchor.transform) {
@@ -150,7 +149,6 @@ public class PlaceToPose : ProgramInstruction {
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnEnable() {
@@ -174,6 +172,6 @@ public class PlaceToPose : ProgramInstruction {
 
         base.Run();
         //speechManager.Say("Running place to pose instruction.");
-        speechManager.Say("The robot is placing the object to preset place pose.");
+        //speechManager.Say("The robot is placing the object to preset place pose.");
     }
 }

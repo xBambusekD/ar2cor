@@ -11,11 +11,13 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
     public Text ShowHideButtonText;
     public Text VoiceCommandsButtonText;
     public Text LearningButtonText;
+    public Text TextToSpeechButtonText;
 
     private float timer;
     private bool env_hidden;
     private bool commands_disabled;
     private bool learning_disabled;
+    private bool texttospeech_disabled;
     public SpeechInputSource speechInputSource;
 
     // Use this for initialization
@@ -24,6 +26,7 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
         env_hidden = false;
         commands_disabled = true;
         learning_disabled = false;
+        texttospeech_disabled = false;
     }
 	
 	// Update is called once per frame
@@ -96,5 +99,18 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
         }
         InteractiveProgrammingManager.Instance.EnableHoloLearning(!learning_disabled);
     }
-
+    
+    public void DisableTextToSpeech() {
+        //enable text to speech and change text to future disable option
+        if (texttospeech_disabled) {
+            TextToSpeechButtonText.text = "DISABLE TEXT TO SPEECH";
+            texttospeech_disabled = false;
+        }
+        //disable text to speech and change text to future enable option
+        else {
+            TextToSpeechButtonText.text = "ENABLE TEXT TO SPEECH";
+            texttospeech_disabled = true;
+        }
+        TextToSpeechManager.Instance.EnableTextToSpeech(!texttospeech_disabled);
+    }
 }

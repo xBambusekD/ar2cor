@@ -46,7 +46,7 @@ public class PickFromPolygon : ProgramInstruction {
             }
             //normal run
             else {
-                if (!arm_attached || speechManager.IsSpeakingOrInQueue()) {
+                if (!arm_attached) {
                     runTime += Time.deltaTime;
                     
                     //move arm to starting position .. in case that it somewhere already exists
@@ -188,7 +188,6 @@ public class PickFromPolygon : ProgramInstruction {
 
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         //stop slightly before gripper reaches the object
         pr2_arm.transform.localPosition = objectToPick.transform.localPosition + new Vector3(0f, 0f, 0.001f);
         pr2_arm.transform.localRotation = Quaternion.LookRotation(objectToPick.transform.localPosition - pr2_arm.transform.localPosition) * arm_rotation;
@@ -198,7 +197,6 @@ public class PickFromPolygon : ProgramInstruction {
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
 
@@ -264,6 +262,6 @@ public class PickFromPolygon : ProgramInstruction {
 
         base.Run();
         //speechManager.Say("Running pick from polygon instruction.");
-        speechManager.Say("The robot is grabbing the object from preset polygon.");
+        //speechManager.Say("The robot is grabbing the object from preset polygon.");
     }
 }

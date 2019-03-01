@@ -87,17 +87,19 @@ public static class RobotRadiusHelper {
 
     private static bool IsObjectWithinArmRadius(RobotArmRadius arm, Vector2 object_position) {
         float distance = Vector2.Distance(arm.GetBaseLinkPosition2d(), object_position);
+        //Debug.Log("DISTANCE FROM ARM: " + distance);
         if (distance >= arm.MinRange && distance <= arm.MaxRange) {
             return true;
         }
         return false;
     }
 
-    public static bool IsObjectOnTable(Vector2 object_position) {
-        Debug.Log(object_position);
-        Debug.Log(tableSize);
+    public static bool IsObjectOnTable(Vector3 object_position) {
+        //Debug.Log(object_position);
+        //Debug.Log(tableSize);
         return (object_position.x >= 0 && object_position.x <= tableSize.x &&
-            -object_position.y >= 0 && -object_position.y <= tableSize.y);
+            -object_position.y >= 0 && -object_position.y <= tableSize.y &&
+            object_position.z >= 0 && object_position.z <= 0.05f);
     }
 
 }

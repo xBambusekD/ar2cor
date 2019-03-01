@@ -54,7 +54,7 @@ public class VisualInspection : ProgramInstruction {
             }
             //normal run
             else {
-                if (!movedToPose || speechManager.IsSpeakingOrInQueue()) {
+                if (!movedToPose) {
                     runTime += Time.deltaTime;
 
                     if (objectToMove != null) {
@@ -111,13 +111,11 @@ public class VisualInspection : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         objectToMove.transform.localPosition = placePosition;
         objectToMove.transform.localRotation = placeQuaternion;
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnEnable() {
@@ -141,6 +139,6 @@ public class VisualInspection : ProgramInstruction {
 
         base.Run();
 
-        speechManager.Say("Sensor checks the quality of the object and classifies it as good or bad.");
+        //speechManager.Say("Sensor checks the quality of the object and classifies it as good or bad.");
     }
 }

@@ -47,6 +47,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
         if(CurrentState != ProgrammingManagerState.def) {
             VisualizationClear();
         }
+        Debug.Log("NEW INTERFACE STATE! " + interfaceStateMsg.ToYAMLString());
 
         if(interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
             switch(interfaceStateMsg.GetProgramCurrentItem().GetIType()) {

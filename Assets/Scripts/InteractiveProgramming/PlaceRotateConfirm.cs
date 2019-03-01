@@ -102,6 +102,8 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     //called whenever user clicks on this object
     public void OnInputClicked(InputClickedEventData eventData) {        
         if (!object_attached) {
+            appBarInstance.OnDoneClicked -= ConfirmRotation;
+
             appBarInstance.State = AppBar.AppBarStateEnum.Hidden;
             GetComponent<BoundingBoxRig>().Deactivate();
 

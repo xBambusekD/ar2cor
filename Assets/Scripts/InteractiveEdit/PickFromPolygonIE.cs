@@ -15,8 +15,6 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
     private ProgramItemMsg programItemMsg;
 
     private GameObject worldAnchor;
-    private GameObject speechManagerObj;
-    private TextToSpeechManager speechManager;
 
     private bool sayReward;
     private bool sayPlaceObject;
@@ -34,8 +32,6 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
     // Use this for initialization
     void Start () {
         worldAnchor = GameObject.FindGameObjectWithTag("world_anchor");
-        speechManagerObj = GameObject.FindGameObjectWithTag("speech_manager");
-        speechManager = speechManagerObj.GetComponent<TextToSpeechManager>();
         sayReward = false;
         sayPlaceObject = false;
         saySelectObject = false;
@@ -59,8 +55,7 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
                         //if no objects are placed on the table
                         //TODO: pokud je objekt detekovan v podavaci.. pocita se.. nemel by.. zkusit kontrolovat aj z souradnici
                         if(!ObjectsManager.Instance.AnyObjectIsOnTable() && !sayPlaceObject) {
-                            speechManager.Say("I don't see any objects placed on the table. You have to place the object on the table that you want the robot to lift.");
-                            Debug.Log("I don't see any objects placed on the table. You have to place the object on the table that you want the robot to lift.");
+                            //TextToSpeechManager.Instance.Speak(Texts.PickFromPolygonIE_NoObjectsOnTable);
                             sayPlaceObject = true;
                             //in case that user removes, places and removes objects from the table
                             saySelectObject = false;
@@ -68,8 +63,7 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
                         //some object is placed on the table
                         if (ObjectsManager.Instance.AnyObjectIsOnTable()) {
                             if (!saySelectObject) {
-                                speechManager.Say("Select object type to be picked up by tapping on its outline.");
-                                Debug.Log("Select object type to be picked up by tapping on its outline.");
+                                //TextToSpeechManager.Instance.Speak(Texts.PickFromPolygonIE_SelectObjectType);
                                 saySelectObject = true;
                                 //in case that user removes objects from the table
                                 sayPlaceObject = false;
@@ -88,14 +82,12 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
                         StopAndDestroyPointingHands();
                         
                         if(sayReward) {
-                            speechManager.Say("Perfect!");
-                            Debug.Log("Perfect!");
+                            //TextToSpeechManager.Instance.Speak(Texts.Perfect);
                             sayReward = false;
                         }
 
                         if (!sayAdjustArea) {
-                            speechManager.WaitAndSay("Adjust pick area as you want - or you can select another object type. When you are finished, click on done.");
-                            Debug.Log("Adjust pick area as you want - or you can select another object type. When you are finished, click on done.");
+                            //TextToSpeechManager.Instance.Speak(Texts.PickFromPolygonIE_AdjustPickArea);
                             sayAdjustArea = true;
                         }
 
@@ -148,8 +140,7 @@ public class PickFromPolygonIE : Singleton<PickFromPolygonIE> {
                 //reset all variables
                 else {
                     if (instructionProgrammed) {
-                        speechManager.Say("Good job! You have successfully programmed pick from polygon instruction.");
-                        Debug.Log("Good job! You have successfully programmed pick from polygon instruction.");
+                        //TextToSpeechManager.Instance.Speak(Texts.PickFromPolygonIE_GoodJob);
                         instructionProgrammed = false;
                         pointingHand.GetComponent<PointingHandMover>().Stop();
                     }

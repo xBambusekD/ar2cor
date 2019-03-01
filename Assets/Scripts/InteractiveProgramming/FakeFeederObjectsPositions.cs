@@ -114,4 +114,13 @@ public static class FakeFeederObjectsPositions {
 
         return orientation;
     }
+
+    //checks if given position is approximately in one of the individual feeds of feeder
+    public static bool CheckIfObjectIsInFeeder(string object_type, Vector3 position) {
+        if (Vector3.Distance(position, GetObjectPositionInFeeder(object_type, FeederType.left_feeder)) < 0.1f ||
+            Vector3.Distance(position, GetObjectPositionInFeeder(object_type, FeederType.right_feeder)) < 0.1f)
+            return true;
+
+        return false;
+    }
 }

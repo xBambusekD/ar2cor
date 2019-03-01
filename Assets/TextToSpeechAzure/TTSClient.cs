@@ -399,7 +399,7 @@ namespace CognitiveServicesTTS
             };
 
             var httpMsg = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
-            Debug.Log($"Response status code: [{httpMsg.StatusCode}]");
+            //Debug.Log($"Response status code: [{httpMsg.StatusCode}]");
 
             Stream httpStream = await httpMsg.Content.ReadAsStreamAsync();
 

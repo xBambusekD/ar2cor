@@ -14,15 +14,19 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         
     private GameObject world_anchor;
 
-    private Vector3 PlacePosition;
-    private Quaternion PlaceOrientation;
+    private Vector3 PlacePosition = Vector3.zero;
+    private Quaternion PlaceOrientation = new Quaternion(0,0,0,0);
+    private Vector3 currentPlacePosition = Vector3.zero;
+    private Quaternion currentPlaceOrientation = new Quaternion(0,0,0,0);
 
     public GameObject BasicObjectManipulatablePrefab;
     //public GameObject BasicObjectUnmanipulatablePrefab;
 
     //private GameObject objectToPlaceUnmanipulatable;
     private GameObject objectToPlace;
-
+    private bool waiting_for_action_response = false;
+    private string currentRequestID;
+    
     public bool learning = false;
 
     private GameObject cursor;
@@ -35,6 +39,14 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
 	
 	// Update is called once per frame
 	public void UpdatePlacePose (Vector3 placePosition, Quaternion placeOrientation) {
+        if(currentPlacePosition == placePosition && PlaceOrientation == placeOrientation) {
+            return;
+        }
+
+        currentPlacePosition = placePosition;
+        currentPlaceOrientation = placeOrientation;
+
+
         if(learning) {
             TimeMsg currentTime = ROSTimeHelper.GetCurrentTime();
 
@@ -53,8 +65,8 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
                     new List<string>(),
                     new List<PoseStampedMsg>() {
                             new PoseStampedMsg(new HeaderMsg(0, currentTime, "marker"),
-                            new PoseMsg(new PointMsg(ROSUnityCoordSystemTransformer.ConvertVector(placePosition)),
-                            new QuaternionMsg(ROSUnityCoordSystemTransformer.ConvertQuaternion(placeOrientation)))) },
+                            new PoseMsg(new PointMsg(ROSUnityCoordSystemTransformer.ConvertVector(currentPlacePosition)),
+                            new QuaternionMsg(ROSUnityCoordSystemTransformer.ConvertQuaternion(currentPlaceOrientation)))) },
                     new List<PolygonStampedMsg>(),
                     programItemMsg.GetRefID(),
                     programItemMsg.GetFlags(),
@@ -153,6 +165,8 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
     }
 
     public IEnumerator SaveToROS() {
+        ROSActionHelper.OnLearningActionResult += OnLearningActionResult;
+
         //save instruction to ROS
         Debug.Log("PLACE TO POSE SAVED");
 
@@ -189,14 +203,32 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         yield return new WaitForSecondsRealtime(0.1f);
 
         currentTime = ROSTimeHelper.GetCurrentTime();
-        string currentRequestID = ROSActionHelper.GenerateUniqueGoalID((int)learning_request_goal.DONE, ROSTimeHelper.ToSec(currentTime));
+        currentRequestID = ROSActionHelper.GenerateUniqueGoalID((int)learning_request_goal.DONE, ROSTimeHelper.ToSec(currentTime));
         LearningRequestActionGoalMsg requestMsg = new LearningRequestActionGoalMsg(new HeaderMsg(0, currentTime, ""), 
             new GoalIDMsg(currentTime, currentRequestID),
             new LearningRequestGoalMsg(learning_request_goal.DONE));
         ROSCommunicationManager.Instance.ros.Publish(LearningRequestActionGoalPublisher.GetMessageTopic(), requestMsg);
+        waiting_for_action_response = true;
+
+        //Wait for action server response
+        yield return new WaitWhile(() => waiting_for_action_response == true);
+        Debug.Log("SERVER RESPONDED!");
+        yield return new WaitForSecondsRealtime(0.1f);
+
+        ROSActionHelper.OnLearningActionResult -= OnLearningActionResult;
 
         //Destroy(objectToPlaceUnmanipulatable);
         InteractiveProgrammingManager.Instance.followedLearningPlacePoseOverride = false;
+
         yield return null;
+    }
+
+
+    private void OnLearningActionResult(LearningRequestActionResultMsg msg) {
+        //if result ID is identical with request ID
+        if (msg.GetStatus().GetGoalID().GetID().Equals(currentRequestID) && msg.GetStatus().GetStatus() == GoalStatusMsg.Status.SUCCEEDED
+            && msg.GetResult().GetSuccess() == true) {
+            waiting_for_action_response = false;
+        }
     }
 }

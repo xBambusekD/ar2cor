@@ -30,7 +30,8 @@ public class DetectedObject : MonoBehaviour, IFocusable {
 	}
 
     public void OnFocusEnter() {
-        if(InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
+        if(InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn && 
+            FakeFeederObjectsPositions.CheckIfObjectIsInFeeder(type, ROSUnityCoordSystemTransformer.ConvertVector(position))) {
             wireframeMat.SetColor("_WireColor", blue);
         }
     }

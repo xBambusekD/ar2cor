@@ -31,10 +31,7 @@ public class ProgramManager : Singleton<ProgramManager> {
 
     private Coroutine buildProgramCoroutine;
     private Coroutine runProgramCoroutine;
-
-    private GameObject speechManagerObj;
-    private TextToSpeechManager speechManager;
-       
+           
     //indicators when user says "Next" or "Previous"
     private bool next;
     private bool previous;
@@ -49,9 +46,6 @@ public class ProgramManager : Singleton<ProgramManager> {
         visualize_block = false;
         next = false;
         previous = false;
-
-        speechManagerObj = GameObject.FindGameObjectWithTag("speech_manager");
-        speechManager = speechManagerObj.GetComponent<TextToSpeechManager>();
     }
 	
 	// Update is called once per frame
@@ -495,7 +489,7 @@ public class ProgramManager : Singleton<ProgramManager> {
             }
         }
         
-        speechManager.Say("Visualization of block " + interfaceStateMsg.GetBlockID().ToString() + " in program " + interfaceStateMsg.GetProgramID().ToString() + " ended.");
+        //speechManager.Say("Visualization of block " + interfaceStateMsg.GetBlockID().ToString() + " in program " + interfaceStateMsg.GetProgramID().ToString() + " ended.");
         visualization_running = false;
         start_visualization = false;
         replay_visualization = false;
@@ -629,10 +623,10 @@ public class ProgramManager : Singleton<ProgramManager> {
                 interfaceStateMsg.GetEditEnabled(), interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode()));
         }
         else if (visualizationState == visualization_state.VISUALIZATION_STOP) {
-            speechManager.Say("Visualization is already stopped!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_VisualizationAlreadyStopped);
         }
         else {
-            speechManager.Say("There is nothing to stop!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_ThereIsNothingToStop);
         }
     }
 
@@ -646,10 +640,10 @@ public class ProgramManager : Singleton<ProgramManager> {
         }
         else if(visualizationState == visualization_state.VISUALIZATION_RUN || visualizationState == visualization_state.VISUALIZATION_RESUME ||
             visualizationState == visualization_state.VISUALIZATION_REPLAY || visualizationState == visualization_state.VISUALIZATION_PAUSE) {
-            speechManager.Say("You have to stop the visualization first!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_YouHaveToStopVis);
         }
         else {
-            speechManager.Say("There is nothing to replay!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_NothingToReplay);
         }
     }
 
@@ -662,13 +656,13 @@ public class ProgramManager : Singleton<ProgramManager> {
                 interfaceStateMsg.GetEditEnabled(), interfaceStateMsg.GetErrorSeverity(), interfaceStateMsg.GetErrorCode()));
         }
         else if (visualizationState == visualization_state.VISUALIZATION_PAUSE) {
-            speechManager.Say("Visualization is already paused!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_AlreadyPaused);
         }
         else if (visualizationState == visualization_state.VISUALIZATION_STOP) {
-            speechManager.Say("Visualization is not even running!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_NotEvenRunning);
         }
         else {
-            speechManager.Say("There is nothing to pause!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_NothingToPause);
         }
     }
 
@@ -682,13 +676,13 @@ public class ProgramManager : Singleton<ProgramManager> {
         }
         else if (visualizationState == visualization_state.VISUALIZATION_RUN || visualizationState == visualization_state.VISUALIZATION_RESUME ||
             visualizationState == visualization_state.VISUALIZATION_REPLAY) {
-            speechManager.Say("You have to pause the visualization first!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_YouHaveToPauseFirst);
         }
         else if (visualizationState == visualization_state.VISUALIZATION_STOP) {
-            speechManager.Say("Visualization is not even running!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_NotEvenRunning);
         }
         else {
-            speechManager.Say("There is nothing to resume!");
+            TextToSpeechManager.Instance.Speak(Texts.Vis_NothingToResume);
         }
     }
 }

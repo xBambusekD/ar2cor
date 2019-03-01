@@ -36,7 +36,7 @@ public class GetReady : ProgramInstruction {
             }
             //normal run
             else {
-                if (!robot_ready || speechManager.IsSpeakingOrInQueue()) {
+                if (!robot_ready) {
 
                     //release arm from attached state and set it to be the parent of world anchor
                     if (pr2_arm.transform.parent != world_anchor.transform) {
@@ -64,14 +64,12 @@ public class GetReady : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         pr2_animator.SetTrigger("close_instantly");
         pr2_arm.transform.localPosition = initPosition;
         pr2_arm.transform.parent = world_anchor.transform;
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnDisable() {
@@ -83,6 +81,6 @@ public class GetReady : ProgramInstruction {
 
         base.Run();
         //speechManager.Say("Running get ready instruction.");
-        speechManager.Say("The robot is getting back to it's default pose.");
+        //speechManager.Say("The robot is getting back to it's default pose.");
     }
 }

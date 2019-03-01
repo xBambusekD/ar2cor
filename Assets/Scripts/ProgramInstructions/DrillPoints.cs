@@ -69,7 +69,7 @@ public class DrillPoints : ProgramInstruction {
             }
             //normal run
             else {
-                if (!drilled || speechManager.IsSpeakingOrInQueue()) {
+                if (!drilled) {
                     runTime += Time.deltaTime;
                                         
                     //move arm to starting position .. in case that it somewhere already exists
@@ -384,7 +384,6 @@ public class DrillPoints : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         if (pr2_arm.transform.parent != world_anchor.transform) {
             pr2_arm.transform.parent = world_anchor.transform;
         }
@@ -396,7 +395,6 @@ public class DrillPoints : ProgramInstruction {
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
         pr2_arm_child.transform.localPosition = poseUp;
     }
 
@@ -466,6 +464,6 @@ public class DrillPoints : ProgramInstruction {
 
         base.Run();
         //speechManager.Say("Running drill points instruction.");
-        speechManager.Say("The robot is applying glue into the holes of the object.");
+        //speechManager.Say("The robot is applying glue into the holes of the object.");
     }
 }

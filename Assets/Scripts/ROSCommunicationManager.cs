@@ -126,6 +126,9 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
                 if (parsed["arms"] != null) {
                     RobotRadiusHelper.SetRobotRadiusParam(parsed["arms"]);
                 }
+                if (parsed["locale"] != null) {
+                    TextToSpeechManager.Instance.SetLanguage(parsed["locale"]);
+                }
             }
             catch(NullReferenceException e) {
                 Debug.Log(e);
@@ -338,7 +341,7 @@ public class GuiNotificationsSubscriber : ROSBridgeSubscriber {
 
     public new static void CallBack(ROSBridgeMsg msg) {
         GuiNotificationMsg GNmsg = (GuiNotificationMsg)msg;
-        ROSTextToSpeech.Instance.SetGuiNotificationMsg(GNmsg);
+        TextToSpeechManager.Instance.SetGuiNotificationMsg(GNmsg);
     }
 }
 #endregion

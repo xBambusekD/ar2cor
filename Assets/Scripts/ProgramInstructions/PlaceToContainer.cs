@@ -60,7 +60,7 @@ public class PlaceToContainer : ProgramInstruction {
             }
             //normal run
             else {
-                if (!placedToPose || speechManager.IsSpeakingOrInQueue()) {
+                if (!placedToPose) {
                     runTime += Time.deltaTime;
 
                     if (objectToPlace != null) {
@@ -183,7 +183,6 @@ public class PlaceToContainer : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         objectToPlace.transform.localPosition = placePosition;
         objectToPlace.transform.localRotation = placeQuaternion;
         if (pr2_arm.transform.parent != world_anchor.transform) {
@@ -214,7 +213,6 @@ public class PlaceToContainer : ProgramInstruction {
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnEnable() {
@@ -237,6 +235,6 @@ public class PlaceToContainer : ProgramInstruction {
 
         base.Run();
 
-        speechManager.Say("After classification, the robot places the object to the container.");
+        //speechManager.Say("After classification, the robot places the object to the container.");
     }
 }

@@ -55,7 +55,7 @@ public static class ProgramHelper {
 
     public static void SetInterfaceStateMsgFromROS(InterfaceStateMsg msg) {
         if (CheckIfInterfaceStateChanged(interfaceStateMsg, msg)) {
-            Debug.Log("PH interface state changed");
+            //Debug.Log("PH interface state changed");
             //Debug.Log(interfaceStateMsg.GetProgramID() != msg.GetProgramID());
             //Debug.Log(interfaceStateMsg.GetProgramID());
             //Debug.Log(msg.GetProgramID());
