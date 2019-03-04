@@ -9,7 +9,6 @@ public class PointingHandMover : MonoBehaviour {
     private bool run = false;
     private GameObject detectedObject;
     private bool pointingToDetectedObject = false;
-    private GameObject worldAnchor;
     	
 	// Update is called once per frame
 	void Update () {
@@ -37,7 +36,6 @@ public class PointingHandMover : MonoBehaviour {
     }
 
     public void SetDetectedObjectReference(GameObject obj) {
-        worldAnchor = GameObject.FindGameObjectWithTag("world_anchor");
         detectedObject = obj;
         pointingToDetectedObject = true;
     }

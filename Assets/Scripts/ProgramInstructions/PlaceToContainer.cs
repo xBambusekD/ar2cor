@@ -22,7 +22,6 @@ public class PlaceToContainer : ProgramInstruction {
     private bool moving_up;
     private bool moving_to_place;
     private bool dropping;
-    private bool moving_arm_up;
 
     private Rigidbody objectToPlaceRigidbody;
 
@@ -36,7 +35,6 @@ public class PlaceToContainer : ProgramInstruction {
         placedToPose = false;
         moving_to_place = true;
         dropping = false;
-        moving_arm_up = false;
         objectToPlaceRigidbody = null;
 
         world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
@@ -228,7 +226,6 @@ public class PlaceToContainer : ProgramInstruction {
         placedToPose = false;
         moving_to_place = true;
         dropping = false;
-        moving_arm_up = false;
 
         InitObjectToPlace();
         InitPlacePose();

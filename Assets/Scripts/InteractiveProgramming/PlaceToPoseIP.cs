@@ -39,7 +39,8 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
 	
 	// Update is called once per frame
 	public void UpdatePlacePose (Vector3 placePosition, Quaternion placeOrientation) {
-        if(currentPlacePosition == placePosition && PlaceOrientation == placeOrientation) {
+        if(ROSUnityCoordSystemTransformer.AlmostEqual(currentPlacePosition, placePosition, 0.001f) &&
+            ROSUnityCoordSystemTransformer.AlmostEqual(currentPlaceOrientation, placeOrientation, 0.001f)) {
             return;
         }
 
@@ -98,7 +99,7 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         ProgramItemMsg referenceItem = ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetRefID()[0]);        
         objectToPlace.GetComponent<PlaceRotateConfirm>().Arm =
             (ROSUnityCoordSystemTransformer.ConvertVector(referenceItem.GetPose()[0].GetPose().GetPosition().GetPoint()).x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? 
-                RobotRadiusHelper.RobotArm.LEFT_ARM : RobotRadiusHelper.RobotArm.RIGHT_ARM;
+                RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
 
         //objectToPlace.transform.localPosition = placePose;
         //objectToPlace.transform.localRotation = placeOrientation;

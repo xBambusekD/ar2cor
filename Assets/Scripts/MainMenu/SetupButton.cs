@@ -7,13 +7,8 @@ public class SetupButton : MonoBehaviour {
 
     public Text buttonText;
 
-    private Button button;
     private ARTableSetupMsg _setup;
-
-    private void Awake() {
-        button = GetComponent<Button>();
-    }
-
+    
     public void SetButtonText(string text) {
         buttonText.text = text;
     }

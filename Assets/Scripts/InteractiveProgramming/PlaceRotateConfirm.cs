@@ -14,12 +14,13 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     private GameObject cursor;
     private GameObject world_anchor;
     private Vector3 snapLocalPosition;
+    private Quaternion snapLocalRotation;
 
     private Material material;
     private Color basic = new Color32(131, 131, 255, 255);
     private Color red = new Color32(255, 20, 20, 255);
 
-    public RobotRadiusHelper.RobotArm Arm { get; set; }
+    public RobotHelper.RobotArmType Arm { get; set; }
 
 
     private void OnEnable() {
@@ -39,8 +40,8 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     }
 
     private void Update() {
-        if(RobotRadiusHelper.IsObjectWithinRobotArmRadius(Arm, world_anchor.transform.InverseTransformPoint(transform.position)) && 
-            RobotRadiusHelper.IsObjectOnTable(world_anchor.transform.InverseTransformPoint(transform.position))) {
+        if(RobotHelper.IsObjectWithinRobotArmRadius(Arm, world_anchor.transform.InverseTransformPoint(transform.position)) && 
+            RobotHelper.IsObjectOnTable(world_anchor.transform.InverseTransformPoint(transform.position))) {
             material.SetColor("_Color", basic);
         }
         else {
@@ -65,13 +66,16 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     private void PlaceObject() {
         if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.place_to_pose_learn ||
             InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.place_to_pose_learn_followed) {
-            if (object_attached && RobotRadiusHelper.IsObjectWithinRobotRadius(world_anchor.transform.InverseTransformPoint(transform.position))) {
+            if (object_attached && RobotHelper.IsObjectWithinRobotArmRadius(Arm, world_anchor.transform.InverseTransformPoint(transform.position))) {
                 object_attached = false;
 
                 snapLocalPosition = transform.localPosition;
+                snapLocalRotation = transform.localRotation;
 
                 transform.parent = world_anchor.transform;
                 transform.GetChild(0).GetComponent<Collider>().enabled = true;
+
+                transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, transform.GetChild(0).localScale.x/2);
 
                 EnableRotation();
             }
@@ -112,6 +116,8 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
             transform.parent = cursor.transform;
             transform.GetChild(0).GetComponent<Collider>().enabled = false;
             transform.localPosition = snapLocalPosition;
+            transform.localScale = Vector3.one;
+            transform.localRotation = snapLocalRotation;
         }
     }
 

@@ -18,8 +18,6 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
     
     public ProgrammingManagerState CurrentState { get; private set; }
 
-    private GameObject world_anchor;
-
     public bool followedLearningPlacePoseOverride = false;
     public bool holoLearningEnabled = true;
 
@@ -33,7 +31,6 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
 
     // Use this for initialization
     void Start () {
-        world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
         CurrentState = ProgrammingManagerState.def;
     }
 	

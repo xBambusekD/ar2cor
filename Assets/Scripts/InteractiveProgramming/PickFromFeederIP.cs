@@ -62,10 +62,13 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             Vector3 robotArmPosition = ROSUnityCoordSystemTransformer.ConvertVector(programItemMsg.GetPose()[0].GetPose().GetPosition().GetPoint());
             Quaternion robotArmRotation = ROSUnityCoordSystemTransformer.ConvertQuaternion(programItemMsg.GetPose()[0].GetPose().GetOrientation().GetQuaternion());
 
-            //show robot arm
-            robotArm.transform.localPosition = robotArmPosition;
-            robotArm.transform.localRotation = robotArmRotation;
-            robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
+            //show robot arm only if it's not grasping object
+            if(!RobotHelper.HasArmGraspedObject(robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2f ? 
+                RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM)) {
+                robotArm.transform.localPosition = robotArmPosition;
+                robotArm.transform.localRotation = robotArmRotation;
+                robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
+            }
 
             Vector3 objectPosition = FakeFeederObjectsPositions.GetObjectPositionInFeeder(programItemMsg.GetObject()[0],
                 (robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2f ? FakeFeederObjectsPositions.FeederType.right_feeder : FakeFeederObjectsPositions.FeederType.left_feeder));
@@ -141,7 +144,7 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
         objectToPick.transform.localPosition = new Vector3(0, 0, detectedObject.bbox.x/2);
         objectToPick.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
         objectToPick.GetComponent<PlaceRotateConfirm>().Arm = 
-            (robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? RobotRadiusHelper.RobotArm.LEFT_ARM : RobotRadiusHelper.RobotArm.RIGHT_ARM;
+            (robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
         
         objectTypeToPick = detectedObject.type;
 

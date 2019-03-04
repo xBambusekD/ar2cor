@@ -9,19 +9,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class RobotRadiusHelper {
+public static class RobotHelper {
 
-    public enum RobotArm : int {
+    public enum RobotArmType : int {
         LEFT_ARM = 1,
         RIGHT_ARM = 2
     }
 
 
-    private static RobotArmRadius leftArm;
-    private static RobotArmRadius rightArm;
+    private static global::RobotArm leftArm =  new RobotArm();
+    private static global::RobotArm rightArm = new RobotArm();
     private static Vector2 tableSize;
 
-
+    #region loadout
     public static void LoadRobotRadius() {
         ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.rosparamGetService, "{\"param_name\": \"art/robot/\" }");
     }
@@ -31,8 +31,8 @@ public static class RobotRadiusHelper {
     }
 
     public static void SetRobotRadiusParam(JSONNode msg) {
-        leftArm = new RobotArmRadius(msg["left_arm"]["base_link"], float.Parse(msg["left_arm"]["min_range"]), float.Parse(msg["left_arm"]["max_range"]));
-        rightArm = new RobotArmRadius(msg["right_arm"]["base_link"], float.Parse(msg["right_arm"]["min_range"]), float.Parse(msg["right_arm"]["max_range"]));
+        leftArm.SetRadius(msg["left_arm"]["base_link"], float.Parse(msg["left_arm"]["min_range"]), float.Parse(msg["left_arm"]["max_range"]));
+        rightArm.SetRadius(msg["right_arm"]["base_link"], float.Parse(msg["right_arm"]["min_range"]), float.Parse(msg["right_arm"]["max_range"]));
 
         GetArmsPosition();
     }
@@ -62,30 +62,32 @@ public static class RobotRadiusHelper {
         GoalIDMsg msg = new GoalIDMsg(ROSTimeHelper.GetCurrentTime(), "");
         ROSCommunicationManager.Instance.ros.Publish(TF2WebRepublisherCancelPublisher.GetMessageTopic(), msg);
     }
+    #endregion
 
+    #region radius helping functions
     //checks if object is within radius of both arms
     public static bool IsObjectWithinRobotRadius(Vector2 object_position_2D) {
-        return IsObjectWithinRobotArmRadius(RobotArm.LEFT_ARM, object_position_2D)
-            && IsObjectWithinRobotArmRadius(RobotArm.RIGHT_ARM, object_position_2D);
+        return IsObjectWithinRobotArmRadius(RobotArmType.LEFT_ARM, object_position_2D)
+            && IsObjectWithinRobotArmRadius(RobotArmType.RIGHT_ARM, object_position_2D);
     }
 
     public static bool IsObjectWithinRobotRadius(Vector3 object_position) {
-        return IsObjectWithinRobotArmRadius(RobotArm.LEFT_ARM, new Vector2(object_position.x, object_position.y))
-            && IsObjectWithinRobotArmRadius(RobotArm.RIGHT_ARM, new Vector2(object_position.x, object_position.y));
+        return IsObjectWithinRobotArmRadius(RobotArmType.LEFT_ARM, new Vector2(object_position.x, object_position.y))
+            || IsObjectWithinRobotArmRadius(RobotArmType.RIGHT_ARM, new Vector2(object_position.x, object_position.y));
     }
-    
+
     //checks if object is within radius of specified robot arm
-    public static bool IsObjectWithinRobotArmRadius(RobotArm arm, Vector2 object_position) {
-        if(arm == RobotArm.LEFT_ARM) {
+    public static bool IsObjectWithinRobotArmRadius(RobotArmType arm, Vector2 object_position) {
+        if(arm == RobotArmType.LEFT_ARM) {
             return IsObjectWithinArmRadius(leftArm, object_position);
         }
-        else if (arm == RobotArm.RIGHT_ARM) {
+        else if (arm == RobotArmType.RIGHT_ARM) {
             return IsObjectWithinArmRadius(rightArm, object_position);
         }
         return false;
     }
 
-    private static bool IsObjectWithinArmRadius(RobotArmRadius arm, Vector2 object_position) {
+    private static bool IsObjectWithinArmRadius(global::RobotArm arm, Vector2 object_position) {
         float distance = Vector2.Distance(arm.GetBaseLinkPosition2d(), object_position);
         //Debug.Log("DISTANCE FROM ARM: " + distance);
         if (distance >= arm.MinRange && distance <= arm.MaxRange) {
@@ -101,5 +103,29 @@ public static class RobotRadiusHelper {
             -object_position.y >= 0 && -object_position.y <= tableSize.y &&
             object_position.z >= 0 && object_position.z <= 0.05f);
     }
+    #endregion
 
+    #region grasping
+    public static void SetLeftArmGraspedObject(ObjInstanceMsg msg) {
+        leftArm.SetGraspedObject(msg);
+    }
+
+    public static void SetRightArmGraspedObject(ObjInstanceMsg msg) {
+        rightArm.SetGraspedObject(msg);
+    }
+
+    public static bool HasArmGraspedObject(RobotArmType arm) {
+        if (arm == RobotArmType.LEFT_ARM) {
+            return leftArm.ObjectGrasped();
+        }
+        else if (arm == RobotArmType.RIGHT_ARM) {
+            return rightArm.ObjectGrasped();
+        }
+        return false;
+    }
+
+    public static bool HasAnyArmGraspedObject() {
+        return leftArm.ObjectGrasped() || rightArm.ObjectGrasped();
+    }
+    #endregion
 }

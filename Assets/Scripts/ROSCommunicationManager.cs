@@ -61,6 +61,9 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
             ros.AddSubscriber(typeof(GuiNotificationsSubscriber));
 
+            ros.AddSubscriber(typeof(RobotLeftArmGraspedObjectSubscriber));
+            ros.AddSubscriber(typeof(RobotRightArmGraspedObjectSubscriber));
+
             ros.AddServiceResponse(typeof(ROSCommunicationManager));
             ros.Connect();
 
@@ -124,7 +127,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             try {
                 JSONNode parsed = JSONNode.Parse(node["message"]);
                 if (parsed["arms"] != null) {
-                    RobotRadiusHelper.SetRobotRadiusParam(parsed["arms"]);
+                    RobotHelper.SetRobotRadiusParam(parsed["arms"]);
                 }
                 if (parsed["locale"] != null) {
                     TextToSpeechManager.Instance.SetLanguage(parsed["locale"]);
@@ -234,7 +237,7 @@ public class HoloLensActivityPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new BoolMsg(msg);
     }
 }
@@ -252,7 +255,7 @@ public class HoloLensLearningPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new BoolMsg(msg);
     }
 }
@@ -292,7 +295,7 @@ public class InterfaceStatePublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new InterfaceStateMsg(msg);
     }
 }
@@ -360,7 +363,7 @@ public class CollisionEnvPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new CollisionObjectsMsg(msg);
     }
 }
@@ -400,7 +403,7 @@ public class LearningRequestActionGoalPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new LearningRequestActionGoalMsg(msg);
     }       
 }
@@ -440,7 +443,7 @@ public class TF2WebRepublisherGoalPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new TFSubscriptionActionGoalMsg(msg);
     }
 }
@@ -458,7 +461,7 @@ public class TF2WebRepublisherCancelPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new GoalIDMsg(msg);
     }
 }
@@ -478,7 +481,7 @@ public class TF2WebRepublisherFeedbackSubscriber : ROSBridgeSubscriber {
 
     public new static void CallBack(ROSBridgeMsg msg) {
         TFSubscriptionActionFeedbackMsg TFmsg = (TFSubscriptionActionFeedbackMsg)msg;
-        RobotRadiusHelper.SetTF2Feedback(TFmsg);
+        RobotHelper.SetTF2Feedback(TFmsg);
     }
 }
 #endregion
@@ -498,8 +501,48 @@ public class TFPublisher : ROSBridgePublisher {
         return msg.ToYAMLString();
     }
 
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
         return new TFMessageMsg(msg);
+    }
+}
+#endregion
+
+#region robot
+public class RobotLeftArmGraspedObjectSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/art/robot/left_arm/grasped_object";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/ObjInstance";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new ObjInstanceMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        ObjInstanceMsg OImsg = (ObjInstanceMsg)msg;
+        RobotHelper.SetLeftArmGraspedObject(OImsg);
+    }
+}
+
+public class RobotRightArmGraspedObjectSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/art/robot/right_arm/grasped_object";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/ObjInstance";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new ObjInstanceMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        ObjInstanceMsg OImsg = (ObjInstanceMsg)msg;
+        RobotHelper.SetRightArmGraspedObject(OImsg);
     }
 }
 #endregion

@@ -27,8 +27,6 @@ public class DrillPoints : ProgramInstruction {
     private Vector3 pose2_init;
     private Vector3 poseDown;
     private Vector3 poseUp;
-    private Quaternion orientation1;
-    private Quaternion orientation2;
     private drilling_state drilling_State;
     private List<GameObject> objectsInPolygon = new List<GameObject>();
 
@@ -37,7 +35,6 @@ public class DrillPoints : ProgramInstruction {
     private bool move_down;
     private bool move_up;
     private GameObject pr2_arm_child;
-    private bool init;
 
     public override void Awake() {
         base.Awake();
@@ -46,7 +43,6 @@ public class DrillPoints : ProgramInstruction {
         drilled = false;
         move_down = false;
         move_up = false;
-        init = false;
         arm_in_starting_position = false;
         world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
     }
@@ -356,9 +352,6 @@ public class DrillPoints : ProgramInstruction {
         pose1_init = new Vector3(position1.GetPosition().GetX(), -position1.GetPosition().GetY(), position1.GetPosition().GetZ());
         pose2_init = new Vector3(position2.GetPosition().GetX(), -position2.GetPosition().GetY(), position2.GetPosition().GetZ());
 
-        orientation1 = new Quaternion(position1.GetOrientation().GetX(), position1.GetOrientation().GetY(), position1.GetOrientation().GetZ(), position1.GetOrientation().GetW());
-        orientation2 = new Quaternion(position2.GetOrientation().GetX(), position2.GetOrientation().GetY(), position2.GetOrientation().GetZ(), position2.GetOrientation().GetW());
-
         //drilling_hole_1_init = true;
         drilling_State = drilling_state.INIT_DRILLING_HOLE_1;
     }
@@ -453,7 +446,6 @@ public class DrillPoints : ProgramInstruction {
         drilled = false;
         move_down = false;
         move_up = false;
-        init = false;
         arm_in_starting_position = false;
 
         InitObjectsToDrill();

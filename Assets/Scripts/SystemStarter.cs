@@ -68,8 +68,8 @@ public class SystemStarter : Singleton<SystemStarter> {
             //Load robot reach radius
             if (!robotRadiusCalled) {
                 robotRadiusCalled = true;
-                RobotRadiusHelper.LoadRobotRadius();
-                RobotRadiusHelper.LoadTableSize();
+                RobotHelper.LoadRobotRadius();
+                RobotHelper.LoadTableSize();
             }
 
 #if UNITY_EDITOR
