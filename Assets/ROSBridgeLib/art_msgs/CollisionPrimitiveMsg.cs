@@ -55,7 +55,7 @@ namespace ROSBridgeLib {
             }
 
             public override string ToString() {
-                return "CollisionPrimitiveMsg [name=" + _name +
+                return "CollisionPrimitive [name=" + _name +
                     ", setup=" + _setup +
                     ", bbox=" + _bbox.ToString() +
                     ", pose=" + _pose.ToString() + "]";
