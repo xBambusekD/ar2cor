@@ -35,19 +35,29 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
     private bool waiting_for_action_response = false;
     private string currentRequestID;
 
+    private GameObject spatial_mapping;
+
     // Use this for initialization
     void Start () {
         cursor = GameObject.FindGameObjectWithTag("cursor");
         world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
+        spatial_mapping = GameObject.FindGameObjectWithTag("spatial_mapping");
     }
-
-    // Update is called once per frame
-    void Update() {
-
-    }
-
+    
 
     public void StartLearning() {
+        FakeFeedersManager.Instance.EnableFakeObjects();
+
+        spatial_mapping.SetActive(false);
+
+        if(robotArm.transform.parent != cursor.transform) {
+            robotArm.transform.parent = cursor.transform;
+            robotArm.transform.localPosition = new Vector3(0f, 0f, 0.3f);
+            robotArm.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
+            //robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
+            robotArm.GetComponent<PR2GripperController>().SetCollidersActive(false);
+            robotArm.GetComponent<PR2GripperController>().OpenGripperInstantly();
+        }
 
     }
 
@@ -113,6 +123,7 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
 
     public void MarkClickedArea(DetectedObject detectedObject) {
+
         //if (objectToPick != null) {
         //    Destroy(objectToPick);
         //}
@@ -123,16 +134,19 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
         robotArmPosition = world_anchor.transform.InverseTransformPoint(pointedArea.localPosition + pointedArea.forward * 0.3f);
         robotArmRotation = Quaternion.Inverse(world_anchor.transform.localRotation) * pointedArea.localRotation;
 
+        bool picking_right_feeder = false;
         //rotate gripper to face feeder
         //picking from right feeder
         if(robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth()/2) {
             Debug.Log("PICKING FROM RIGHT FEEDER");
             robotArmRotation.eulerAngles += new Vector3(90, 0, 0);
+            picking_right_feeder = true;
         }
         //picking from left feeder
         else {
             Debug.Log("PICKING FROM LEFT FEEDER");
             robotArmRotation.eulerAngles += new Vector3(-90, 0, 0);
+            picking_right_feeder = false;
         }
 
 
@@ -140,18 +154,25 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
         objectToPick.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
         objectToPick.transform.GetChild(0).transform.localScale = detectedObject.bbox;
         objectToPick.transform.GetChild(0).GetComponent<Collider>().enabled = false;
-        objectToPick.transform.parent = cursor.transform;
-        objectToPick.transform.localPosition = new Vector3(0, 0, detectedObject.bbox.x/2);
-        objectToPick.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
+        objectToPick.transform.parent = world_anchor.transform;
+        objectToPick.transform.localEulerAngles = picking_right_feeder ? new Vector3(90f, 90f, -90f) : new Vector3(-90f, 90f, -90f);
         objectToPick.GetComponent<PlaceRotateConfirm>().Arm = 
-            (robotArmPosition.x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
-        
+            picking_right_feeder ? RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
+        objectToPick.GetComponent<PlaceRotateConfirm>().snapLocalRotation = objectToPick.transform.rotation;
+
+        objectToPick.transform.parent = cursor.transform;
+        objectToPick.transform.localPosition = new Vector3(0, 0, detectedObject.bbox.x / 2);
+
         objectTypeToPick = detectedObject.type;
+
+        objectToPick.GetComponent<PlaceRotateConfirm>().object_attached = true;
 
         StartCoroutine(SaveToROS());
     }
 
     private IEnumerator SaveToROS() {
+        robotArm.GetComponent<PR2GripperController>().SetArmActive(false);
+
         ROSActionHelper.OnLearningActionResult += OnLearningActionResult;
 
         Debug.Log("PICK FROM FEEDER SAVED");
@@ -237,6 +258,15 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
         ROSActionHelper.OnLearningActionResult -= OnLearningActionResult;
         yield return null;
+
+
+        robotArm.transform.parent = world_anchor.transform;
+        robotArm.GetComponent<PR2GripperController>().PlaceGripperToInit();
+        robotArm.GetComponent<PR2GripperController>().SetArmActive(false);
+        robotArm.GetComponent<PR2GripperController>().SetCollidersActive(true);
+        robotArm.GetComponent<PR2GripperController>().CloseGripperInstantly();
+
+        spatial_mapping.SetActive(true);
     }
 
     private void OnLearningActionResult(LearningRequestActionResultMsg msg) {
@@ -245,5 +275,9 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             && msg.GetResult().GetSuccess() == true) {
             waiting_for_action_response = false;
         }
+    }
+
+    public void StaringAtObject(bool active) {
+        robotArm.GetComponent<PR2GripperController>().SetArmActive(active);
     }
 }

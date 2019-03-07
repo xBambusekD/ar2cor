@@ -16,7 +16,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
         def
     }
     
-    public ProgrammingManagerState CurrentState { get; private set; }
+    public ProgrammingManagerState CurrentState { get; set; }
 
     public bool followedLearningPlacePoseOverride = false;
     public bool holoLearningEnabled = true;
@@ -46,8 +46,8 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
         }
         Debug.Log("NEW INTERFACE STATE! " + interfaceStateMsg.ToYAMLString());
 
-        if(interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
-            switch(interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
+        if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
+            switch (interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
                 case ProgramTypes.PICK_FROM_FEEDER:
                     PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
                     if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled) {
@@ -62,7 +62,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                     break;
                 case ProgramTypes.PLACE_TO_POSE:
                     PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
-                    if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && followedLearningPlacePoseOverride && 
+                    if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && followedLearningPlacePoseOverride &&
                         CurrentState != ProgrammingManagerState.place_to_pose_learn_followed) {
                         CurrentState = ProgrammingManagerState.place_to_pose_learn_followed;
                         PlaceToPoseIP.Instance.StartLearningContinuous();
@@ -83,7 +83,7 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                     break;
             }
         }
-        else {
+        else { 
             CurrentState = ProgrammingManagerState.def;
             followedLearningPlacePoseOverride = false;
         }

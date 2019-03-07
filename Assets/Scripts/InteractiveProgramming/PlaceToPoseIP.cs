@@ -91,15 +91,20 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         //}
 
         Visualize();
+
+        UISoundManager.Instance.PlaySnap();
         objectToPlace.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
         objectToPlace.transform.GetChild(0).GetComponent<Collider>().enabled = false;
+        objectToPlace.GetComponent<PlaceRotateConfirm>().snapLocalRotation = objectToPlace.transform.rotation;
         objectToPlace.transform.parent = cursor.transform;
         objectToPlace.transform.localPosition = new Vector3(0, 0, objectToPlace.transform.GetChild(0).transform.localScale.x / 2);
-        objectToPlace.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
+        //objectToPlace.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
         ProgramItemMsg referenceItem = ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetRefID()[0]);        
         objectToPlace.GetComponent<PlaceRotateConfirm>().Arm =
             (ROSUnityCoordSystemTransformer.ConvertVector(referenceItem.GetPose()[0].GetPose().GetPosition().GetPoint()).x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? 
                 RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
+
+        objectToPlace.GetComponent<PlaceRotateConfirm>().object_attached = true;
 
         //objectToPlace.transform.localPosition = placePose;
         //objectToPlace.transform.localRotation = placeOrientation;
@@ -107,6 +112,9 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
     }
 
     public void StartLearningContinuous() {
+
+        FakeFeedersManager.Instance.DisableFakeObjects();
+
         learning = true;
         Debug.Log("PLACE_TO_POSE STARTED LEARNING CONTINUOUS");
     }
@@ -205,7 +213,7 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
 
         currentTime = ROSTimeHelper.GetCurrentTime();
         currentRequestID = ROSActionHelper.GenerateUniqueGoalID((int)learning_request_goal.DONE, ROSTimeHelper.ToSec(currentTime));
-        LearningRequestActionGoalMsg requestMsg = new LearningRequestActionGoalMsg(new HeaderMsg(0, currentTime, ""), 
+        LearningRequestActionGoalMsg requestMsg = new LearningRequestActionGoalMsg(new HeaderMsg(0, currentTime, ""),
             new GoalIDMsg(currentTime, currentRequestID),
             new LearningRequestGoalMsg(learning_request_goal.DONE));
         ROSCommunicationManager.Instance.ros.Publish(LearningRequestActionGoalPublisher.GetMessageTopic(), requestMsg);
@@ -220,6 +228,7 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
 
         //Destroy(objectToPlaceUnmanipulatable);
         InteractiveProgrammingManager.Instance.followedLearningPlacePoseOverride = false;
+        InteractiveProgrammingManager.Instance.CurrentState = InteractiveProgrammingManager.ProgrammingManagerState.place_to_pose_vis;
 
         yield return null;
     }

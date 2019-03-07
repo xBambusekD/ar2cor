@@ -19,6 +19,9 @@ TagManager:
   - speech_input_source
   - cursor
   - manipulatable_object
+  - feeder_object
+  - detected_object
+  - spatial_mapping
   layers:
   - Default
   - TransparentFX

@@ -43,8 +43,8 @@ public class TextToSpeechManager : Singleton<TextToSpeechManager> {
     }
 
     IEnumerator WaitWhileSpeakingAndThenSay(string textToSay) {
-        yield return new WaitWhile(() => textToSpeechDefault.SpeechTextInQueue() || textToSpeechDefault.IsSpeaking());
-        textToSpeechDefault.StartSpeaking(textToSay);
+        yield return new WaitWhile(() => IsSpeakingOrInQueue());
+        Speak(textToSay);
     }
 
     //Based on set language, function returns true/false if synthesizer is speaking
@@ -55,7 +55,7 @@ public class TextToSpeechManager : Singleton<TextToSpeechManager> {
                 return textToSpeechDefault.IsSpeaking() || textToSpeechDefault.SpeechTextInQueue();
             //use azure's text to speech cloud
             case Texts.Languages.CZECH:
-                return textToSpeechAzure.isSpeaking;
+                return textToSpeechAzure.IsSpeaking();
             default:
                 return false;
         }
@@ -68,13 +68,21 @@ public class TextToSpeechManager : Singleton<TextToSpeechManager> {
     //Sets current GUI notification from ARCOR. If TextToSpeech is enabled, notification is synthesized.
     public void SetGuiNotificationMsg(GuiNotificationMsg msg) {
         //prevent duplicate messages
-        if(!currentGuiNotification.GetMsg().Equals(msg.GetMsg())) {
-            currentGuiNotification = msg;
-            Debug.Log("SPEAKING: " + currentGuiNotification.GetMsg());
-            if (texttospeech_enabled) {
+        //if(!currentGuiNotification.GetMsg().Equals(msg.GetMsg())) {
+        currentGuiNotification = msg;
+
+        Debug.Log("SPEAKING: " + currentGuiNotification.GetMsg());
+        if (texttospeech_enabled) {
+            //if temp notification cames, wait until regular stops speaking and then play
+            if (currentGuiNotification.GetTemp()) {
+                if (IsSpeakingOrInQueue()) {
+                    WaitAndSay(currentGuiNotification.GetMsg());
+                }
+            } else {
                 Speak(currentGuiNotification.GetMsg());
             }
         }
+        //}
     }
 
     //For enabling/disabling TextToSpeech from main menu.
@@ -84,7 +92,6 @@ public class TextToSpeechManager : Singleton<TextToSpeechManager> {
 
     //Loads set language from ROS param server.
     public void LoadLanguage() {
-        languageSet = true;
         ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.rosparamGetService, "{\"param_name\": \"art/interface/projected_gui/app/\" }");
     }
 
@@ -101,5 +108,7 @@ public class TextToSpeechManager : Singleton<TextToSpeechManager> {
                 break;
         }
         Debug.Log(language);
+        languageSet = true;
+
     }
 }

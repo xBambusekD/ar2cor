@@ -33,6 +33,9 @@ namespace HoloToolkit.Unity.UX
         /// </summary>
         public float HoverOffsetYScale = 0.25f;
 
+        [SerializeField]
+        private bool positionAppBarOnTop = false;
+
         /// <summary>
         /// Pushes the app bar away from the object
         /// </summary>
@@ -356,7 +359,13 @@ namespace HoloToolkit.Unity.UX
                 Vector3 faceNormal = helper.GetFaceNormal(followingFaceIndex);
 
                 //finally we have new position
-                finalPosition = helper.GetFaceBottomCentroid(followingFaceIndex) + (faceNormal * HoverOffsetZ);
+                if(positionAppBarOnTop) {
+                    finalPosition = helper.GetFaceTopCentroid(followingFaceIndex) + (faceNormal * HoverOffsetZ);
+                }
+                else {
+                    finalPosition = helper.GetFaceBottomCentroid(followingFaceIndex) + (faceNormal * HoverOffsetZ);
+                }
+
             }
 
             // Follow our bounding box

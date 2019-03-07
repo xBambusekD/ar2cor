@@ -177,6 +177,21 @@ namespace HoloToolkit.Unity.UX
         }
 
         /// <summary>
+        /// Get the center of the top edge of a face of the bounding box determined by index
+        /// </summary>
+        /// <param name="index">parameter indicating which face is used. 0-5</param>
+        /// <returns>a vector representing the bottom most edge center of the face</returns>
+        public Vector3 GetFaceTopCentroid(int index) {
+            Vector3[] edgeCentroids = GetFaceEdgeMidpoints(index);
+
+            Vector3 leastYPoint = edgeCentroids[0];
+            for (int i = 1; i < 4; ++i) {
+                leastYPoint = edgeCentroids[i].y > leastYPoint.y ? edgeCentroids[i] : leastYPoint;
+            }
+            return leastYPoint;
+        }
+
+        /// <summary>
         /// This function returns the four couners of a face of a bounding cube specified by index.
         /// </summary>
         /// <param name="index">the index of the face of the bounding cube. 0-5</param>

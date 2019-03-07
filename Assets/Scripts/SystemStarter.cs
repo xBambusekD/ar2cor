@@ -27,6 +27,7 @@ public class SystemStarter : Singleton<SystemStarter> {
 
     private bool ntpTimeSet = false;
     private bool robotRadiusCalled = false;
+    private bool languageCalled = false;
 
     // Use this for initialization
     void Start() {
@@ -40,11 +41,12 @@ public class SystemStarter : Singleton<SystemStarter> {
 	void Update() {
         if(ROSCommunicationManager.Instance.connectedToROS) {
 
-            if(!TextToSpeechManager.Instance.languageSet) {
+            if (!languageCalled) {
                 TextToSpeechManager.Instance.LoadLanguage();
+                languageCalled = true;
             }
 
-            if(!ntpTimeSet) {
+            if (!ntpTimeSet) {
                 ntpTimeSet = true;
                 UnbiasedTime.Init(MainMenuManager.Instance.currentSetup.GetIP());
             }
@@ -55,7 +57,7 @@ public class SystemStarter : Singleton<SystemStarter> {
                 ObjectsManager.Instance.objectReloadInitiated = true;
             }
 
-            if(!ObjectsManager.Instance.objectTypesLoaded) {
+            if (!ObjectsManager.Instance.objectTypesLoaded) {
                 return;
             }
 
@@ -72,14 +74,20 @@ public class SystemStarter : Singleton<SystemStarter> {
                 RobotHelper.LoadTableSize();
             }
 
+            if (!TextToSpeechManager.Instance.languageSet) {
+                return;
+            }
+
 #if UNITY_EDITOR
             if (!calibrated) {
                 calibrated = true;
+
+                //StartCoroutine(startFakeCalibration());
                 //GameObject super_root = new GameObject("super_root");
                 //super_root.transform.position = Vector3.zero;
                 //worldAnchor.transform.parent = super_root.transform;
                 //super_root.transform.eulerAngles = new Vector3(-90f, 0f, 0f);
-                worldAnchor.transform.eulerAngles = new Vector3(-90f, 0f, 0f);
+                worldAnchor.transform.eulerAngles = new Vector3(-90f, 20f, 0f);
                 //worldAnchor.transform.Rotate(180f, 0f, 0f, Space.Self);
 
                 if (OnSystemStarted != null) {
@@ -104,7 +112,7 @@ public class SystemStarter : Singleton<SystemStarter> {
                     anchorLoaded = true;
                     calibrated = true;
 
-                    if(OnSystemStarted != null) {
+                    if (OnSystemStarted != null) {
                         OnSystemStarted();
                     }
                 }
@@ -116,6 +124,12 @@ public class SystemStarter : Singleton<SystemStarter> {
 #endif
         }
     }
+
+    //private IEnumerator startFakeCalibration() {
+    //    TextToSpeechManager.Instance.Speak(Texts.OnCalibrationStarts);
+    //    yield return new WaitWhile(() => TextToSpeechManager.Instance.IsSpeakingOrInQueue());
+    //    TextToSpeechManager.Instance.Speak(Texts.OnCalibrationContinues);
+    //}
 
     private IEnumerator startCalibration() {
         SetVuforiaActive(true);
@@ -137,7 +151,7 @@ public class SystemStarter : Singleton<SystemStarter> {
         GameObject marker13 = new GameObject();
 
         foreach (GameObject marker in CalibManager.Instance.detectedMarkersList) {
-            switch(marker.name) {
+            switch (marker.name) {
                 case "HelpAnchor_10":
                     marker10 = marker;
                     break;

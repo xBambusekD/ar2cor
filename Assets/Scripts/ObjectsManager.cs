@@ -65,6 +65,7 @@ public class ObjectsManager : Singleton<ObjectsManager> {
             detectedObject = Instantiate(m_Prefabs[0]);
         }
         detectedObject.transform.parent = worldAnchor.transform;
+        detectedObject.tag = "detected_object";
         
         DetectedObject obj = detectedObject.GetComponent<DetectedObject>();
         obj._id = objectData["name"].AsInt;

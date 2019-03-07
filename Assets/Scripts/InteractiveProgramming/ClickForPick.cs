@@ -9,6 +9,8 @@ public class ClickForPick : MonoBehaviour, IInputClickHandler {
         if(InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn &&
             FakeFeederObjectsPositions.CheckIfObjectIsInFeeder(GetComponent<DetectedObject>().type, ROSUnityCoordSystemTransformer.ConvertVector(GetComponent<DetectedObject>().position))) {
             PickFromFeederIP.Instance.MarkClickedArea(GetComponent<DetectedObject>());
+
+            UISoundManager.Instance.PlaySnap();
         }
     }
 

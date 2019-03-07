@@ -15,6 +15,8 @@ public class UnparentObjectOnClick : MonoBehaviour, IInputHandler {
     }
 
     public void OnInputDown(InputEventData eventData) {
+        UISoundManager.Instance.PlayHololensClick();
+
         if(transform.parent != null) {
             transform.parent = null;
             CalibManager.Instance.AddDetectedMarker(gameObject);

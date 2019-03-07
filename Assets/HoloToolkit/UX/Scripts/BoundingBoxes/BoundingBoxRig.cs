@@ -13,6 +13,14 @@ namespace HoloToolkit.Unity.UX
     /// </summary>
     public class BoundingBoxRig : MonoBehaviour
     {
+        public enum AxisToAffect {
+            All,
+            X,
+            Y,
+            Z
+        }
+
+
         [Header("Flattening")]
         [SerializeField]
         [Tooltip("Choose this option if Rig is to be applied to a 2D object.")]
@@ -55,7 +63,7 @@ namespace HoloToolkit.Unity.UX
         private bool useScaleHandles = true;
 
         [SerializeField]
-        private bool useOnlySideRotateHandles = false;
+        private AxisToAffect rotationAxisToAffect = AxisToAffect.All;
 
         [Header("Preset Components")]
         [SerializeField]
@@ -338,7 +346,7 @@ namespace HoloToolkit.Unity.UX
 
             if (rotateHandles == null)
             {
-                if (useOnlySideRotateHandles) {
+                if (rotationAxisToAffect != AxisToAffect.All) {
                     rotateHandles = new GameObject[4];
                     rigRotateGizmoHandles = new BoundingBoxGizmoHandle[4];
                 }
@@ -363,7 +371,7 @@ namespace HoloToolkit.Unity.UX
                     rigRotateGizmoHandles[i].AffineType = BoundingBoxGizmoHandleTransformType.Rotation;                   
                 }
 
-                if (useOnlySideRotateHandles) {
+                if (rotationAxisToAffect == AxisToAffect.X) {
                     rigRotateGizmoHandles[0].Axis = BoundingBoxGizmoHandleAxisToAffect.X;
                     rigRotateGizmoHandles[1].Axis = BoundingBoxGizmoHandleAxisToAffect.X;
                     rigRotateGizmoHandles[2].Axis = BoundingBoxGizmoHandleAxisToAffect.X;
@@ -372,6 +380,28 @@ namespace HoloToolkit.Unity.UX
                     rigRotateGizmoHandles[0].IsLeftHandedRotation = false;
                     rigRotateGizmoHandles[1].IsLeftHandedRotation = true;
                     rigRotateGizmoHandles[2].IsLeftHandedRotation = false;
+                    rigRotateGizmoHandles[3].IsLeftHandedRotation = true;
+                }
+                else if (rotationAxisToAffect == AxisToAffect.Y) {
+                    rigRotateGizmoHandles[0].Axis = BoundingBoxGizmoHandleAxisToAffect.Y;
+                    rigRotateGizmoHandles[1].Axis = BoundingBoxGizmoHandleAxisToAffect.Y;
+                    rigRotateGizmoHandles[2].Axis = BoundingBoxGizmoHandleAxisToAffect.Y;
+                    rigRotateGizmoHandles[3].Axis = BoundingBoxGizmoHandleAxisToAffect.Y;
+
+                    rigRotateGizmoHandles[0].IsLeftHandedRotation = false;
+                    rigRotateGizmoHandles[1].IsLeftHandedRotation = false;
+                    rigRotateGizmoHandles[2].IsLeftHandedRotation = false;
+                    rigRotateGizmoHandles[3].IsLeftHandedRotation = false;
+                }
+                else if (rotationAxisToAffect == AxisToAffect.Z) {
+                    rigRotateGizmoHandles[0].Axis = BoundingBoxGizmoHandleAxisToAffect.Z;
+                    rigRotateGizmoHandles[1].Axis = BoundingBoxGizmoHandleAxisToAffect.Z;
+                    rigRotateGizmoHandles[2].Axis = BoundingBoxGizmoHandleAxisToAffect.Z;
+                    rigRotateGizmoHandles[3].Axis = BoundingBoxGizmoHandleAxisToAffect.Z;
+
+                    rigRotateGizmoHandles[0].IsLeftHandedRotation = false;
+                    rigRotateGizmoHandles[1].IsLeftHandedRotation = false;
+                    rigRotateGizmoHandles[2].IsLeftHandedRotation = true;
                     rigRotateGizmoHandles[3].IsLeftHandedRotation = true;
                 }
                 else {
@@ -409,11 +439,23 @@ namespace HoloToolkit.Unity.UX
                 }
             }
 
-            if (useOnlySideRotateHandles) {
+            if (rotationAxisToAffect == AxisToAffect.X) {
                 rotateHandles[0].transform.localPosition = (handleCentroids[0] + handleCentroids[4]) * 0.5f;
                 rotateHandles[1].transform.localPosition = (handleCentroids[1] + handleCentroids[5]) * 0.5f;
                 rotateHandles[2].transform.localPosition = (handleCentroids[2] + handleCentroids[6]) * 0.5f;
                 rotateHandles[3].transform.localPosition = (handleCentroids[3] + handleCentroids[7]) * 0.5f;
+            }
+            else if (rotationAxisToAffect == AxisToAffect.Y) {
+                rotateHandles[0].transform.localPosition = (handleCentroids[2] + handleCentroids[0]) * 0.5f;
+                rotateHandles[1].transform.localPosition = (handleCentroids[3] + handleCentroids[1]) * 0.5f;
+                rotateHandles[2].transform.localPosition = (handleCentroids[6] + handleCentroids[4]) * 0.5f;
+                rotateHandles[3].transform.localPosition = (handleCentroids[7] + handleCentroids[5]) * 0.5f;
+            }
+            else if (rotationAxisToAffect == AxisToAffect.Z) {
+                rotateHandles[0].transform.localPosition = (handleCentroids[0] + handleCentroids[1]) * 0.5f;
+                rotateHandles[1].transform.localPosition = (handleCentroids[2] + handleCentroids[3]) * 0.5f;
+                rotateHandles[2].transform.localPosition = (handleCentroids[4] + handleCentroids[5]) * 0.5f;
+                rotateHandles[3].transform.localPosition = (handleCentroids[6] + handleCentroids[7]) * 0.5f;
             }
             else {
                 rotateHandles[0].transform.localPosition = (handleCentroids[2] + handleCentroids[0]) * 0.5f;

@@ -181,7 +181,7 @@ MonoBehaviour:
   rotateAroundPivot: 1
   useResizeHandles: 0
   useScaleHandles: 0
-  useOnlySideRotateHandles: 1
+  rotationAxisToAffect: 2
   boundingBoxPrefab: {fileID: 114030465538688920, guid: 52f4a504e03b0b7499eb414bef45633a,
     type: 2}
   appBarPrefab: {fileID: 114050950401502068, guid: 820e5243a5454af41a051e4bc55f11af,
@@ -198,3 +198,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b2e6f68529de4441b5d5f5311bde910, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  object_attached: 1
+  snapLocalRotation: {x: 0, y: 0, z: 0, w: 0}

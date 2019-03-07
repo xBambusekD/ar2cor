@@ -28,7 +28,10 @@ public class SpeechManager : MonoBehaviour {
     public bool isReady = false;
 
     [HideInInspector]
-    public bool isSpeaking = false;
+    private bool isSpeaking = false;
+
+    [HideInInspector]
+    private bool isProcessing = false;
 
 #if UNITY_EDITOR || !UNITY_WSA
     /// <summary>
@@ -77,6 +80,15 @@ public class SpeechManager : MonoBehaviour {
         // avoid blocking the main Unity thread.
         // Make sure you have successfully obtained a token before making any Text-to-Speech API calls.
         StartCoroutine(AuthenticateSpeechService(authenticating));
+    }
+
+    private void Update() {
+        if(audioSource.isPlaying) {
+            isSpeaking = true;
+        }
+        else {
+            isSpeaking = false;
+        }
     }
 
     /// <summary>
@@ -161,7 +173,8 @@ public class SpeechManager : MonoBehaviour {
                            + Environment.NewLine + ex.Message);
             }
         }
-        isSpeaking = false;
+        isProcessing = false;
+        isSpeaking = true;
     }
 
     /// <summary>
@@ -193,7 +206,7 @@ public class SpeechManager : MonoBehaviour {
     /// </summary>
     /// <param name="message"></param>
     public void Speak(string message) {
-        isSpeaking = true;
+        isProcessing = true;
         try
         {
 
@@ -230,7 +243,7 @@ public class SpeechManager : MonoBehaviour {
         {
             Debug.Log("An error occurred when attempting to synthesize speech audio."
                        + Environment.NewLine + ex.Message);
-            isSpeaking = false;
+            isProcessing = false;
         }
     }
 
@@ -395,5 +408,9 @@ public class SpeechManager : MonoBehaviour {
         }
 
         return unityData;
+    }
+
+    public bool IsSpeaking() {
+        return isSpeaking || isProcessing;
     }
 }

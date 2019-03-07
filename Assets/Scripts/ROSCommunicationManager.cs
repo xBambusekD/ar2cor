@@ -126,11 +126,13 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             JSONNode node = JSONNode.Parse(yaml);
             try {
                 JSONNode parsed = JSONNode.Parse(node["message"]);
+                Debug.Log(parsed);
                 if (parsed["arms"] != null) {
                     RobotHelper.SetRobotRadiusParam(parsed["arms"]);
                 }
                 if (parsed["locale"] != null) {
                     TextToSpeechManager.Instance.SetLanguage(parsed["locale"]);
+                    Debug.Log(parsed["locale"]);
                 }
             }
             catch(NullReferenceException e) {
