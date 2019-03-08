@@ -91,7 +91,9 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             //objectToPickUnmanipulatable.transform.localRotation = ROSUnityCoordSystemTransformer.ConvertQuaternion(objectOrientation);
             //objectToPickUnmanipulatable.transform.GetChild(0).transform.localScale = objectDims;
 
-            if(objectToPick == null) {
+            Debug.Log("BEFORE INSTANTIATING");
+            if(objectToPick == null || objectToPick.Equals(null)) {
+                Debug.Log("INSTANTIATING");
                 objectToPick = Instantiate(BasicObjectManipulatablePrefab, world_anchor.transform);
             }
             objectToPick.GetComponent<ObjectManipulationEnabler>().DisableManipulation();
@@ -102,16 +104,18 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
     }
 
     public void VisualizeClear() {
+        Debug.Log("VISUALIZE CLEAR from Pick");
         if (ProgramHelper.ItemLearned(programItemMsg)) {
             robotArm.GetComponent<PR2GripperController>().PlaceGripperToInit();
             robotArm.GetComponent<PR2GripperController>().SetArmActive(false);
 
             //if (objectToPickUnmanipulatable != null)
             //    Destroy(objectToPickUnmanipulatable);
-            if (objectToPick != null) {
+            if (objectToPick != null || !objectToPick.Equals(null)) {
                 objectToPick.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
                 objectToPick.GetComponent<PlaceRotateConfirm>().DestroyItself();
                 objectToPick = null;
+                PlaceToPoseIP.Instance.ObjectDestroyed();
             }
         }
     }
@@ -279,5 +283,9 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
     public void StaringAtObject(bool active) {
         robotArm.GetComponent<PR2GripperController>().SetArmActive(active);
+    }
+
+    public void ObjectDestroyed() {
+        objectToPick = null;
     }
 }

@@ -132,7 +132,7 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
             //objectToPlaceUnmanipulatable.transform.localRotation = placeOrientation;
             //objectToPlaceUnmanipulatable.transform.GetChild(0).transform.localScale = objectDims;
 
-            if (objectToPlace == null) {
+            if (objectToPlace == null || objectToPlace.Equals(null)) {
                 objectToPlace = Instantiate(BasicObjectManipulatablePrefab, world_anchor.transform);
                 Debug.Log("Instantiating object");
             }
@@ -143,11 +143,14 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         }
     }
     public void VisualizeClear() {
+        Debug.Log("VISUALIZE CLEAR from Place");
+
         if (ProgramHelper.ItemLearned(programItemMsg)) {
-            if (objectToPlace != null) {
+            if (objectToPlace != null || !objectToPlace.Equals(null)) {
                 objectToPlace.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
                 objectToPlace.GetComponent<PlaceRotateConfirm>().DestroyItself();
                 objectToPlace = null;
+                PickFromFeederIP.Instance.ObjectDestroyed();
             }
             //Destroy(objectToPlaceUnmanipulatable);
         }
@@ -240,5 +243,9 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
             && msg.GetResult().GetSuccess() == true) {
             waiting_for_action_response = false;
         }
+    }
+
+    public void ObjectDestroyed() {
+        objectToPlace = null;
     }
 }
