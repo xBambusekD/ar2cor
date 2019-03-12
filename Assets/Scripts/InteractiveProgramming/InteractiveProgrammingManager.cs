@@ -34,60 +34,57 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
         CurrentState = ProgrammingManagerState.def;
     }
 	
-	// Update is called once per frame
-	void Update () {
-
-    }
-
 
     private void InterfaceStateChanged(InterfaceStateMsg interfaceStateMsg) {
-        if(CurrentState != ProgrammingManagerState.def) {
-            VisualizationClear();
-        }
-        Debug.Log("NEW INTERFACE STATE! " + interfaceStateMsg.ToYAMLString());
-
-        if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
-            switch (interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
-                case ProgramTypes.PICK_FROM_FEEDER:
-                    PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
-                    if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled) {
-                        CurrentState = ProgrammingManagerState.pick_from_feeder_learn;
-                        PickFromFeederIP.Instance.StartLearning();
-                        followedLearningPlacePoseOverride = true;
-                    }
-                    else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
-                        CurrentState = ProgrammingManagerState.pick_from_feeder_vis;
-                        PickFromFeederIP.Instance.Visualize();
-                    }
-                    break;
-                case ProgramTypes.PLACE_TO_POSE:
-                    PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
-                    if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && followedLearningPlacePoseOverride &&
-                        CurrentState != ProgrammingManagerState.place_to_pose_learn_followed) {
-                        CurrentState = ProgrammingManagerState.place_to_pose_learn_followed;
-                        PlaceToPoseIP.Instance.StartLearningContinuous();
-                        //followedLearningPlacePoseOverride = false;
-                    }
-                    else if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && !followedLearningPlacePoseOverride &&
-                        CurrentState != ProgrammingManagerState.place_to_pose_learn) {
-                        CurrentState = ProgrammingManagerState.place_to_pose_learn;
-                        PlaceToPoseIP.Instance.StartLearning();
-                    }
-                    else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
-                        CurrentState = ProgrammingManagerState.place_to_pose_vis;
-                        PlaceToPoseIP.Instance.Visualize();
-                    }
-                    break;
-                default:
-                    CurrentState = ProgrammingManagerState.def;
-                    break;
+        if (SystemStarter.Instance.calibrated) {
+            if (CurrentState != ProgrammingManagerState.def) {
+                VisualizationClear();
             }
+            Debug.Log("NEW INTERFACE STATE! " + interfaceStateMsg.ToYAMLString());
+
+            if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
+                switch (interfaceStateMsg.GetProgramCurrentItem().GetIType()) {
+                    case ProgramTypes.PICK_FROM_FEEDER:
+                        PickFromFeederIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
+                        if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled) {
+                            CurrentState = ProgrammingManagerState.pick_from_feeder_learn;
+                            PickFromFeederIP.Instance.StartLearning();
+                            followedLearningPlacePoseOverride = true;
+                        }
+                        else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
+                            CurrentState = ProgrammingManagerState.pick_from_feeder_vis;
+                            PickFromFeederIP.Instance.Visualize();
+                        }
+                        break;
+                    case ProgramTypes.PLACE_TO_POSE:
+                        PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
+                        if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && followedLearningPlacePoseOverride &&
+                            CurrentState != ProgrammingManagerState.place_to_pose_learn_followed) {
+                            CurrentState = ProgrammingManagerState.place_to_pose_learn_followed;
+                            PlaceToPoseIP.Instance.StartLearningContinuous();
+                            //followedLearningPlacePoseOverride = false;
+                        }
+                        else if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled && !followedLearningPlacePoseOverride &&
+                            CurrentState != ProgrammingManagerState.place_to_pose_learn) {
+                            CurrentState = ProgrammingManagerState.place_to_pose_learn;
+                            PlaceToPoseIP.Instance.StartLearning();
+                        }
+                        else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
+                            CurrentState = ProgrammingManagerState.place_to_pose_vis;
+                            PlaceToPoseIP.Instance.Visualize();
+                        }
+                        break;
+                    default:
+                        CurrentState = ProgrammingManagerState.def;
+                        break;
+                }
+            }
+            else {
+                CurrentState = ProgrammingManagerState.def;
+                followedLearningPlacePoseOverride = false;
+            }
+            Debug.Log(CurrentState);
         }
-        else { 
-            CurrentState = ProgrammingManagerState.def;
-            followedLearningPlacePoseOverride = false;
-        }
-        Debug.Log(CurrentState);
     }
 
     private void VisualizationClear() {

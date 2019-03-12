@@ -20,6 +20,8 @@ public class DetectedObject : MonoBehaviour, IFocusable {
     private bool triggered = false;
     private Collider triggering_collider;
 
+    private bool focus_stay = false;
+
     void Start() {
         wireframeMat = GetComponent<Renderer>().material;
         renderer = GetComponent<Renderer>();
@@ -38,6 +40,10 @@ public class DetectedObject : MonoBehaviour, IFocusable {
             renderer.enabled = true;
             triggered = false;
         }
+
+        if(focus_stay) {
+            OnFocusStay();
+        }
 	}
 
     public void SetObject(Vector3 pos, Quaternion rot, Vector3 box, string obj_type, int id) {
@@ -54,6 +60,7 @@ public class DetectedObject : MonoBehaviour, IFocusable {
             wireframeMat.SetColor("_WireColor", blue);
             PickFromFeederIP.Instance.StaringAtObject(true);
         }
+        focus_stay = true;
     }
 
     public void OnFocusExit() {
@@ -61,7 +68,17 @@ public class DetectedObject : MonoBehaviour, IFocusable {
         if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
             PickFromFeederIP.Instance.StaringAtObject(false);
         }
+
+        focus_stay = false;
+        PickFromFeederIP.Instance.IndicateRobotReachability(false);
     }
+
+    public void OnFocusStay() {
+        if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
+            PickFromFeederIP.Instance.IndicateRobotReachability(true);
+        }
+    }
+
 
     void OnTriggerEnter(Collider col) {
         if (col.transform.parent.tag.Equals("manipulatable_object")) {

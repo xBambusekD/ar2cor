@@ -103,6 +103,12 @@ public static class RobotHelper {
             -object_position.y >= 0 && -object_position.y <= tableSize.y &&
             object_position.z >= 0 && object_position.z <= 0.05f);
     }
+
+    public static bool IsArmAboveTable(Vector3 arm_position) {
+        return (arm_position.x >= 0 && arm_position.x <= tableSize.x &&
+            
+            arm_position.z >= 0 && arm_position.z <= 0.5f);
+    }
     #endregion
 
     #region grasping

@@ -90,12 +90,11 @@ public class SystemStarter : Singleton<SystemStarter> {
                 worldAnchor.transform.eulerAngles = new Vector3(-90f, 20f, 0f);
                 //worldAnchor.transform.Rotate(180f, 0f, 0f, Space.Self);
 
+                worldAnchorVisualizationCube.gameObject.SetActive(true);
+                worldAnchorRecalibrationButton.gameObject.SetActive(true);
                 if (OnSystemStarted != null) {
                     OnSystemStarted();
                 }
-
-                //textToSpeechManager.Speak("Ahoj, já jsem Váš průvodce tímto programem. Musíte kliknout na objekt a poté na stůl. To je vše. A nečum.");
-                //SpeechManagerAzure.Speak("Ahoj, ja som Váš sprievodca týmto programom. Musíte kliknúť na objekt a potom na stôl. To je všetko. A nečum.");
             }
 #endif
 #if !UNITY_EDITOR

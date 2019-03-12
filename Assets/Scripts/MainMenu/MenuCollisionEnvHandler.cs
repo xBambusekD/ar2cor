@@ -23,7 +23,7 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
     // Use this for initialization
     void Start () {
         timer = 5f;
-        env_hidden = false;
+        env_hidden = true;
         commands_disabled = true;
         learning_disabled = false;
         texttospeech_disabled = false;

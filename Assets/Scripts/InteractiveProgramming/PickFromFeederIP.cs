@@ -54,9 +54,10 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
             robotArm.transform.parent = cursor.transform;
             robotArm.transform.localPosition = new Vector3(0f, 0f, 0.3f);
             robotArm.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
-            //robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
+            robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
             robotArm.GetComponent<PR2GripperController>().SetCollidersActive(false);
             robotArm.GetComponent<PR2GripperController>().OpenGripperInstantly();
+            //robotArm.GetComponent<PR2GripperController>().FollowTransform(cursor.transform);
         }
 
     }
@@ -283,6 +284,22 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
     public void StaringAtObject(bool active) {
         robotArm.GetComponent<PR2GripperController>().SetArmActive(active);
+    }
+
+    public void IndicateRobotReachability(bool active) {
+        if (active) {
+            Vector3 arm_position_in_world = world_anchor.transform.InverseTransformPoint(robotArm.transform.position);
+            Debug.Log(arm_position_in_world);
+            if (RobotHelper.IsArmAboveTable(arm_position_in_world)) { 
+                robotArm.GetComponent<PR2GripperController>().MaterialColorToGreen();
+            }
+            else {
+                robotArm.GetComponent<PR2GripperController>().MaterialColorToRed();
+            }
+        }
+        else {
+            robotArm.GetComponent<PR2GripperController>().MaterialColorToDefault();
+        }
     }
 
     public void ObjectDestroyed() {
