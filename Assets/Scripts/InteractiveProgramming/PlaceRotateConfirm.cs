@@ -31,6 +31,15 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     private void OnDisable() {
         ClickForPlace.OnClicked -= PlaceObject;
         GeneralClick.OnClicked -= PlayErrorSound;
+
+        try {
+            appBarInstance.BoundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+            appBarInstance.State = AppBar.AppBarStateEnum.Hidden;
+            appBarInstance.OnDoneClicked -= ConfirmRotation;
+        }
+        catch (NullReferenceException e) {
+
+        }        
     }
 
     private void Start() {        
@@ -110,10 +119,11 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
         //rotate object around z axis to face it with y axis down
         //transform.Rotate(0f, 0f, -90f, Space.Self);
         PlaceToPoseIP.Instance.SaveObjectPosition(transform.localPosition, transform.localRotation);
-        PlaceToPoseIP.Instance.PassObjectToPlaceReference(gameObject);
+        //PlaceToPoseIP.Instance.PassObjectToPlaceReference(gameObject);
 
         DeactivateItself();
     }
+
 
     //called whenever user clicks on this object
     public void OnInputClicked(InputClickedEventData eventData) {        

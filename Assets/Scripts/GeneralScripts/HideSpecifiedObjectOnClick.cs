@@ -3,18 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HideSpecifiedObjectOnClick : MonoBehaviour, IInputHandler {
+public class HideSpecifiedObjectOnClick : MonoBehaviour, IInputClickHandler {
 
     [SerializeField]
     private List<GameObject> ObjectsToHide = new List<GameObject>();
-    
-    public void OnInputDown(InputEventData eventData) {
-        foreach(GameObject obj in ObjectsToHide) {
+
+    public void OnInputClicked(InputClickedEventData eventData) {
+        foreach (GameObject obj in ObjectsToHide) {
             obj.SetActive(!obj.activeSelf);
         }
     }
 
-    public void OnInputUp(InputEventData eventData) {
-        
-    }
 }

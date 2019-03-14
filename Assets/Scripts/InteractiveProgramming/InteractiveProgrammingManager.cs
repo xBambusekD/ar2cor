@@ -69,8 +69,18 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                             CurrentState = ProgrammingManagerState.place_to_pose_learn;
                             PlaceToPoseIP.Instance.StartLearning();
                         }
+                        else if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled &&
+                            (CurrentState == ProgrammingManagerState.place_to_pose_learn_followed || CurrentState == ProgrammingManagerState.place_to_pose_learn)) {
+                            PlaceToPoseIP.Instance.UpdatePlacePoseFromROS(ROSUnityCoordSystemTransformer.ConvertVector(interfaceStateMsg.GetProgramCurrentItem().GetPose()[0].GetPose().GetPosition().GetPoint()),
+                                ROSUnityCoordSystemTransformer.ConvertQuaternion(interfaceStateMsg.GetProgramCurrentItem().GetPose()[0].GetPose().GetOrientation().GetQuaternion()));
+                        }
                         else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
                             CurrentState = ProgrammingManagerState.place_to_pose_vis;
+                            PlaceToPoseIP.Instance.Visualize();
+                        }
+                        else if (!interfaceStateMsg.GetEditEnabled() && CurrentState == ProgrammingManagerState.place_to_pose_learn_followed) {
+                            CurrentState = ProgrammingManagerState.place_to_pose_vis;
+                            followedLearningPlacePoseOverride = false;
                             PlaceToPoseIP.Instance.Visualize();
                         }
                         break;

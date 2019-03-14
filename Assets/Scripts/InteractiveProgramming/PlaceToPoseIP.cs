@@ -81,6 +81,16 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         }
     }
 
+    public void UpdatePlacePoseFromROS(Vector3 position, Quaternion rotation) {
+        if(!objectToPlace.GetComponent<PlaceRotateConfirm>().object_attached) {
+            objectToPlace.transform.localPosition = position;
+            objectToPlace.transform.localRotation = rotation;
+
+            currentPlacePosition = position;
+            currentPlaceOrientation = rotation;
+        }
+    }
+
 
     public void StartLearning() {
         learning = true;
@@ -229,9 +239,12 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
 
         ROSActionHelper.OnLearningActionResult -= OnLearningActionResult;
 
-        //Destroy(objectToPlaceUnmanipulatable);
-        InteractiveProgrammingManager.Instance.followedLearningPlacePoseOverride = false;
-        InteractiveProgrammingManager.Instance.CurrentState = InteractiveProgrammingManager.ProgrammingManagerState.place_to_pose_vis;
+        
+        //if(InteractiveProgrammingManager.Instance.followedLearningPlacePoseOverride) {
+        //    InteractiveProgrammingManager.Instance.followedLearningPlacePoseOverride = false;
+        //    InteractiveProgrammingManager.Instance.CurrentState = InteractiveProgrammingManager.ProgrammingManagerState.place_to_pose_vis;
+        //    Visualize();
+        //}
 
         yield return null;
     }

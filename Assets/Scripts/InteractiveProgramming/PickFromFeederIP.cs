@@ -50,15 +50,17 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
 
         spatial_mapping.SetActive(false);
 
-        if(robotArm.transform.parent != cursor.transform) {
-            robotArm.transform.parent = cursor.transform;
-            robotArm.transform.localPosition = new Vector3(0f, 0f, 0.3f);
-            robotArm.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
-            robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
-            robotArm.GetComponent<PR2GripperController>().SetCollidersActive(false);
-            robotArm.GetComponent<PR2GripperController>().OpenGripperInstantly();
+        //if(robotArm.transform.parent != cursor.transform) {
+        //robotArm.transform.parent = cursor.transform;
+        //robotArm.transform.localPosition = new Vector3(0f, 0f, 0.3f);
+        //robotArm.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
+        robotArm.GetComponent<PR2GripperController>().PlaceGripperToManipulation();
+        robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
+        robotArm.GetComponent<PR2GripperController>().SetCollidersActive(false);
+        robotArm.GetComponent<PR2GripperController>().OpenGripperInstantly();
+        robotArm.GetComponent<FollowTransform>().enabled = true;
             //robotArm.GetComponent<PR2GripperController>().FollowTransform(cursor.transform);
-        }
+        //}
 
     }
 
@@ -79,6 +81,7 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
                 robotArm.transform.localPosition = robotArmPosition;
                 robotArm.transform.localRotation = robotArmRotation;
                 robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
+                robotArm.GetComponent<PR2GripperController>().CloseGripperInstantly();
             }
 
             Vector3 objectPosition = FakeFeederObjectsPositions.GetObjectPositionInFeeder(programItemMsg.GetObject()[0],
@@ -171,6 +174,8 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
         objectTypeToPick = detectedObject.type;
 
         objectToPick.GetComponent<PlaceRotateConfirm>().object_attached = true;
+
+        PlaceToPoseIP.Instance.PassObjectToPlaceReference(objectToPick);
 
         StartCoroutine(SaveToROS());
     }
@@ -265,11 +270,12 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
         yield return null;
 
 
-        robotArm.transform.parent = world_anchor.transform;
-        robotArm.GetComponent<PR2GripperController>().PlaceGripperToInit();
-        robotArm.GetComponent<PR2GripperController>().SetArmActive(false);
-        robotArm.GetComponent<PR2GripperController>().SetCollidersActive(true);
+        //robotArm.transform.parent = world_anchor.transform;
+        robotArm.GetComponent<FollowTransform>().enabled = false;
         robotArm.GetComponent<PR2GripperController>().CloseGripperInstantly();
+        robotArm.GetComponent<PR2GripperController>().PlaceGripperToInit();
+        robotArm.GetComponent<PR2GripperController>().SetCollidersActive(true);
+        robotArm.GetComponent<PR2GripperController>().SetArmActive(false);
 
         spatial_mapping.SetActive(true);
     }
@@ -289,7 +295,7 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
     public void IndicateRobotReachability(bool active) {
         if (active) {
             Vector3 arm_position_in_world = world_anchor.transform.InverseTransformPoint(robotArm.transform.position);
-            Debug.Log(arm_position_in_world);
+            //Debug.Log(arm_position_in_world);
             if (RobotHelper.IsArmAboveTable(arm_position_in_world)) { 
                 robotArm.GetComponent<PR2GripperController>().MaterialColorToGreen();
             }

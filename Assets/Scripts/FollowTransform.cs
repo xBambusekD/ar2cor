@@ -8,6 +8,10 @@ public class FollowTransform : MonoBehaviour {
     public float RotateSmoothTime = 0.1f;
     public float MoveSpeed = 10f;
 
+    public bool UseStartTransform = false;
+    public Vector3 StartPosition;
+    public Vector3 StartRotation;
+
     private float AngularVelocity = 0.0f;
     
     private Vector3 startParentPosition;
@@ -20,13 +24,46 @@ public class FollowTransform : MonoBehaviour {
 
     private Matrix4x4 parentMatrix;
 
-    void Start() {
+    //void Start() {
+    //    startParentPosition = TransformToFollow.position;
+    //    startParentRotationQ = TransformToFollow.rotation;
+    //    startParentScale = TransformToFollow.lossyScale;
+
+    //    if(UseStartTransform) {
+    //        startChildPosition = TransformToFollow.InverseTransformPoint(StartPosition);
+    //        startChildRotationQ = Quaternion.Inverse(TransformToFollow.rotation) * Quaternion.Euler(StartRotation);
+    //    }
+    //    else {
+    //        startChildPosition = transform.position;
+    //        startChildRotationQ = transform.rotation;
+    //    }
+    //    startChildScale = transform.lossyScale;
+
+    //    // Keeps child position from being modified at the start by the parent's initial transform
+    //    startChildPosition = DivideVectors(Quaternion.Inverse(TransformToFollow.rotation) * (startChildPosition - startParentPosition), startParentScale);
+    //}
+
+    private void OnEnable() {
         startParentPosition = TransformToFollow.position;
         startParentRotationQ = TransformToFollow.rotation;
         startParentScale = TransformToFollow.lossyScale;
 
+        if (UseStartTransform) {
+            Transform previous_parent = transform.parent;
+
+            transform.parent = TransformToFollow;
+            transform.localPosition = StartPosition;
+            transform.localEulerAngles = StartRotation;
+
+            transform.parent = previous_parent;
+
+            //transform.position = TransformToFollow.InverseTransformPoint(transform.position);
+            //transform.rotation = Quaternion.Inverse(TransformToFollow.rotation) * Quaternion.Euler(StartRotation);
+        }
+        
         startChildPosition = transform.position;
         startChildRotationQ = transform.rotation;
+        
         startChildScale = transform.lossyScale;
 
         // Keeps child position from being modified at the start by the parent's initial transform

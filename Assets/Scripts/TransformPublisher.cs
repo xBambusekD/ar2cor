@@ -13,18 +13,13 @@ public class TransformPublisher : MonoBehaviour {
 
     private TFMessageMsg tfMsg;
 
-    // Use this for initialization
-    void Start () {
-    }
-	
 	// Update is called once per frame
 	void Update () {
         if(SystemStarter.Instance.calibrated) {
             //Vector3 relativePositionToParent = gameObject.transform.InverseTransformPoint(parentGameObject.transform.position);
             Vector3 relativePositionToParent = parentGameObject.transform.InverseTransformPoint(gameObject.transform.position);
             Quaternion relativeRotationToParent = Quaternion.Inverse(parentGameObject.transform.rotation) * gameObject.transform.rotation;
-
-            
+                        
 
             tfMsg = new TFMessageMsg(new List<TransformStampedMsg>() {new TransformStampedMsg(new HeaderMsg(0, ROSTimeHelper.GetCurrentTime(), frame_id), child_frame_id,
                 new TransformMsg(new Vector3Msg(relativePositionToParent.x, -relativePositionToParent.y, relativePositionToParent.z), 

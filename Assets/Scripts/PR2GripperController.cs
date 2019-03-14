@@ -10,6 +10,12 @@ public class PR2GripperController : MonoBehaviour {
     [SerializeField]
     private Vector3 GripperInitEulerRotation = new Vector3(-90f, 90f, 0f);
 
+    [SerializeField]
+    private Vector3 GripperManipulationPosition = new Vector3(0f, 0f, 0.3f);
+
+    [SerializeField]
+    private Vector3 GripperManipulationEulerRotation = new Vector3(0f, 90f, 0f);
+
     private GameObject world_anchor;
     private Animator animator;
 
@@ -75,6 +81,11 @@ public class PR2GripperController : MonoBehaviour {
         transform.localEulerAngles = GripperInitEulerRotation;
     }
 
+    public void PlaceGripperToManipulation() {
+        transform.localPosition = GripperManipulationPosition;
+        transform.localEulerAngles = GripperManipulationEulerRotation;
+    }
+
     public void ParentToWorldAnchor() {
         transform.parent = world_anchor.transform;
     }
@@ -96,10 +107,20 @@ public class PR2GripperController : MonoBehaviour {
     }
 
     public void OpenGripperInstantly() {
+        foreach (AnimatorControllerParameter p in animator.parameters) {
+            if (p.type == AnimatorControllerParameterType.Trigger) {
+                animator.ResetTrigger(p.name);
+            }
+        }
         animator.SetTrigger("open_instantly");
     }
 
     public void CloseGripperInstantly() {
+        foreach (AnimatorControllerParameter p in animator.parameters) {
+            if (p.type == AnimatorControllerParameterType.Trigger) {
+                animator.ResetTrigger(p.name);
+            }
+        }
         animator.SetTrigger("close_instantly");
     }
 
