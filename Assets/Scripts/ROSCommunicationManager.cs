@@ -48,6 +48,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
             ros.AddSubscriber(typeof(HololensStateSubscriber));
             ros.AddSubscriber(typeof(CollisionEnvSubscriber));
             ros.AddSubscriber(typeof(LearningRequestActionResultSubscriber));
+            ros.AddPublisher(typeof(HoloLensClickPublisher));
             ros.AddPublisher(typeof(HoloLensActivityPublisher));
             ros.AddPublisher(typeof(HoloLensLearningPublisher));
             ros.AddPublisher(typeof(InterfaceStatePublisher));
@@ -226,6 +227,24 @@ public class DetectedObjectsSubscriber : ROSBridgeSubscriber {
 
 
 #region hololens
+public class HoloLensClickPublisher : ROSBridgePublisher {
+    public new static string GetMessageTopic() {
+        return "/art/interface/hololens/click";
+    }
+
+    public new static string GetMessageType() {
+        return "std_msgs/Header";
+    }
+
+    public static string ToYAMLString(HeaderMsg msg) {
+        return msg.ToYAMLString();
+    }
+
+    public static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new HeaderMsg(msg);
+    }
+}
+
 public class HoloLensActivityPublisher : ROSBridgePublisher {
     public new static string GetMessageTopic() {
         return "/art/interface/hololens/active";
