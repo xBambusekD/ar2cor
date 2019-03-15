@@ -1,4 +1,5 @@
 ﻿using HoloToolkit.Unity;
+using HoloToolkit.Unity.UX;
 using ROSBridgeLib.actionlib_msgs;
 using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.geometry_msgs;
@@ -82,7 +83,8 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
     }
 
     public void UpdatePlacePoseFromROS(Vector3 position, Quaternion rotation) {
-        if(!objectToPlace.GetComponent<PlaceRotateConfirm>().object_attached) {
+        // do not update when object is attached to gaze and do not update if user is currently using one of the rotation handles
+        if(!objectToPlace.GetComponent<PlaceRotateConfirm>().object_attached && !objectToPlace.GetComponent<BoundingBoxRig>().UsingHandle) {
             objectToPlace.transform.localPosition = position;
             objectToPlace.transform.localRotation = rotation;
 

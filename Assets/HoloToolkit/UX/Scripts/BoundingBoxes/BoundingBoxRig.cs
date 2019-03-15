@@ -166,10 +166,15 @@ namespace HoloToolkit.Unity.UX
             ShowRig = false;
         }
 
+        [HideInInspector]
+        public bool UsingHandle { get; private set; }
+
         public void FocusOnHandle(GameObject handle)
         {
             if (handle != null)
             {
+                UsingHandle = true;
+
                 for (int i = 0; i < rotateHandles.Length; ++i)
                 {
                     rotateHandles[i].SetActive(rotateHandles[i].gameObject == handle);
@@ -187,6 +192,8 @@ namespace HoloToolkit.Unity.UX
             }
             else
             {
+                UsingHandle = false;
+
                 for (int i = 0; i < rotateHandles.Length; ++i)
                 {
                     rotateHandles[i].SetActive(true);

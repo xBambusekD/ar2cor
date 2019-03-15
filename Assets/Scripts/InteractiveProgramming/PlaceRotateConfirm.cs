@@ -7,8 +7,10 @@ using UnityEngine;
 
 public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
 
-    private AppBar appBarInstance;
+    [HideInInspector]
+    public AppBar appBarInstance;
 
+    [HideInInspector]
     public bool object_attached = false;
 
     private GameObject cursor;
@@ -106,7 +108,7 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     private void EnableRotation() {
         appBarInstance.State = AppBar.AppBarStateEnum.Manipulation;
         GetComponent<BoundingBoxRig>().Activate();
-
+        
         //subscribe to event when user clicks OK in AppBar
         appBarInstance.OnDoneClicked += ConfirmRotation;
     }
