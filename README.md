@@ -1,4 +1,4 @@
-# AR2COR
+# AR²COR
 
 Unity application for Microsoft HoloLens for use in [ARCOR](https://github.com/robofit/arcor) platform (augmented reality-based human-robot interaction). Application visualizes detected objects by robot ("to see what robot sees"), it provides visualization of robot learned programs which is fully controllable with voice. Furthemore, user is able to configure collision environment with use of gestures. The application communicates with ARCOR through a rosbridge, since the ARCOR runs under the Ubuntu 14.04 along with ROS Indigo.
 
