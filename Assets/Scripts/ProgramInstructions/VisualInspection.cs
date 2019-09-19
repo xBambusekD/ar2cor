@@ -15,13 +15,11 @@ public class VisualInspection : ProgramInstruction {
     private Vector3 placePosition;
     private Vector3 upPosition;
     private Quaternion placeQuaternion;
-    private GameObject world_anchor;
+    //private GameObject world_anchor;
 
     private bool movedToPose;
     private bool moving_up;
     private bool moving_to_place;
-    private bool moving_down;
-    private bool moving_arm_up;
 
     public override void Awake() {
         base.Awake();
@@ -30,10 +28,8 @@ public class VisualInspection : ProgramInstruction {
         movedToPose = false;
         moving_up = true;
         moving_to_place = false;
-        moving_down = false;
-        moving_arm_up = false;
 
-        world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
+        //world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
     }
     	
 	// Update is called once per frame
@@ -54,7 +50,7 @@ public class VisualInspection : ProgramInstruction {
             }
             //normal run
             else {
-                if (!movedToPose || speechManager.IsSpeakingOrInQueue()) {
+                if (!movedToPose) {
                     runTime += Time.deltaTime;
 
                     if (objectToMove != null) {
@@ -111,13 +107,11 @@ public class VisualInspection : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         objectToMove.transform.localPosition = placePosition;
         objectToMove.transform.localRotation = placeQuaternion;
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnEnable() {
@@ -133,14 +127,12 @@ public class VisualInspection : ProgramInstruction {
         movedToPose = false;
         moving_up = true;
         moving_to_place = false;
-        moving_down = false;
-        moving_arm_up = false;
 
         InitObjectToPlace();
         InitPlacePose();
 
         base.Run();
 
-        speechManager.Say("Sensor checks the quality of the object and classifies it as good or bad.");
+        //speechManager.Say("Sensor checks the quality of the object and classifies it as good or bad.");
     }
 }

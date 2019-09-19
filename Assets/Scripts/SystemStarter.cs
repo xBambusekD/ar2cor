@@ -5,9 +5,13 @@ using HoloToolkit.Unity;
 using SimpleJSON;
 using System.IO;
 using Vuforia;
+using UnbiasedTimeManager;
 
 public class SystemStarter : Singleton<SystemStarter> {
-    
+
+    public delegate void SystemStartedAction();
+    public event SystemStartedAction OnSystemStarted;
+
     public bool calibrated;
     public GameObject worldAnchor;
     public GameObject worldAnchorVisualizationCube;
@@ -15,11 +19,15 @@ public class SystemStarter : Singleton<SystemStarter> {
     public GameObject helpAnchor;
     public GameObject helpAnchorVisualizationCube;
     public float worldAnchorOffset = 0.045f;
-    public TextToSpeechManager speechManager;
+    //public TextToSpeechManager speechManager;
     
     private bool anchorLoaded;
     private bool calibration_launched;
     private List<GameObject> childrenToHide = new List<GameObject>();
+
+    private bool ntpTimeSet = false;
+    private bool robotRadiusCalled = false;
+    private bool languageCalled = false;
 
     // Use this for initialization
     void Start() {
@@ -27,16 +35,69 @@ public class SystemStarter : Singleton<SystemStarter> {
         anchorLoaded = false;
         calibrated = false;
         calibration_launched = false;
-
-#if UNITY_EDITOR
-        calibrated = true;
-#endif
-        
     }
     	
 	// Update is called once per frame
 	void Update() {
         if(ROSCommunicationManager.Instance.connectedToROS) {
+
+            if (!languageCalled) {
+                TextToSpeechManager.Instance.LoadLanguage();
+                languageCalled = true;
+            }
+
+            if (!ntpTimeSet) {
+                ntpTimeSet = true;
+                UnbiasedTime.Init(MainMenuManager.Instance.currentSetup.GetIP());
+            }
+
+            //Load known object types from database
+            if (!ObjectsManager.Instance.objectReloadInitiated) {
+                ObjectsManager.Instance.ReloadObjectTypes();
+                ObjectsManager.Instance.objectReloadInitiated = true;
+            }
+
+            if (!ObjectsManager.Instance.objectTypesLoaded) {
+                return;
+            }
+
+            //wait until time synchronizes with ntp
+            if (!UnbiasedTime.Instance.TimeSynchronized) {
+                //Debug.Log("TIME STILL NOT SYNCHRONIZED");
+                return;
+            }
+
+            //Load robot reach radius
+            if (!robotRadiusCalled) {
+                robotRadiusCalled = true;
+                RobotHelper.LoadRobotRadius();
+                RobotHelper.LoadTableSize();
+            }
+
+            if (!TextToSpeechManager.Instance.languageSet) {
+                return;
+            }
+
+#if UNITY_EDITOR
+            if (!calibrated) {
+                calibrated = true;
+
+                //StartCoroutine(startFakeCalibration());
+                //GameObject super_root = new GameObject("super_root");
+                //super_root.transform.position = Vector3.zero;
+                //worldAnchor.transform.parent = super_root.transform;
+                //super_root.transform.eulerAngles = new Vector3(-90f, 0f, 0f);
+                worldAnchor.transform.eulerAngles = new Vector3(-90f, 20f, 0f);
+                //worldAnchor.transform.Rotate(180f, 0f, 0f, Space.Self);
+
+                worldAnchorVisualizationCube.gameObject.SetActive(true);
+                worldAnchorRecalibrationButton.gameObject.SetActive(true);
+                if (OnSystemStarted != null) {
+                    OnSystemStarted();
+                }
+            }
+#endif
+#if !UNITY_EDITOR
             if (!anchorLoaded && !calibrated && !calibration_launched && (WorldAnchorManager.Instance.AnchorStore != null)) {
                 string[] ids = WorldAnchorManager.Instance.AnchorStore.GetAllIds();
                 //world anchor is present
@@ -49,14 +110,25 @@ public class SystemStarter : Singleton<SystemStarter> {
 
                     anchorLoaded = true;
                     calibrated = true;
+
+                    if (OnSystemStarted != null) {
+                        OnSystemStarted();
+                    }
                 }
                 else {
                     StartCoroutine(startCalibration());
                     calibration_launched = true;
                 }
             }
+#endif
         }
     }
+
+    //private IEnumerator startFakeCalibration() {
+    //    TextToSpeechManager.Instance.Speak(Texts.OnCalibrationStarts);
+    //    yield return new WaitWhile(() => TextToSpeechManager.Instance.IsSpeakingOrInQueue());
+    //    TextToSpeechManager.Instance.Speak(Texts.OnCalibrationContinues);
+    //}
 
     private IEnumerator startCalibration() {
         SetVuforiaActive(true);
@@ -67,9 +139,9 @@ public class SystemStarter : Singleton<SystemStarter> {
         //if it's recalibration.. remove current world anchor
         WorldAnchorManager.Instance.RemoveAnchor(worldAnchor.gameObject);
 
-        speechManager.WaitAndSay("System is going to calibrate. Please put the markers to the corners of the table.");
-        yield return new WaitWhile(() => speechManager.textToSpeech.SpeechTextInQueue() || speechManager.textToSpeech.IsSpeaking());
-        speechManager.WaitAndSay("Marker detection started. Please look directly at each one of the markers and click on the cubes to confirm calibration.");
+        TextToSpeechManager.Instance.Speak(Texts.OnCalibrationStarts);
+        yield return new WaitWhile(() => TextToSpeechManager.Instance.IsSpeakingOrInQueue());
+        TextToSpeechManager.Instance.Speak(Texts.OnCalibrationContinues);
 
         yield return new WaitWhile(() => CalibManager.Instance.allMarkersDetected == false);
 
@@ -78,7 +150,7 @@ public class SystemStarter : Singleton<SystemStarter> {
         GameObject marker13 = new GameObject();
 
         foreach (GameObject marker in CalibManager.Instance.detectedMarkersList) {
-            switch(marker.name) {
+            switch (marker.name) {
                 case "HelpAnchor_10":
                     marker10 = marker;
                     break;
@@ -129,7 +201,11 @@ public class SystemStarter : Singleton<SystemStarter> {
 
         HideActiveChildrenObjects(false, worldAnchor);
 
-        speechManager.WaitAndSay("Calibration completed.");
+        TextToSpeechManager.Instance.Speak(Texts.OnCalibrationEnd);
+
+        if (OnSystemStarted != null) {
+            OnSystemStarted();
+        }
 
         SetVuforiaActive(false);
     }

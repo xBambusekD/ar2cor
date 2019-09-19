@@ -22,7 +22,6 @@ public class PlaceToContainer : ProgramInstruction {
     private bool moving_up;
     private bool moving_to_place;
     private bool dropping;
-    private bool moving_arm_up;
 
     private Rigidbody objectToPlaceRigidbody;
 
@@ -36,7 +35,6 @@ public class PlaceToContainer : ProgramInstruction {
         placedToPose = false;
         moving_to_place = true;
         dropping = false;
-        moving_arm_up = false;
         objectToPlaceRigidbody = null;
 
         world_anchor = GameObject.FindGameObjectWithTag("world_anchor");
@@ -60,7 +58,7 @@ public class PlaceToContainer : ProgramInstruction {
             }
             //normal run
             else {
-                if (!placedToPose || speechManager.IsSpeakingOrInQueue()) {
+                if (!placedToPose) {
                     runTime += Time.deltaTime;
 
                     if (objectToPlace != null) {
@@ -183,7 +181,6 @@ public class PlaceToContainer : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         objectToPlace.transform.localPosition = placePosition;
         objectToPlace.transform.localRotation = placeQuaternion;
         if (pr2_arm.transform.parent != world_anchor.transform) {
@@ -214,7 +211,6 @@ public class PlaceToContainer : ProgramInstruction {
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnEnable() {
@@ -230,13 +226,12 @@ public class PlaceToContainer : ProgramInstruction {
         placedToPose = false;
         moving_to_place = true;
         dropping = false;
-        moving_arm_up = false;
 
         InitObjectToPlace();
         InitPlacePose();
 
         base.Run();
 
-        speechManager.Say("After classification, the robot places the object to the container.");
+        //speechManager.Say("After classification, the robot places the object to the container.");
     }
 }

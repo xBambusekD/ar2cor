@@ -7,8 +7,6 @@ public abstract class ProgramInstruction : MonoBehaviour {
     public bool run;
 
     public float runTime;
-    public GameObject speechManagerObj;
-    public TextToSpeechManager speechManager;
     public GameObject pr2_arm;
     public Animator pr2_animator;
 
@@ -17,8 +15,6 @@ public abstract class ProgramInstruction : MonoBehaviour {
 
     //has to be called from child .. base.Awake()
     public virtual void Awake() {
-        speechManagerObj = GameObject.FindGameObjectWithTag("speech_manager");
-        speechManager = speechManagerObj.GetComponent<TextToSpeechManager>();
         run = false;
         next = false;
         previous = false;
@@ -47,8 +43,7 @@ public abstract class ProgramInstruction : MonoBehaviour {
 
     //places the robot gripper into initial position
     public void PlaceRobotGripperToInit() {
-        pr2_arm.transform.localPosition = new Vector3(0.75f, -0.5f, 0.5f);
-        pr2_arm.transform.localEulerAngles = new Vector3(90f, -90f, 0f);
+        pr2_arm.GetComponent<PR2GripperController>().PlaceGripperToInit();
     }
 
     public void OnNextInstruction() {

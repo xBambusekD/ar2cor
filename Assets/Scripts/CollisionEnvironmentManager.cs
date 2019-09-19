@@ -22,6 +22,8 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
     private GameObject worldAnchor;
 
     private List<string> nonManipulatableObjects = new List<string>() { "table", "rf-front", "rf-middle", "rf-rear", "kinect-n1", "kinect-n2" };
+
+    private bool environment_hidden = true;
     
     // Use this for initialization
     void Start () {
@@ -35,7 +37,7 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
         if (SystemStarter.Instance.calibrated) {
             if(!manipulatingWithObject) {
                 if (collisionObjectsMsg != null) {
-                    Debug.Log(collisionObjectsMsg.ToYAMLString());
+                    //Debug.Log(collisionObjectsMsg.ToYAMLString());
                     existingPrimitives.Clear();
                     foreach (CollisionPrimitiveMsg primitiveMsg in collisionObjectsMsg.GetPrimitives()) {
                         //get all existing primitives names
@@ -77,11 +79,16 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
         }
         //if primitive wasn't updated, meaning it doesn't exists.. so create new one
         if(!updated) {
-            GameObject new_primitive = Instantiate(new GameObject(), worldAnchor.transform);
-            new_primitive.name = "CollisionObj-" + primitiveMsg.GetName();
+            GameObject new_primitive = new GameObject("CollisionObj-" + primitiveMsg.GetName());
+            new_primitive.transform.parent = worldAnchor.transform;
+            new_primitive.transform.localPosition = Vector3.zero;
+            new_primitive.transform.localEulerAngles = Vector3.zero;
             CollisionPrimitive collisionPrimitive = new_primitive.AddComponent<CollisionPrimitive>();
             // TODO pick correct prefab due to collision primitive (cube, sphere..)
             collisionPrimitive.InitNewPrimitive(primitiveMsg, collisionPrefabs[0]);
+
+            new_primitive.SetActive(!environment_hidden);
+
             collisionPrimitives.Add(new_primitive);
 
             // remove AppBarDisplay to not to show the app bar in order to disable manipulation with specified objects
@@ -146,6 +153,7 @@ public class CollisionEnvironmentManager : Singleton<CollisionEnvironmentManager
 
     //hides or shows collision environment - if hide_env == true - environment hides, else it shows
     public void HideCollisionEnvironment(bool hide_env) {
+        environment_hidden = hide_env;
         foreach(GameObject primitive in collisionPrimitives) {
             primitive.SetActive(!hide_env);
         }

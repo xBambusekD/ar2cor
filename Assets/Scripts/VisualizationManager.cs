@@ -22,7 +22,7 @@ public class VisualizationManager : Singleton<VisualizationManager> {
 	void Update () {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {
-                if (interfaceStateMsg.GetSystemState() == 6) {
+                if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_VISUALIZE) {
                     if (hololensStateMsg != null) {
                         if (hololensStateMsg.GetHololensState() == hololens_state.STATE_VISUALIZING) {
                             //sets current visualization state for program manager

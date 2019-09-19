@@ -13,10 +13,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
     private InterfaceStateMsg interfaceStateMsg;
     private ProgramItemMsg programItemMsg;
     private ProgramMsg programMsg;
-
-    private GameObject speechManagerObj;
-    private TextToSpeechManager speechManager;
-    
+        
     private bool sayAdjustArea;
     private bool sayUnknownObjectType;
     private bool objTypeReferenceSet;
@@ -31,8 +28,6 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
 
     // Use this for initialization
     void Start() {
-        speechManagerObj = GameObject.FindGameObjectWithTag("speech_manager");
-        speechManager = speechManagerObj.GetComponent<TextToSpeechManager>();
         sayAdjustArea = false;
         sayUnknownObjectType = false;
         objTypeReferenceSet = false;
@@ -46,7 +41,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {
                 //pick from polygon editing
-                if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PlaceToPose" &&
+                if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING && programItemMsg.GetIType() == "PlaceToPose" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
 
                     //check that object type is set
@@ -58,8 +53,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
                         ProgramBlockMsg programBlockMsg = programMsg.GetBlockByID(interfaceStateMsg.GetBlockID());
                         ProgramItemMsg refItem = programBlockMsg.GetProgramItemByID(programItemMsg.GetRefID()[0]);
                         if (refItem.GetObject().Count == 0 && !sayUnknownObjectType) {
-                            speechManager.Say("Robot doesn't know which object you want to place. You have to program picking instruction first.");
-                            Debug.Log("Robot doesn't know which object you want to place. You have to program picking instruction first.");
+                            //TextToSpeechManager.Instance.Speak(Texts.PlaceToPoseIE_PickIsNotProgrammed);
                             sayUnknownObjectType = true;
                         }
                         else if (refItem.GetObject().Count > 0) {
@@ -69,8 +63,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
 
                     //if object type is set
                     if (!sayAdjustArea && objTypeReferenceSet) {
-                        speechManager.Say("Drag object outline to set place pose and blue point to set orientation. When you are finished, click on done.");
-                        Debug.Log("Drag object outline to set place pose and blue point to set orientation. When you are finished, click on done.");
+                        //TextToSpeechManager.Instance.Speak(Texts.PlaceToPoseIE_DragOBjectOutline);
                         sayAdjustArea = true;
                     }
 
@@ -116,15 +109,13 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
                 //reset all variables
                 else {
                     if (instructionProgrammed) {
-                        speechManager.Say("Good job! You have successfully programmed place to pose instruction.");
-                        Debug.Log("Good job! You have successfully programmed place to pose instruction.");
+                        //TextToSpeechManager.Instance.Speak(Texts.PlaceToPoseIE_GoodJob);
                         instructionProgrammed = false;
                         pointingHand.GetComponent<PointingHandMover>().Stop();
                     }
                     //if just object type reference is set but not place pose
                     else if (objTypeReferenceSet) {
-                        speechManager.Say("You forgot to set the place pose. You have to move with it.");
-                        Debug.Log("You forgot to set the place pose. You have to move with it.");
+                        //TextToSpeechManager.Instance.Speak(Texts.PlaceToPoseIE_ForgotPlacePose);
                         pointingHand.GetComponent<PointingHandMover>().Stop();
                     }
                     sayAdjustArea = false;
@@ -153,7 +144,7 @@ public class PlaceToPoseIE : Singleton<PlaceToPoseIE> {
     public void SetProgramMsgFromROS(ProgramMsg msg) {
         //set only if system is really in edit mode of this particullar instruction
         if (interfaceStateMsg != null) {
-            if (interfaceStateMsg.GetSystemState() == 2 && programItemMsg.GetIType() == "PlaceToPose" &&
+            if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING && programItemMsg.GetIType() == "PlaceToPose" &&
                     interfaceStateMsg.GetEditEnabled() == true) {
                 programMsg = msg;
             }

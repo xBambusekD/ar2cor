@@ -39,6 +39,17 @@ using Windows.Foundation;
 
 namespace ROSBridgeLib {
     public class ROSBridgeWebSocketConnection {
+
+        private class ROSService {
+            public string Name;
+            public string Value;
+
+            public ROSService(string name, string value) {
+                Name = name;
+                Value = value;
+            }
+        }
+
         private class RenderTask {
             private Type _subscriber;
             private string _topic;
@@ -80,8 +91,7 @@ namespace ROSBridgeLib {
         private List<Type> _subscribers; // our subscribers
         private List<Type> _publishers; //our publishers
         private Type _serviceResponse; // to deal with service responses
-        private string _serviceName = null;
-        private string _serviceValues = null;
+        private List<ROSService> _serviceNameValues = new List<ROSService>();
         private List<RenderTask> _taskQ = new List<RenderTask>();
 
         private object _queueLock = new object();
@@ -314,8 +324,7 @@ namespace ROSBridgeLib {
                 }
                 else if ("service_response".Equals(op)) {
                     Debug.Log("Got service response " + node.ToString());
-                    _serviceName = node["service"];
-                    _serviceValues = (node["values"] == null) ? "" : node["values"].ToString();
+                    _serviceNameValues.Add(new ROSService(node["service"], (node["values"] == null) ? "" : node["values"].ToString()));
                 }
                 else
                     Debug.Log("Must write code here for other messages");
@@ -335,18 +344,18 @@ namespace ROSBridgeLib {
             if (newTask != null)
                 Update(newTask.getSubscriber(), newTask.getMsg());
 
-            if (_serviceName != null && _serviceValues != null) {
-                ServiceResponse(_serviceResponse, _serviceName, _serviceValues);
-                _serviceName = null;
-                _serviceValues = null;
+            if (_serviceNameValues.Count > 0) {                 
+                ServiceResponse(_serviceResponse, _serviceNameValues[0].Name, _serviceNameValues[0].Value);
+                _serviceNameValues.RemoveAt(0);
             }
         }
 
-        public void Publish(String topic, ROSBridgeMsg msg) {
+        public void Publish(String topic, ROSBridgeMsg msg, bool debug_log = true) {
 #if UNITY_EDITOR
             if (_ws != null) {
                 string s = ROSBridgeMsg.Publish(topic, msg.ToYAMLString());
-                Debug.Log ("Sending " + s);
+                if (debug_log)
+                    Debug.Log ("Sending " + s);
                 _ws.Send(s);
             }
 #endif

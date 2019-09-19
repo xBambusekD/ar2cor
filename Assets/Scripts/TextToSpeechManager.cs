@@ -1,61 +1,114 @@
 ﻿using HoloToolkit.Unity;
+using ROSBridgeLib.art_msgs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TextToSpeechManager : MonoBehaviour {
-    public TextToSpeech textToSpeech;
+public class TextToSpeechManager : Singleton<TextToSpeechManager> {
+    public TextToSpeech textToSpeechDefault;
+    public SpeechManager textToSpeechAzure;
 
-	// Use this for initialization
-	void Awake () {
-        textToSpeech = GetComponent<TextToSpeech>();       
-    }
+    [HideInInspector]
+    public bool languageSet = false;
 
-    void Start() {
-        textToSpeech.StartSpeaking("System has started.");
-    }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}    
+    private GuiNotificationMsg currentGuiNotification = new GuiNotificationMsg("", 0, false, GuiNotificationMsg.MessageType.INFO);
 
-    public void OnFirstCalibration() {
-        textToSpeech.StartSpeaking("System needs to calibrate. Please put the marker on the left bottom corner of the table.");
-    }
+    private bool texttospeech_enabled = true;
 
-    public void OnCalibrationStart() {
-        textToSpeech.StartSpeaking("Marker detection started. Please look directly at the marker.");
-    }
+    private Texts.Languages language;
 
-    public void OnCalibrationEnd() {
-        textToSpeech.StartSpeaking("Calibration completed.");
-    }
-    
-    public void Say(String textToSay) {
-        //if she talks .. stop her
-        if (IsSpeakingOrInQueue())
-            StopSpeaking();
-
-        textToSpeech.StartSpeaking(textToSay);
+    //Based on set language, different speech synthesizer are used.
+    public void Speak(string textToSay) {
+        if(texttospeech_enabled) {
+            switch(language) {
+                //use embeded text to speech
+                case Texts.Languages.ENGLISH:
+                    if (IsSpeakingOrInQueue())
+                        StopSpeaking();
+                    textToSpeechDefault.StartSpeaking(textToSay);
+                    break;
+                //use azure's text to speech cloud
+                case Texts.Languages.CZECH:
+                    textToSpeechAzure.Speak(textToSay);
+                    break;
+            }
+        }
+        Debug.Log(textToSay);
     }
 
     //waits for Zira to talk out sentence and then speaks
-    public void WaitAndSay(String textToSay) {
+    public void WaitAndSay(string textToSay) {
         StartCoroutine(WaitWhileSpeakingAndThenSay(textToSay));        
     }
 
-    IEnumerator WaitWhileSpeakingAndThenSay(String textToSay) {
-        yield return new WaitWhile(() => textToSpeech.SpeechTextInQueue() || textToSpeech.IsSpeaking());
-        textToSpeech.StartSpeaking(textToSay);
+    IEnumerator WaitWhileSpeakingAndThenSay(string textToSay) {
+        yield return new WaitWhile(() => IsSpeakingOrInQueue());
+        Speak(textToSay);
     }
 
+    //Based on set language, function returns true/false if synthesizer is speaking
     public bool IsSpeakingOrInQueue() {
-        return textToSpeech.IsSpeaking() || textToSpeech.SpeechTextInQueue();
+        switch(language) {
+            //use embeded text to speech
+            case Texts.Languages.ENGLISH:
+                return textToSpeechDefault.IsSpeaking() || textToSpeechDefault.SpeechTextInQueue();
+            //use azure's text to speech cloud
+            case Texts.Languages.CZECH:
+                return textToSpeechAzure.IsSpeaking();
+            default:
+                return false;
+        }
     }
 
     public void StopSpeaking() {
-        textToSpeech.StopSpeaking();
+        textToSpeechDefault.StopSpeaking();
+    }
+
+    //Sets current GUI notification from ARCOR. If TextToSpeech is enabled, notification is synthesized.
+    public void SetGuiNotificationMsg(GuiNotificationMsg msg) {
+        //prevent duplicate messages
+        //if(!currentGuiNotification.GetMsg().Equals(msg.GetMsg())) {
+        currentGuiNotification = msg;
+
+        Debug.Log("SPEAKING: " + currentGuiNotification.GetMsg());
+        if (texttospeech_enabled) {
+            //if temp notification cames, wait until regular stops speaking and then play
+            if (currentGuiNotification.GetTemp()) {
+                if (IsSpeakingOrInQueue()) {
+                    WaitAndSay(currentGuiNotification.GetMsg());
+                }
+            } else {
+                Speak(currentGuiNotification.GetMsg());
+            }
+        }
+        //}
+    }
+
+    //For enabling/disabling TextToSpeech from main menu.
+    public void EnableTextToSpeech(bool tts_enabled) {
+        texttospeech_enabled = tts_enabled;
+    }
+
+    //Loads set language from ROS param server.
+    public void LoadLanguage() {
+        ROSCommunicationManager.Instance.ros.CallService(ROSCommunicationManager.rosparamGetService, "{\"param_name\": \"art/interface/projected_gui/app/\" }");
+    }
+
+    //Called from ROSCommunicationManager when response to LoadLanguage service arrives. Sets text translations.
+    public void SetLanguage(string lang) {
+        switch(lang) {
+            case "en_US":
+                language = Texts.Languages.ENGLISH;
+                Texts.Language = Texts.Languages.ENGLISH;
+                break;
+            case "cs_CZ":
+                language = Texts.Languages.CZECH;
+                Texts.Language = Texts.Languages.CZECH;
+                break;
+        }
+        Debug.Log(language);
+        languageSet = true;
+
     }
 }

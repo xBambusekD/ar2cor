@@ -16,6 +16,9 @@ namespace HoloToolkit.Unity.UX
     /// </summary>
     public class AppBar : InteractionReceiver
     {
+        public delegate void ClickAction();
+        public event ClickAction OnDoneClicked;
+
         private float buttonWidth = 1.50f;
 
         /// <summary>
@@ -29,6 +32,9 @@ namespace HoloToolkit.Unity.UX
         /// to force the app bar to appear below the object
         /// </summary>
         public float HoverOffsetYScale = 0.25f;
+
+        [SerializeField]
+        private bool positionAppBarOnTop = false;
 
         /// <summary>
         /// Pushes the app bar away from the object
@@ -224,8 +230,9 @@ namespace HoloToolkit.Unity.UX
                     boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
                     Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
                     Destroy(boundingBox.Target);
+                    Destroy(boundingBox.gameObject);
                     //destroy also parent of target gameobject
-                    if(boundingBox.Target.transform.parent != null) {
+                    if (boundingBox.Target.transform.parent != null) {
                         boundingBox.Target.GetComponentInParent<CollisionPrimitive>().DestroyThis();
                         //Destroy(boundingBox.Target.transform.parent.gameObject);
                     }
@@ -254,6 +261,10 @@ namespace HoloToolkit.Unity.UX
                     State = AppBarStateEnum.Default;
                     // Deactivate BoundingBoxRig
                     boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+
+                    //custom informing other object about Done clicked
+                    if(OnDoneClicked != null)
+                        OnDoneClicked();
                     break;
 
                 default:
@@ -264,8 +275,10 @@ namespace HoloToolkit.Unity.UX
         public void DestroyThis() {
             // Destroy the target object, Bounding Box, Bounding Box Rig and App Bar
             boundingBox.Target.GetComponent<BoundingBoxRig>().Deactivate();
+            boundingBox.Target.GetComponent<BoundingBoxRig>().DestroyBoxInstance();
             Destroy(boundingBox.Target.GetComponent<BoundingBoxRig>());
             Destroy(boundingBox.Target);
+            Destroy(boundingBox.gameObject);
             Destroy(gameObject);
         }
 
@@ -346,7 +359,13 @@ namespace HoloToolkit.Unity.UX
                 Vector3 faceNormal = helper.GetFaceNormal(followingFaceIndex);
 
                 //finally we have new position
-                finalPosition = helper.GetFaceBottomCentroid(followingFaceIndex) + (faceNormal * HoverOffsetZ);
+                if(positionAppBarOnTop) {
+                    finalPosition = helper.GetFaceTopCentroid(followingFaceIndex) + (faceNormal * HoverOffsetZ);
+                }
+                else {
+                    finalPosition = helper.GetFaceBottomCentroid(followingFaceIndex) + (faceNormal * HoverOffsetZ);
+                }
+
             }
 
             // Follow our bounding box

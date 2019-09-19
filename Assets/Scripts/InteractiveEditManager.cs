@@ -21,7 +21,7 @@ public class InteractiveEditManager : Singleton<InteractiveEditManager> {
         if (SystemStarter.Instance.calibrated) {
             if (interfaceStateMsg != null) {                 
                 //state learning
-                if (interfaceStateMsg.GetSystemState() == 2) {
+                if (interfaceStateMsg.GetSystemState() == InterfaceStateMsg.SystemState.STATE_LEARNING) {
                     //TODO: kontrola jestli se interfaceState zmenil..
                     if (interfaceStateChanged) {
                         Debug.Log("InterfaceState changed!");
@@ -35,17 +35,8 @@ public class InteractiveEditManager : Singleton<InteractiveEditManager> {
         }
     }
 
-    private bool InterfaceStateChanged(InterfaceStateMsg currentState, InterfaceStateMsg newState) {
-        
-        return !(currentState.GetSystemState() == newState.GetSystemState() &&
-            currentState.GetProgramID() == newState.GetProgramID() &&
-            currentState.GetBlockID() == newState.GetBlockID() &&
-            currentState.GetEditEnabled() == newState.GetEditEnabled() &&
-            currentState.GetProgramCurrentItem().ToYAMLString().Equals(newState.GetProgramCurrentItem().ToYAMLString()));
-    }
-
     public void SetInterfaceStateMsgFromROS(InterfaceStateMsg msg) {
-        if ((interfaceStateMsg == null) || InterfaceStateChanged(interfaceStateMsg, msg)) {
+        if ((interfaceStateMsg == null) || ProgramHelper.CheckIfInterfaceStateChanged(interfaceStateMsg, msg)) {
             Debug.Log("TRUE InterfaceState changed!");
             interfaceStateMsg = msg;
             interfaceStateChanged = true;

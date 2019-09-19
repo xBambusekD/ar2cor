@@ -28,19 +28,15 @@ public class WaitUntilUserFinishes : ProgramInstruction {
             }
             //normal run
             else {
-                if (!(speechManager.IsSpeakingOrInQueue())) {
-                    run = false;
-                }
+                run = false;
             }
         }
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
     }
 
     void OnDisable() {
@@ -50,6 +46,6 @@ public class WaitUntilUserFinishes : ProgramInstruction {
     public override void Run() {
         base.Run();
         //speechManager.Say("Running wait until user finishes instruction.");
-        speechManager.Say("The robot will wait until you finish interaction with objects in current task.");
+        //speechManager.Say("The robot will wait until you finish interaction with objects in current task.");
     }
 }

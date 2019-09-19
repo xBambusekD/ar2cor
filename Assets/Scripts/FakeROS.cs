@@ -28,7 +28,7 @@ public class FakeROS : MonoBehaviour {
 	}
 
     private void CreateFakeInterfaceStateMsg() {
-        intefaceStateMsg = new InterfaceStateMsg("ART_BRAIN", 6, new TimeMsg(1520366291, 111136913), 13, 1,
+        intefaceStateMsg = new InterfaceStateMsg("ART_BRAIN", InterfaceStateMsg.SystemState.STATE_VISUALIZE, new TimeMsg(1520366291, 111136913), 13, 1,
                                 new ProgramItemMsg(1, 2, 0, "PickFromPolygon", "", new List<string>(), new List<PoseStampedMsg>(),
                                     new List<PolygonStampedMsg>(), new List<ushort>(), new List<KeyValueMsg>(), new List<string>(), new List<SceneLabelMsg>()),
                                 new List<KeyValueMsg>(), false, 0, 0);

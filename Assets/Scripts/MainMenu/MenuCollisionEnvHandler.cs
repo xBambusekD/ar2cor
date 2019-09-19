@@ -1,4 +1,5 @@
 ﻿using HoloToolkit.Unity.InputModule;
+using ROSBridgeLib.std_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,17 +10,23 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
     public Text InfoMessage;
     public Text ShowHideButtonText;
     public Text VoiceCommandsButtonText;
+    public Text LearningButtonText;
+    public Text TextToSpeechButtonText;
 
     private float timer;
     private bool env_hidden;
     private bool commands_disabled;
+    private bool learning_disabled;
+    private bool texttospeech_disabled;
     public SpeechInputSource speechInputSource;
 
     // Use this for initialization
     void Start () {
         timer = 5f;
-        env_hidden = false;
+        env_hidden = true;
         commands_disabled = true;
+        learning_disabled = false;
+        texttospeech_disabled = false;
     }
 	
 	// Update is called once per frame
@@ -79,4 +86,31 @@ public class MenuCollisionEnvHandler : MonoBehaviour {
         }
     }
 
+    public void DisableHoloLearning() {
+        //enable voice commands and change text to future disable option
+        if (learning_disabled) {
+            LearningButtonText.text = "DISABLE LEARNING";
+            learning_disabled = false;
+        }
+        //disable voice commands and change text to future enable option
+        else {
+            LearningButtonText.text = "ENABLE LEARNING";
+            learning_disabled = true;
+        }
+        InteractiveProgrammingManager.Instance.EnableHoloLearning(!learning_disabled);
+    }
+    
+    public void DisableTextToSpeech() {
+        //enable text to speech and change text to future disable option
+        if (texttospeech_disabled) {
+            TextToSpeechButtonText.text = "DISABLE TEXT TO SPEECH";
+            texttospeech_disabled = false;
+        }
+        //disable text to speech and change text to future enable option
+        else {
+            TextToSpeechButtonText.text = "ENABLE TEXT TO SPEECH";
+            texttospeech_disabled = true;
+        }
+        TextToSpeechManager.Instance.EnableTextToSpeech(!texttospeech_disabled);
+    }
 }

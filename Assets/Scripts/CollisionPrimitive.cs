@@ -14,7 +14,7 @@ public class CollisionPrimitive : MonoBehaviour {
 
     public CollisionPrimitiveMsg collisionPrimitiveMsg;
     private GameObject primitive;
-    private AppBar appBarInstance;
+    //private AppBar appBarInstance;
     private Vector3 lastPosition;
     private Vector3 lastScale;
     private Quaternion lastRotation;
@@ -100,13 +100,13 @@ public class CollisionPrimitive : MonoBehaviour {
         //primitive.transform.hasChanged = false;
     }
 
-
-    public void SetAppBar(AppBar appBar) {
-        appBarInstance = appBar;
-    }
-
     public void DestroyAppBar() {
-        appBarInstance.DestroyThis();
+        try {
+            //destroy app bar
+            GetComponentInChildren<BoundingBoxRig>().appBarInstance.DestroyThis();
+        } catch(Exception e) {
+            Debug.Log(e);
+        }
     }
 
     public void DestroyThis() {

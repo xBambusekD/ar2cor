@@ -49,7 +49,7 @@ public class PickFromFeeder : ProgramInstruction {
             }
             //normal run
             else { 
-                if (!arm_attached || speechManager.IsSpeakingOrInQueue()) {
+                if (!arm_attached) {
                     runTime += Time.deltaTime;
                     
                     //move arm to starting position .. in case that it somewhere already exists
@@ -151,10 +151,10 @@ public class PickFromFeeder : ProgramInstruction {
         //determine from which feeder the robot is going to grab.. if it's on the left side of the table (<1m) then left feeder and vice versa
         left_feeder = programItem.GetPose()[0].GetPose().GetPosition().GetX() < 1f;
         if (left_feeder) {
-            arm_rotation = Quaternion.Euler(90f, 90f, 0f);
+            arm_rotation = Quaternion.Euler(-90f, -90f, 0f);
         }
         else {
-            arm_rotation = Quaternion.Euler(-90f, 90f, 0f);
+            arm_rotation = Quaternion.Euler(90f, -90f, 0f);
         }
         gripper_pose = programItem.GetPose()[0].GetPose();
         gripper_init_pose = new Vector3(gripper_pose.GetPosition().GetX(), -gripper_pose.GetPosition().GetY(), gripper_pose.GetPosition().GetZ());
@@ -163,7 +163,6 @@ public class PickFromFeeder : ProgramInstruction {
     }
 
     private void SkipToEnd() {
-        speechManager.StopSpeaking();
         //if robot is picking from left/right feeder, then stop slightly before gripper reaches it
         if(left_feeder) {
             pr2_arm.transform.localPosition = objectToPick.transform.localPosition + new Vector3(0.001f, 0f, 0f);
@@ -177,7 +176,7 @@ public class PickFromFeeder : ProgramInstruction {
     }
 
     private void GoBackToStart() {
-        speechManager.StopSpeaking();
+ 
     }
 
      private void OnDestroy() {
@@ -247,12 +246,12 @@ public class PickFromFeeder : ProgramInstruction {
         InitRobotGripper();
         InitObjectToPick();
         base.Run();
-        if(left_feeder) {
-            speechManager.Say("The robot is grabbing the object from feeder on your left side.");
-        }
-        else {
-            speechManager.Say("The robot is grabbing the object from feeder on your right side.");
-        }
+        //if(left_feeder) {
+        //    speechManager.Say("The robot is grabbing the object from feeder on your left side.");
+        //}
+        //else {
+        //    speechManager.Say("The robot is grabbing the object from feeder on your right side.");
+        //}
         //speechManager.Say("Running pick from feeder instruction.");
     }
 }

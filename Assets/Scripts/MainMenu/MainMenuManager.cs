@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class MainMenuManager : Singleton<MainMenuManager> {
 
+    public bool AutoConnect = false;
+
     public GameObject SetupPicker;
     public GameObject SetupList;
     public GameObject CollisionShapes;
@@ -21,10 +23,17 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         
     private SetupsFileMsg setupsFileMsg;
     public ARTableSetupMsg currentSetup;
-    private bool positionSet;
     private GameObject worldAnchor;
 
     public GameObject SpatialMapping;
+
+    private void OnEnable() {
+        SystemStarter.Instance.OnSystemStarted += PositionMenu;
+    }
+
+    private void OnDisable() {
+        SystemStarter.Instance.OnSystemStarted -= PositionMenu;
+    }
 
     // Use this for initialization
     void Start () {
@@ -39,16 +48,20 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         //turn off spatial mapping to enable user to connect
         SpatialMapping.SetActive(false);
 
-        positionSet = false;
         worldAnchor = GameObject.FindGameObjectWithTag("world_anchor");
+
+        if(AutoConnect) {
+            OnSetupPickerConnectButtonClicked();
+        }
     }
 
-    void Update() {
-        if(SystemStarter.Instance.calibrated && !positionSet) {
-            gameObject.transform.parent = worldAnchor.transform;
-            gameObject.transform.localPosition = new Vector3(1.4f, -1f, 0.7f);
-            gameObject.transform.localRotation = Quaternion.Euler(124f, -90f, -90f);
-            positionSet = true;
+    private void PositionMenu() {
+        gameObject.transform.parent = worldAnchor.transform;
+        gameObject.transform.localPosition = new Vector3(1.4f, -1f, 1.0f);
+        gameObject.transform.localRotation = Quaternion.Euler(124f, -90f, -90f);
+
+        if (AutoConnect) {
+            gameObject.SetActive(false);
         }
     }
 

@@ -12,8 +12,13 @@ using ROSBridgeLib.diagnostic_msgs;
 * @author Daniel Bambušek
 */
 
+
+
 namespace ROSBridgeLib {
     namespace art_msgs {
+
+
+
         //public enum program_type : UInt16 {
         //    GET_READY = 0,
         //    NOP = 1,
@@ -32,6 +37,27 @@ namespace ROSBridgeLib {
         //    WELDING_SEAM = 401,
         //    DRILL_POINTS = 600
         //}
+
+        public class ProgramTypes {
+            public const string GET_READY = "GetReady";
+            public const string NOP = "NOP";
+            public const string WAIT_FOR_USER = "WaitForUser";
+            public const string WAIT_UNTIL_USER_FINISHES = "WaitUntilUserFinishes";
+            public const string PICK_FROM_POLYGON = "PickFromPolygon";
+            public const string PICK_FROM_FEEDER = "PickFromFeeder";
+            public const string PICK_OBJECT_ID = "PickObjectId";
+            public const string PICK_TOOL = "PickTool";
+            public const string PLACE_TO_POSE = "PlaceToPose";
+            public const string PLACE_TO_GRID = "PlaceToGrid";
+            public const string PLACE_TOOL = "PlaceTool";
+            public const string PATH_THROUGH_POINTS = "PathThroughPoints";
+            public const string PATH_THROUGH_TRAJECTORY = "PathThroughTrajectory";
+            public const string WELDING_POINTS = "WeldingPoints";
+            public const string WELDING_SEAM = "WeldingSeam";
+            public const string DRILL_POINTS = "DrillPoints";
+            public const string VISUAL_INSPECTION = "VisualInspection";
+            public const string PLACE_TO_CONTAINER = "PlaceToContainer";
+        }
 
         public class ProgramItemMsg : ROSBridgeMsg {
             private UInt16 _id;     //id of program
@@ -177,17 +203,31 @@ namespace ROSBridgeLib {
                     _ref_idSTR.Add(id.ToString());
                 }
 
+                string objectString = "[";
+                for (int i = 0; i < _object.Count; i++) {
+                    objectString = objectString + "\"" + _object[i] + "\"";
+                    if (_object.Count - i > 1) objectString += ",";
+                }
+                objectString += "]";
+
+                string doNotClearString = "[";
+                for (int i = 0; i < _do_not_clear.Count; i++) {
+                    doNotClearString = doNotClearString + "\"" + _do_not_clear[i] + "\"";
+                    if (_do_not_clear.Count - i > 1) doNotClearString += ",";
+                }
+                doNotClearString += "]";
+
                 return "ProgramItem [id=" + _id +
                     ", on_success=" + _on_success +
                     ", on_failure=" + _on_failure +
                     ", type=\"" + _type + "\"" +
                     ", name=\"" + _name + "\"" +
-                    ", object=[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
+                    ", object=" + objectString +
                     ", pose=" + poseString +
                     ", polygon=" + polygonString +
                     ", ref_id=[" + string.Join(",", _ref_idSTR.ToArray()) + "]" +
                     ", flags=" + flagsString +
-                    ", do_not_clear=[\"" + string.Join("\",\"", _do_not_clear.ToArray()) + "\"]" +
+                    ", do_not_clear=" + doNotClearString +
                     ", labels=" + labelsString + "]";
             }
 
@@ -225,17 +265,31 @@ namespace ROSBridgeLib {
                     _ref_idSTR.Add(id.ToString());
                 }
 
+                string objectString = "[";
+                for (int i = 0; i < _object.Count; i++) {
+                    objectString = objectString + "\"" + _object[i] + "\"";
+                    if (_object.Count - i > 1) objectString += ",";
+                }
+                objectString += "]";
+
+                string doNotClearString = "[";
+                for (int i = 0; i < _do_not_clear.Count; i++) {
+                    doNotClearString = doNotClearString + "\"" + _do_not_clear[i] + "\"";
+                    if (_do_not_clear.Count - i > 1) doNotClearString += ",";
+                }
+                doNotClearString += "]";
+
                 return "{\"id\":" + _id +
                     ", \"on_success\":" + _on_success +
                     ", \"on_failure\":" + _on_failure +
                     ", \"type\":\"" + _type + "\"" +
                     ", \"name\":\"" + _name + "\"" +
-                    ", \"object\":[\"" + string.Join("\",\"", _object.ToArray()) + "\"]" +
+                    ", \"object\":" + objectString +
                     ", \"pose\":" + poseString +
                     ", \"polygon\":" + polygonString +
                     ", \"ref_id\":[" + string.Join(",", _ref_idSTR.ToArray()) + "]" +
                     ", \"flags\":" + flagsString +
-                    ", \"do_not_clear\":[\"" + string.Join("\",\"", _do_not_clear.ToArray()) + "\"]" +
+                    ", \"do_not_clear\":" + doNotClearString +
                     ", \"labels\":" + labelsString + "}";
             }
 		}
