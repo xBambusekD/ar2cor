@@ -12,6 +12,11 @@ public class ClickForPick : MonoBehaviour, IInputClickHandler {
 
             UISoundManager.Instance.PlaySnap();
         }
+        else if(InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_polygon_learn) {
+            PickFromPolygonIP.Instance.MarkClickedArea(GetComponent<DetectedObject>());
+
+            UISoundManager.Instance.PlaySnap();
+        }
     }
 
 }

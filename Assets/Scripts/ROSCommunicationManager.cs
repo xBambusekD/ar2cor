@@ -41,65 +41,65 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
     }
 
     void Update () {
-        //if(connectToROS) {
-        //    ros.SetIPConfig(serverIP, port);
-        //    ros.AddSubscriber(typeof(DetectedObjectsSubscriber));
-        //    ros.AddSubscriber(typeof(InterfaceStateSubscriber));
-        //    ros.AddSubscriber(typeof(HololensStateSubscriber));
-        //    ros.AddSubscriber(typeof(CollisionEnvSubscriber));
-        //    ros.AddSubscriber(typeof(LearningRequestActionResultSubscriber));
-        //    ros.AddPublisher(typeof(HoloLensClickPublisher));
-        //    ros.AddPublisher(typeof(HoloLensActivityPublisher));
-        //    ros.AddPublisher(typeof(HoloLensLearningPublisher));
-        //    ros.AddPublisher(typeof(InterfaceStatePublisher));
-        //    ros.AddPublisher(typeof(CollisionEnvPublisher));
-        //    ros.AddPublisher(typeof(TFPublisher));
-        //    ros.AddPublisher(typeof(LearningRequestActionGoalPublisher));
+        if (connectToROS) {
+            ros.SetIPConfig(serverIP, port);
+            ros.AddSubscriber(typeof(DetectedObjectsSubscriber));
+            ros.AddSubscriber(typeof(InterfaceStateSubscriber));
+            ros.AddSubscriber(typeof(HololensStateSubscriber));
+            ros.AddSubscriber(typeof(CollisionEnvSubscriber));
+            ros.AddSubscriber(typeof(LearningRequestActionResultSubscriber));
+            ros.AddPublisher(typeof(HoloLensClickPublisher));
+            ros.AddPublisher(typeof(HoloLensActivityPublisher));
+            ros.AddPublisher(typeof(HoloLensLearningPublisher));
+            ros.AddPublisher(typeof(InterfaceStatePublisher));
+            ros.AddPublisher(typeof(CollisionEnvPublisher));
+            ros.AddPublisher(typeof(TFPublisher));
+            ros.AddPublisher(typeof(LearningRequestActionGoalPublisher));
 
-        //    ros.AddPublisher(typeof(TF2WebRepublisherGoalPublisher));
-        //    ros.AddPublisher(typeof(TF2WebRepublisherCancelPublisher));
-        //    ros.AddSubscriber(typeof(TF2WebRepublisherFeedbackSubscriber));
+            ros.AddPublisher(typeof(TF2WebRepublisherGoalPublisher));
+            ros.AddPublisher(typeof(TF2WebRepublisherCancelPublisher));
+            ros.AddSubscriber(typeof(TF2WebRepublisherFeedbackSubscriber));
 
-        //    ros.AddSubscriber(typeof(GuiNotificationsSubscriber));
+            ros.AddSubscriber(typeof(GuiNotificationsSubscriber));
 
-        //    ros.AddSubscriber(typeof(RobotLeftArmGraspedObjectSubscriber));
-        //    ros.AddSubscriber(typeof(RobotRightArmGraspedObjectSubscriber));
+            ros.AddSubscriber(typeof(RobotLeftArmGraspedObjectSubscriber));
+            ros.AddSubscriber(typeof(RobotRightArmGraspedObjectSubscriber));
 
-        //    ros.AddServiceResponse(typeof(ROSCommunicationManager));
-        //    ros.Connect();
+            ros.AddServiceResponse(typeof(ROSCommunicationManager));
+            ros.Connect();
 
-        //    connectToROS = false;
-        //}
+            connectToROS = false;
+        }
 
-        //if(ros._connected) {
-        //    connectedToROS = true;
+        if (ros._connected) {
+            connectedToROS = true;
 
-        //    //activate callbacks
-        //    ros.Render();
+            //activate callbacks
+            ros.Render();
 
-        //    //every 5 secs publish activity msg
-        //    if (awake_counter <= 0f) {
-        //        ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true), debug_log:false);
-        //        ros.Publish(HoloLensLearningPublisher.GetMessageTopic(), new BoolMsg(InteractiveProgrammingManager.Instance.holoLearningEnabled), debug_log:false);
+            //every 5 secs publish activity msg
+            if (awake_counter <= 0f) {
+                ros.Publish(HoloLensActivityPublisher.GetMessageTopic(), new BoolMsg(true), debug_log: false);
+                ros.Publish(HoloLensLearningPublisher.GetMessageTopic(), new BoolMsg(InteractiveProgrammingManager.Instance.holoLearningEnabled), debug_log: false);
 
-        //        awake_counter = 5f;
-        //    }
-        //    awake_counter -= Time.deltaTime;
+                awake_counter = 5f;
+            }
+            awake_counter -= Time.deltaTime;
 
-        //    //if(UnbiasedTime.Instance.TimeSynchronized) {
-        //    //    try {
-        //    //        Debug.Log(ROSTimeHelper.GetCurrentTime().ToYAMLString());
-        //    //    }
-        //    //    catch (Exception e) {
+            //if(UnbiasedTime.Instance.TimeSynchronized) {
+            //    try {
+            //        Debug.Log(ROSTimeHelper.GetCurrentTime().ToYAMLString());
+            //    }
+            //    catch (Exception e) {
 
-        //    //    }
-        //    //}
+            //    }
+            //}
 
-        //}
+        }
 
-        //if(!ros._connected) {
-        //    connectedToROS = false;
-        //}
+        if (!ros._connected) {
+            connectedToROS = false;
+        }
     }
 
     //callback which calls when service is received

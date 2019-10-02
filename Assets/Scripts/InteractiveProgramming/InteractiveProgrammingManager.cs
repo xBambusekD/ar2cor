@@ -9,10 +9,14 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
 
     public enum ProgrammingManagerState {
         pick_from_feeder_learn,
+        pick_from_polygon_learn,
         place_to_pose_learn_followed,
         place_to_pose_learn,
+        place_to_container_learn,
         pick_from_feeder_vis,
+        pick_from_polygon_vis,
         place_to_pose_vis,
+        place_to_container_vis,
         def
     }
     
@@ -55,6 +59,9 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                             CurrentState = ProgrammingManagerState.pick_from_feeder_vis;
                             PickFromFeederIP.Instance.Visualize();
                         }
+                        break;
+                    case ProgramTypes.PICK_FROM_POLYGON:
+                        PickFromPolygonIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
                         break;
                     case ProgramTypes.PLACE_TO_POSE:
                         PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);

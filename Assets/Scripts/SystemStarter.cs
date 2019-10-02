@@ -39,44 +39,44 @@ public class SystemStarter : Singleton<SystemStarter> {
     	
 	// Update is called once per frame
 	void Update() {
-        //if(ROSCommunicationManager.Instance.connectedToROS) {
+        if (ROSCommunicationManager.Instance.connectedToROS) {
 
-        //    if (!languageCalled) {
-        //        TextToSpeechManager.Instance.LoadLanguage();
-        //        languageCalled = true;
-        //    }
+            if (!languageCalled) {
+                TextToSpeechManager.Instance.LoadLanguage();
+                languageCalled = true;
+            }
 
-        //    if (!ntpTimeSet) {
-        //        ntpTimeSet = true;
-        //        UnbiasedTime.Init(MainMenuManager.Instance.currentSetup.GetIP());
-        //    }
+            if (!ntpTimeSet) {
+                ntpTimeSet = true;
+                UnbiasedTime.Init(MainMenuManager.Instance.currentSetup.GetIP());
+            }
 
-        //    //Load known object types from database
-        //    if (!ObjectsManager.Instance.objectReloadInitiated) {
-        //        ObjectsManager.Instance.ReloadObjectTypes();
-        //        ObjectsManager.Instance.objectReloadInitiated = true;
-        //    }
+            //Load known object types from database
+            if (!ObjectsManager.Instance.objectReloadInitiated) {
+                ObjectsManager.Instance.ReloadObjectTypes();
+                ObjectsManager.Instance.objectReloadInitiated = true;
+            }
 
-        //    if (!ObjectsManager.Instance.objectTypesLoaded) {
-        //        return;
-        //    }
+            if (!ObjectsManager.Instance.objectTypesLoaded) {
+                return;
+            }
 
-        //    //wait until time synchronizes with ntp
-        //    if (!UnbiasedTime.Instance.TimeSynchronized) {
-        //        //Debug.Log("TIME STILL NOT SYNCHRONIZED");
-        //        return;
-        //    }
+            //wait until time synchronizes with ntp
+            //if (!UnbiasedTime.Instance.TimeSynchronized) {
+            //    //Debug.Log("TIME STILL NOT SYNCHRONIZED");
+            //    return;
+            //}
 
-        //    //Load robot reach radius
-        //    if (!robotRadiusCalled) {
-        //        robotRadiusCalled = true;
-        //        RobotHelper.LoadRobotRadius();
-        //        RobotHelper.LoadTableSize();
-        //    }
+            //Load robot reach radius
+            if (!robotRadiusCalled) {
+                robotRadiusCalled = true;
+                //RobotHelper.LoadRobotRadius();
+                RobotHelper.LoadTableSize();
+            }
 
-        //    if (!TextToSpeechManager.Instance.languageSet) {
-        //        return;
-        //    }
+            if (!TextToSpeechManager.Instance.languageSet) {
+                return;
+            }
 
 #if UNITY_EDITOR
             if (!calibrated) {
@@ -121,7 +121,7 @@ public class SystemStarter : Singleton<SystemStarter> {
                 }
             }
 #endif
-//        }
+        }
     }
 
     //private IEnumerator startFakeCalibration() {

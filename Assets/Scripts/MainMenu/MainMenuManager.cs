@@ -113,7 +113,7 @@ public class MainMenuManager : Singleton<MainMenuManager> {
         }
         else {
             //init file with default setups in case that no save file exists
-            file = "{\"last_setup\":\"ARTABLE SETUP 1\",\"saved_setups\":[{\"setup_name\":\"ARTABLE SETUP 1\",\"connection\":{\"ip\":\"192.168.104.200\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1.5\",\"length\":\"0.7\"}},{\"setup_name\":\"ARTABLE SETUP 3\",\"connection\":{\"ip\":\"192.168.1.227\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1\",\"length\":\"0.6\"}}]}";
+            file = "{\"last_setup\":\"ARTABLE SETUP 3\",\"saved_setups\":[{\"setup_name\":\"ARTABLE SETUP 1\",\"connection\":{\"ip\":\"192.168.104.200\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1.5\",\"length\":\"0.7\"}},{\"setup_name\":\"ARTABLE SETUP 3\",\"connection\":{\"ip\":\"192.168.104.112\",\"port\":\"9090\"},\"table_dims\":{\"width\":\"1.02\",\"length\":\"0.667\"}}]}";
             File.WriteAllText(Application.persistentDataPath + "/saved_setups", file);
         }
 
