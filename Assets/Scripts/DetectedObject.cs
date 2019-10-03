@@ -60,6 +60,10 @@ public class DetectedObject : MonoBehaviour, IFocusable {
             wireframeMat.SetColor("_WireColor", blue);
             PickFromFeederIP.Instance.StaringAtObject(true);
         }
+        else if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_polygon_learn) {
+            wireframeMat.SetColor("_WireColor", blue);
+            PickFromPolygonIP.Instance.StaringAtObject(true);
+        }
         focus_stay = true;
     }
 
@@ -67,6 +71,9 @@ public class DetectedObject : MonoBehaviour, IFocusable {
         wireframeMat.SetColor("_WireColor", green);
         if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_feeder_learn) {
             PickFromFeederIP.Instance.StaringAtObject(false);
+        }
+        else if (InteractiveProgrammingManager.Instance.CurrentState == InteractiveProgrammingManager.ProgrammingManagerState.pick_from_polygon_learn) {
+            PickFromPolygonIP.Instance.StaringAtObject(false);
         }
 
         focus_stay = false;

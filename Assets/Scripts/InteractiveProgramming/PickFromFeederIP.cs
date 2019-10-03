@@ -55,8 +55,8 @@ public class PickFromFeederIP : Singleton<PickFromFeederIP> {
         //robotArm.transform.localPosition = new Vector3(0f, 0f, 0.3f);
         //robotArm.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
         robotArm.GetComponent<PR2GripperController>().PlaceGripperToManipulation();
-        robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
         robotArm.GetComponent<PR2GripperController>().SetCollidersActive(false);
+        robotArm.GetComponent<PR2GripperController>().SetArmActive(true);
         robotArm.GetComponent<PR2GripperController>().OpenGripperInstantly();
         robotArm.GetComponent<FollowTransform>().enabled = true;
             //robotArm.GetComponent<PR2GripperController>().FollowTransform(cursor.transform);

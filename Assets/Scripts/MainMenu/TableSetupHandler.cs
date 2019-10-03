@@ -19,6 +19,6 @@ public class TableSetupHandler : MonoBehaviour {
         string width = string.IsNullOrEmpty(TableWidthInput.text) ? TableWidthPlaceholder.text : TableWidthInput.text;
         string length = string.IsNullOrEmpty(TableLengthInput.text) ? TableLengthPlaceholder.text : TableLengthInput.text;
         
-        MainMenuManager.Instance.AddNewSetup(new ARTableSetupMsg(setup_name, "5", "SET IP", "", width, length));
+        MainMenuManager.Instance.AddNewSetup(new ARTableSetupMsg(setup_name, "5", "192.168.104.100", "9090", width, length));
     }
 }

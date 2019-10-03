@@ -13,12 +13,20 @@ public static class RobotHelper {
 
     public enum RobotArmType : int {
         LEFT_ARM = 1,
-        RIGHT_ARM = 2
+        RIGHT_ARM = 2,
+        ARM = 3
     }
 
+    public enum RobotType : int {
+        PR2 = 1,
+        NYRIO = 2
+    }
+
+    public static RobotType activeRobot;
 
     private static global::RobotArm leftArm =  new RobotArm();
     private static global::RobotArm rightArm = new RobotArm();
+    private static global::RobotArm nyrioArm = new RobotArm();
     private static Vector2 tableSize;
 
     #region loadout
@@ -31,17 +39,28 @@ public static class RobotHelper {
     }
 
     public static void SetRobotRadiusParam(JSONNode msg) {
-        leftArm.SetRadius(msg["left_arm"]["base_link"], float.Parse(msg["left_arm"]["min_range"]), float.Parse(msg["left_arm"]["max_range"]));
-        rightArm.SetRadius(msg["right_arm"]["base_link"], float.Parse(msg["right_arm"]["min_range"]), float.Parse(msg["right_arm"]["max_range"]));
+        if(msg["left_arm"] != null) {
+            activeRobot = RobotType.PR2;
 
-        GetArmsPosition();
+            leftArm.SetRadius(msg["left_arm"]["base_link"], float.Parse(msg["left_arm"]["min_range"]), float.Parse(msg["left_arm"]["max_range"]));
+            rightArm.SetRadius(msg["right_arm"]["base_link"], float.Parse(msg["right_arm"]["min_range"]), float.Parse(msg["right_arm"]["max_range"]));
+
+            GetArmsPosition(new List<string>() { leftArm.BaseLink, rightArm.BaseLink });
+        }
+        else {
+            activeRobot = RobotType.NYRIO;
+
+            nyrioArm.SetRadius(msg["arm"]["base_link"], float.Parse(msg["arm"]["min_range"]), float.Parse(msg["arm"]["max_range"]));
+            
+            GetArmsPosition(new List<string>() { nyrioArm.BaseLink });
+        }
     }
 
-    private static void GetArmsPosition() {
+    private static void GetArmsPosition(List<string> arms_baseLinks) {
         TimeMsg currentTime = ROSTimeHelper.GetCurrentTime();
         TFSubscriptionActionGoalMsg msg = new TFSubscriptionActionGoalMsg(new HeaderMsg(1, currentTime, ""), 
             new GoalIDMsg(currentTime, ROSActionHelper.GenerateUniqueGoalID("robot_radius", ROSTimeHelper.ToSec(currentTime))),
-            new TFSubscriptionGoalMsg(new List<string>() { leftArm.BaseLink, rightArm.BaseLink }, "marker", 0f, 0f, 1f));
+            new TFSubscriptionGoalMsg(arms_baseLinks, "marker", 0f, 0f, 1f));
         ROSCommunicationManager.Instance.ros.Publish(TF2WebRepublisherGoalPublisher.GetMessageTopic(), msg);
     }
 
@@ -49,11 +68,18 @@ public static class RobotHelper {
         CancelTF2Action();
 
         foreach(TransformStampedMsg tf in msg.GetFeedback().GetTransforms()) {
-            if(leftArm.BaseLink.Equals(tf.GetChildFrameId())) {
-                leftArm.SetBaseLinkPosition(tf.GetTransform().GetTranslation().GetVector());
+            if(activeRobot == RobotType.PR2) {
+                if (leftArm.BaseLink.Equals(tf.GetChildFrameId())) {
+                    leftArm.SetBaseLinkPosition(tf.GetTransform().GetTranslation().GetVector());
+                }
+                else if (rightArm.BaseLink.Equals(tf.GetChildFrameId())) {
+                    rightArm.SetBaseLinkPosition(tf.GetTransform().GetTranslation().GetVector());
+                }
             }
-            else if (rightArm.BaseLink.Equals(tf.GetChildFrameId())) {
-                rightArm.SetBaseLinkPosition(tf.GetTransform().GetTranslation().GetVector());
+            else if(activeRobot == RobotType.NYRIO) {
+                if (nyrioArm.BaseLink.Equals(tf.GetChildFrameId())) {
+                    nyrioArm.SetBaseLinkPosition(tf.GetTransform().GetTranslation().GetVector());
+                }
             }
         }
     }
@@ -78,11 +104,14 @@ public static class RobotHelper {
 
     //checks if object is within radius of specified robot arm
     public static bool IsObjectWithinRobotArmRadius(RobotArmType arm, Vector2 object_position) {
-        if(arm == RobotArmType.LEFT_ARM) {
+        if (arm == RobotArmType.LEFT_ARM) {
             return IsObjectWithinArmRadius(leftArm, object_position);
         }
         else if (arm == RobotArmType.RIGHT_ARM) {
             return IsObjectWithinArmRadius(rightArm, object_position);
+        }
+        else if (arm == RobotArmType.ARM) {
+            return IsObjectWithinArmRadius(nyrioArm, object_position);
         }
         return false;
     }
@@ -100,8 +129,8 @@ public static class RobotHelper {
         //Debug.Log(object_position);
         //Debug.Log(tableSize);
         return (object_position.x >= 0 && object_position.x <= tableSize.x &&
-            -object_position.y >= 0 && -object_position.y <= tableSize.y &&
-            object_position.z >= 0 && object_position.z <= 0.05f);
+            -object_position.y >= 0 && -object_position.y <= tableSize.y);
+            //object_position.z >= 0 && object_position.z <= 0.05f);
     }
 
     public static bool IsArmAboveTable(Vector3 arm_position) {
@@ -120,12 +149,19 @@ public static class RobotHelper {
         rightArm.SetGraspedObject(msg);
     }
 
+    public static void SetNyrioArmGraspedObject(ObjInstanceMsg msg) {
+        nyrioArm.SetGraspedObject(msg);
+    }
+
     public static bool HasArmGraspedObject(RobotArmType arm) {
         if (arm == RobotArmType.LEFT_ARM) {
             return leftArm.ObjectGrasped();
         }
         else if (arm == RobotArmType.RIGHT_ARM) {
             return rightArm.ObjectGrasped();
+        }
+        else if (arm == RobotArmType.ARM) {
+            return nyrioArm.ObjectGrasped();
         }
         return false;
     }

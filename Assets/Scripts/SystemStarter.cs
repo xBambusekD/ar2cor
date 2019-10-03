@@ -62,15 +62,15 @@ public class SystemStarter : Singleton<SystemStarter> {
             }
 
             //wait until time synchronizes with ntp
-            //if (!UnbiasedTime.Instance.TimeSynchronized) {
-            //    //Debug.Log("TIME STILL NOT SYNCHRONIZED");
-            //    return;
-            //}
+            if (!UnbiasedTime.Instance.TimeSynchronized) {
+                //Debug.Log("TIME STILL NOT SYNCHRONIZED");
+                return;
+            }
 
             //Load robot reach radius
             if (!robotRadiusCalled) {
                 robotRadiusCalled = true;
-                //RobotHelper.LoadRobotRadius();
+                RobotHelper.LoadRobotRadius();
                 RobotHelper.LoadTableSize();
             }
 

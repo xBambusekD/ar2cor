@@ -4,6 +4,7 @@ using ROSBridgeLib.actionlib_msgs;
 using ROSBridgeLib.art_msgs;
 using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.std_msgs;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -111,10 +112,15 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         objectToPlace.transform.parent = cursor.transform;
         objectToPlace.transform.localPosition = new Vector3(0, 0, objectToPlace.transform.GetChild(0).transform.localScale.x / 2);
         //objectToPlace.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
-        ProgramItemMsg referenceItem = ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetRefID()[0]);        
-        objectToPlace.GetComponent<PlaceRotateConfirm>().Arm =
-            (ROSUnityCoordSystemTransformer.ConvertVector(referenceItem.GetPose()[0].GetPose().GetPosition().GetPoint()).x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ? 
-                RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
+        ProgramItemMsg referenceItem = ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetRefID()[0]);
+        if(RobotHelper.activeRobot == RobotHelper.RobotType.PR2) {
+            objectToPlace.GetComponent<PlaceRotateConfirm>().Arm =
+                (ROSUnityCoordSystemTransformer.ConvertVector(referenceItem.GetPose()[0].GetPose().GetPosition().GetPoint()).x > MainMenuManager.Instance.currentSetup.GetTableWidth() / 2) ?
+                    RobotHelper.RobotArmType.LEFT_ARM : RobotHelper.RobotArmType.RIGHT_ARM;
+        }
+        else if(RobotHelper.activeRobot == RobotHelper.RobotType.NYRIO) {
+            objectToPlace.GetComponent<PlaceRotateConfirm>().Arm = RobotHelper.RobotArmType.ARM;
+        }
 
         objectToPlace.GetComponent<PlaceRotateConfirm>().object_attached = true;
 
@@ -158,13 +164,17 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         Debug.Log("VISUALIZE CLEAR from Place");
 
         if (ProgramHelper.ItemLearned(programItemMsg)) {
-            if (objectToPlace != null || !objectToPlace.Equals(null)) {
-                objectToPlace.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
-                objectToPlace.GetComponent<PlaceRotateConfirm>().DestroyItself();
-                objectToPlace = null;
-                PickFromFeederIP.Instance.ObjectDestroyed();
+            try {
+                if (objectToPlace != null || !objectToPlace.Equals(null)) {
+                    objectToPlace.GetComponent<ObjectManipulationEnabler>().EnableManipulation();
+                    objectToPlace.GetComponent<PlaceRotateConfirm>().DestroyItself();
+                    objectToPlace = null;
+                    PlaceToPoseIP.Instance.ObjectDestroyed();
+                }
             }
-            //Destroy(objectToPlaceUnmanipulatable);
+            catch (NullReferenceException e) {
+                Debug.Log(e);
+            }
         }
     }
 
@@ -181,8 +191,9 @@ public class PlaceToPoseIP : Singleton<PlaceToPoseIP> {
         learning = false;
         ProgramHelper.LoadProgram = true;
 
-        PlacePosition = new Vector3(position.x, position.y,
-            ObjectsManager.Instance.GetObjectTypeDimensions(ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetRefID()[0]).GetObject()[0]).x/2);
+        //PlacePosition = new Vector3(position.x, position.y,
+        //    ObjectsManager.Instance.GetObjectTypeDimensions(ProgramHelper.GetProgramItemById(interfaceStateMsg.GetBlockID(), programItemMsg.GetRefID()[0]).GetObject()[0]).x/2);
+        PlacePosition = new Vector3(position.x, position.y, position.z);
         PlaceOrientation = rotation;
 
         StartCoroutine(SaveToROS());

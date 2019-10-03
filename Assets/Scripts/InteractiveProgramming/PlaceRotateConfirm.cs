@@ -108,7 +108,7 @@ public class PlaceRotateConfirm : MonoBehaviour, IInputClickHandler {
     private void EnableRotation() {
         appBarInstance.State = AppBar.AppBarStateEnum.Manipulation;
         GetComponent<BoundingBoxRig>().Activate();
-        
+
         //subscribe to event when user clicks OK in AppBar
         appBarInstance.OnDoneClicked += ConfirmRotation;
     }

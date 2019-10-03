@@ -62,6 +62,15 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
                         break;
                     case ProgramTypes.PICK_FROM_POLYGON:
                         PickFromPolygonIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
+                        if (interfaceStateMsg.GetEditEnabled() && holoLearningEnabled) {
+                            CurrentState = ProgrammingManagerState.pick_from_polygon_learn;
+                            PickFromPolygonIP.Instance.StartLearning();
+                            followedLearningPlacePoseOverride = true;
+                        }
+                        else if (!interfaceStateMsg.GetEditEnabled() && !followedLearningPlacePoseOverride) {
+                            CurrentState = ProgrammingManagerState.pick_from_polygon_vis;
+                            PickFromPolygonIP.Instance.Visualize();
+                        }
                         break;
                     case ProgramTypes.PLACE_TO_POSE:
                         PlaceToPoseIP.Instance.SetInterfaceStateMsgFromROS(interfaceStateMsg);
@@ -108,6 +117,9 @@ public class InteractiveProgrammingManager : Singleton<InteractiveProgrammingMan
         switch(CurrentState) {
             case ProgrammingManagerState.pick_from_feeder_vis:
                 PickFromFeederIP.Instance.VisualizeClear();
+                break;
+            case ProgrammingManagerState.pick_from_polygon_vis:
+                PickFromPolygonIP.Instance.VisualizeClear();
                 break;
             case ProgrammingManagerState.place_to_pose_vis:
                 PlaceToPoseIP.Instance.VisualizeClear();

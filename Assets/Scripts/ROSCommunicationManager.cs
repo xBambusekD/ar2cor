@@ -64,6 +64,7 @@ public class ROSCommunicationManager : Singleton<ROSCommunicationManager> {
 
             ros.AddSubscriber(typeof(RobotLeftArmGraspedObjectSubscriber));
             ros.AddSubscriber(typeof(RobotRightArmGraspedObjectSubscriber));
+            ros.AddSubscriber(typeof(RobotArmGraspedObjectSubscriber));
 
             ros.AddServiceResponse(typeof(ROSCommunicationManager));
             ros.Connect();
@@ -564,6 +565,25 @@ public class RobotRightArmGraspedObjectSubscriber : ROSBridgeSubscriber {
     public new static void CallBack(ROSBridgeMsg msg) {
         ObjInstanceMsg OImsg = (ObjInstanceMsg)msg;
         RobotHelper.SetRightArmGraspedObject(OImsg);
+    }
+}
+
+public class RobotArmGraspedObjectSubscriber : ROSBridgeSubscriber {
+    public new static string GetMessageTopic() {
+        return "/art/robot/arm/grasped_object";
+    }
+
+    public new static string GetMessageType() {
+        return "art_msgs/ObjInstance";
+    }
+
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg) {
+        return new ObjInstanceMsg(msg);
+    }
+
+    public new static void CallBack(ROSBridgeMsg msg) {
+        ObjInstanceMsg OImsg = (ObjInstanceMsg)msg;
+        RobotHelper.SetNyrioArmGraspedObject(OImsg);
     }
 }
 #endregion
